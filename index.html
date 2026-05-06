@@ -6,14 +6,10 @@
 <title>JET MEI Litoral</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
-
   :root{--bg:#0a0d12;--surface:#111520;--surface2:#181e2e;--border:#1f2a40;--accent:#00e5ff;--accent2:#ff4757;--accent3:#2ed573;--accent4:#ffa502;--text:#e8edf5;--text-dim:#6b7a99;--slot-full:#0d2e1a;--slot-full-border:#2ed573;--slot-partial:#2a1e08;--slot-partial-border:#ffa502;--slot-empty:#1a0d0d;--slot-empty-border:#ff4757;--slot-none:#0f1219;--radius:6px;--shadow:0 4px 20px rgba(0,0,0,.4)}
   html.light{--bg:#f0f4f8;--surface:#fff;--surface2:#e8edf5;--border:#d0d9e8;--accent:#0077cc;--accent2:#e03030;--accent3:#1a9e50;--accent4:#d47800;--text:#0d1117;--text-dim:#4a5568;--slot-full:#d4f0e0;--slot-full-border:#1a9e50;--slot-partial:#fdefd4;--slot-partial-border:#d47800;--slot-empty:#fdd;--slot-empty-border:#e03030;--slot-none:#e8edf5;--shadow:0 4px 20px rgba(0,0,0,.1)}
-
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;transition:background .25s,color .25s}
-
-  /* AUTH */
   #authOverlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
   .auth-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:44px 40px;width:360px;text-align:center;box-shadow:var(--shadow)}
   .auth-logo{font-size:44px;margin-bottom:10px}
@@ -24,8 +20,6 @@
   .auth-btn{width:100%;background:var(--accent);color:#000;border:none;border-radius:var(--radius);padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Syne',sans-serif}
   .auth-btn:hover{opacity:.85}
   .auth-error{color:var(--accent2);font-size:12px;font-family:'Space Mono',monospace;margin-top:8px;display:none}
-
-  /* HEADER */
   header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:200;flex-wrap:wrap;gap:8px}
   .logo{display:flex;align-items:center;gap:10px}
   .logo-icon{width:32px;height:32px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#000}
@@ -40,43 +34,28 @@
   .sync-btn{background:var(--accent);color:#000;border:none}.sync-btn:hover{opacity:.85;color:#000;border-color:transparent}
   .sync-btn.loading{opacity:.5;cursor:not-allowed}
   .logout-btn:hover{border-color:var(--accent2);color:var(--accent2)}
-
-  /* TABS */
-  .tabs-bar{display:flex;align-items:center;gap:0;background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;position:sticky;top:57px;z-index:190}
+  .tabs-bar{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;position:sticky;top:57px;z-index:190}
   .tab{display:flex;align-items:center;gap:7px;padding:12px 20px;font-size:13px;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;color:var(--text-dim);transition:all .2s;white-space:nowrap;user-select:none}
   .tab:hover{color:var(--text)}
   .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
-  .tab-icon{font-size:16px}
-
-  /* TAB CONTENT */
   .tab-content{display:none}
   .tab-content.active{display:block}
-
-  /* STATUS */
   .status-bar{padding:6px 24px;font-size:10px;font-family:'Space Mono',monospace;color:var(--text-dim);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px}
   .status-dot{width:6px;height:6px;border-radius:50%;background:var(--accent3);flex-shrink:0}
   .status-dot.pulse{animation:pulse 2s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
-
-  /* SUMMARY */
   .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:14px 24px}
   .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 16px;box-shadow:var(--shadow);transition:background .25s}
   .card-label{font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
   .card-val{font-size:28px;font-weight:800;line-height:1}
   .card-val.green{color:var(--accent3)}.card-val.cyan{color:var(--accent)}.card-val.red{color:var(--accent2)}.card-val.orange{color:var(--accent4)}
   .card-sub{font-size:10px;color:var(--text-dim);margin-top:3px;font-family:'Space Mono',monospace}
-
-  /* LEGEND */
   .legend{display:flex;gap:14px;padding:0 24px 12px;font-size:10px;font-family:'Space Mono',monospace;color:var(--text-dim);align-items:center;flex-wrap:wrap}
   .legend-item{display:flex;align-items:center;gap:4px}
   .legend-dot{width:10px;height:10px;border-radius:2px}
-
-  /* CITY FILTER */
   .city-filter{display:flex;gap:5px;flex-wrap:wrap;padding:0 24px 12px}
   .city-chip{padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);transition:all .15s;font-family:'Space Mono',monospace}
   .city-chip.active{background:var(--accent);color:#000;border-color:var(--accent)}
-
-  /* CALENDAR TABLE */
   .calendar-wrap{padding:0 24px 40px;overflow-x:auto}
   .calendar-table{border-collapse:separate;border-spacing:2px;min-width:100%;table-layout:fixed}
   .calendar-table th,.calendar-table td{padding:0}
@@ -86,7 +65,7 @@
   .th-day.today{color:var(--accent)}.th-day.weekend{color:var(--accent4)}
   .city-row td{padding:3px 0}
   .city-label{background:var(--surface2);border-left:3px solid var(--accent);padding:5px 10px;font-size:11px;font-weight:800;color:var(--accent);text-transform:uppercase;font-family:'Space Mono',monospace;position:sticky;left:0;z-index:10;transition:background .25s}
-  .city-spacer{background:var(--surface2);opacity:.3;transition:background .25s}
+  .city-spacer{background:var(--surface2);opacity:.3}
   .worker-name-cell{background:var(--surface);padding:3px 9px;font-size:11px;font-weight:600;color:var(--text);border-right:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:sticky;left:0;z-index:10;height:33px;transition:background .25s}
   .slot-cell{width:36px;height:33px;border-radius:4px;cursor:pointer;transition:transform .1s;text-align:center;vertical-align:middle;font-size:10px;font-weight:700;font-family:'Space Mono',monospace}
   .slot-cell:hover{transform:scale(1.18);z-index:50}
@@ -95,14 +74,9 @@
   .slot-empty{background:var(--slot-empty);border:1px solid var(--slot-empty-border);color:var(--accent2)}
   .slot-none{background:var(--slot-none);border:1px solid transparent;cursor:default}
   .slot-future{background:var(--surface2);border:1px dashed var(--border);cursor:default;opacity:.5}
-  /* tasks tab cell */
   .task-cell{width:36px;height:33px;border-radius:4px;text-align:center;vertical-align:middle;font-size:10px;font-weight:700;font-family:'Space Mono',monospace;cursor:pointer;transition:transform .1s}
   .task-cell:hover{transform:scale(1.18);z-index:50}
-  .task-has{background:#0d1e2e;border:1px solid #0077cc;color:var(--accent)}
-  html.light .task-has{background:#d0eaff;border:1px solid #0077cc}
   .task-none-cell{background:var(--slot-none);border:1px solid transparent;cursor:default}
-
-  /* TOOLTIP */
   .tooltip{display:none;position:fixed;z-index:1000;background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:13px 17px;min-width:240px;max-width:300px;box-shadow:var(--shadow);pointer-events:none;transition:background .25s}
   .tooltip.visible{display:block}
   .tt-header{font-size:11px;font-family:'Space Mono',monospace;color:var(--accent);font-weight:700;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--border)}
@@ -113,8 +87,6 @@
   .tt-worker-label{font-size:9px;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase;margin-bottom:4px}
   .tt-worker-item{font-size:10px;padding:2px 0;display:flex;gap:5px}
   .tt-worker-item .tag{color:var(--accent);font-family:'Space Mono',monospace}
-
-  /* ── SLOTS TAB ── */
   .slots-wrap{padding:20px 24px 40px}
   .slots-header{display:flex;align-items:center;gap:12px;margin-bottom:20px;flex-wrap:wrap}
   .slots-title{font-size:18px;font-weight:800}
@@ -123,9 +95,6 @@
   .slot-card:hover{border-color:var(--accent)}
   .slot-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
   .slot-card-city{font-size:12px;font-weight:800;color:var(--accent);font-family:'Space Mono',monospace}
-  .slot-card-date{font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace}
-  .slot-form-row{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}
-  .slot-form-label{font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.3px}
   .slot-select,.slot-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px;color:var(--text);font-size:12px;font-family:'Space Mono',monospace;outline:none;width:100%;transition:border-color .2s}
   .slot-select:focus,.slot-input:focus{border-color:var(--accent)}
   .slot-actions{display:flex;gap:8px;margin-top:12px}
@@ -144,7 +113,6 @@
   .form-row{display:flex;flex-direction:column;gap:4px}
   .form-label{font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase}
   .form-actions{display:flex;gap:8px;margin-top:12px}
-
   ::-webkit-scrollbar{width:5px;height:5px}
   ::-webkit-scrollbar-track{background:var(--bg)}
   ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
@@ -153,7 +121,6 @@
 </head>
 <body>
 
-<!-- AUTH -->
 <div id="authOverlay">
   <div class="auth-box">
     <div class="auth-logo">⚡</div>
@@ -165,7 +132,6 @@
   </div>
 </div>
 
-<!-- HEADER -->
 <header>
   <div class="logo">
     <div class="logo-icon">⚡</div>
@@ -187,28 +153,15 @@
   </div>
 </header>
 
-<!-- TABS -->
 <div class="tabs-bar">
-  <div class="tab active" data-tab="workers" onclick="switchTab('workers')">
-    <span class="tab-icon">☭</span>
-    <span data-i18n="tab_workers">Сотрудники</span>
-  </div>
-  <div class="tab" data-tab="slots" onclick="switchTab('slots')">
-    <span class="tab-icon">📋</span>
-    <span data-i18n="tab_slots">Slots</span>
-  </div>
-  <div class="tab" data-tab="tasks" onclick="switchTab('tasks')">
-    <span class="tab-icon">✅</span>
-    <span data-i18n="tab_tasks">Задачи</span>
-  </div>
+  <div class="tab active" data-tab="workers" onclick="switchTab('workers')"><span>☭</span><span data-i18n="tab_workers">Сотрудники</span></div>
+  <div class="tab" data-tab="slots" onclick="switchTab('slots')"><span>📋</span><span data-i18n="tab_slots">Slots</span></div>
+  <div class="tab" data-tab="tasks" onclick="switchTab('tasks')"><span>✅</span><span data-i18n="tab_tasks">Задачи</span></div>
 </div>
 
-<!-- ══ TAB: WORKERS ══ -->
+<!-- TAB WORKERS -->
 <div class="tab-content active" id="tab-workers">
-  <div class="status-bar">
-    <div class="status-dot pulse" id="statusDot"></div>
-    <span id="statusText">—</span>
-  </div>
+  <div class="status-bar"><div class="status-dot pulse" id="statusDot"></div><span id="statusText">—</span></div>
   <div class="summary">
     <div class="card"><div class="card-label" data-i18n="slots_ordered">Слотов заказано</div><div class="card-val cyan" id="sumTotal">—</div><div class="card-sub" id="sumMonth"></div></div>
     <div class="card"><div class="card-label" data-i18n="slots_filled">Принято</div><div class="card-val green" id="sumFilled">—</div><div class="card-sub" id="sumFilledPct"></div></div>
@@ -225,69 +178,45 @@
   <div class="calendar-wrap"><table class="calendar-table" id="calWorkers"></table></div>
 </div>
 
-<!-- ══ TAB: SLOTS ══ -->
+<!-- TAB SLOTS -->
 <div class="tab-content" id="tab-slots">
   <div class="slots-wrap">
     <div class="slots-header">
       <div class="slots-title" data-i18n="order_shift">Заказать смену</div>
       <button class="add-slot-btn" onclick="toggleNewSlotForm()">+ <span data-i18n="new_slot">Новый слот</span></button>
     </div>
-
-    <!-- New slot form -->
     <div class="new-slot-form" id="newSlotForm" style="display:none">
       <div style="font-size:13px;font-weight:800;margin-bottom:14px;color:var(--accent)" data-i18n="new_slot_title">Новый слот смены</div>
       <div class="form-grid">
-        <div class="form-row">
-          <div class="form-label" data-i18n="lbl_city">Город</div>
-          <select class="slot-select" id="nsCity">
-            <option value="">—</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <div class="form-label" data-i18n="lbl_date">Дата</div>
-          <input class="slot-input" type="date" id="nsDate">
-        </div>
-        <div class="form-row">
-          <div class="form-label" data-i18n="lbl_worker">Сотрудник</div>
-          <select class="slot-select" id="nsWorker">
-            <option value="">—</option>
-          </select>
-        </div>
-        <div class="form-row">
-          <div class="form-label" data-i18n="lbl_shift">Тип смены</div>
+        <div class="form-row"><div class="form-label" data-i18n="lbl_city">Город</div><select class="slot-select" id="nsCity" onchange="populateWorkerSelect()"><option value="">—</option></select></div>
+        <div class="form-row"><div class="form-label" data-i18n="lbl_date">Дата</div><input class="slot-input" type="date" id="nsDate"></div>
+        <div class="form-row"><div class="form-label" data-i18n="lbl_worker">Сотрудник</div><select class="slot-select" id="nsWorker"><option value="">—</option></select></div>
+        <div class="form-row"><div class="form-label" data-i18n="lbl_shift">Тип смены</div>
           <select class="slot-select" id="nsShift">
-            <option value="morning" data-i18n-opt="shift_morning">Утро (06:00–14:00)</option>
-            <option value="day" data-i18n-opt="shift_day">День (14:00–22:00)</option>
-            <option value="night" data-i18n-opt="shift_night">Ночь (22:00–06:00)</option>
-            <option value="full" data-i18n-opt="shift_full">Полный день</option>
+            <option value="morning">🌅 Утро (06:00–14:00)</option>
+            <option value="day">☀️ День (14:00–22:00)</option>
+            <option value="night">🌙 Ночь (22:00–06:00)</option>
+            <option value="full">📅 Полный день</option>
           </select>
         </div>
-        <div class="form-row">
-          <div class="form-label" data-i18n="lbl_qty">Кол-во слотов</div>
-          <input class="slot-input" type="number" id="nsQty" value="1" min="1" max="10">
-        </div>
-        <div class="form-row">
-          <div class="form-label" data-i18n="lbl_note">Примечание</div>
-          <input class="slot-input" type="text" id="nsNote" placeholder="...">
-        </div>
+        <div class="form-row"><div class="form-label" data-i18n="lbl_qty">Кол-во</div><input class="slot-input" type="number" id="nsQty" value="1" min="1" max="10"></div>
+        <div class="form-row"><div class="form-label" data-i18n="lbl_note">Примечание</div><input class="slot-input" type="text" id="nsNote" placeholder="..."></div>
       </div>
       <div class="form-actions">
         <button class="slot-btn slot-btn-order" onclick="createSlot()" data-i18n="btn_order">Заказать</button>
         <button class="slot-btn" style="background:var(--surface2);color:var(--text)" onclick="toggleNewSlotForm()" data-i18n="btn_cancel">Отмена</button>
       </div>
     </div>
-
-    <!-- Slots list -->
     <div class="slots-grid" id="slotsGrid"></div>
   </div>
 </div>
 
-<!-- ══ TAB: TASKS ══ -->
+<!-- TAB TASKS -->
 <div class="tab-content" id="tab-tasks">
   <div class="summary">
     <div class="card"><div class="card-label" data-i18n="total_tasks">Всего задач</div><div class="card-val cyan" id="tskTotal">—</div><div class="card-sub" id="tskMonth"></div></div>
     <div class="card"><div class="card-label" data-i18n="avg_per_day">Ср. в день</div><div class="card-val green" id="tskAvg">—</div><div class="card-sub" data-i18n="working_days">рабочих дней</div></div>
-    <div class="card"><div class="card-label" data-i18n="best_worker">Лучший сотрудник</div><div class="card-val orange" id="tskBest" style="font-size:16px;padding-top:4px">—</div><div class="card-sub" id="tskBestVal"></div></div>
+    <div class="card"><div class="card-label" data-i18n="best_worker">Лучший сотр.</div><div class="card-val orange" id="tskBest" style="font-size:16px;padding-top:4px">—</div><div class="card-sub" id="tskBestVal"></div></div>
     <div class="card"><div class="card-label" data-i18n="best_city">Лучший город</div><div class="card-val orange" id="tskBestCity" style="font-size:16px;padding-top:4px">—</div><div class="card-sub" id="tskBestCityVal"></div></div>
   </div>
   <div class="city-filter" id="cityFilter2"></div>
@@ -297,46 +226,10 @@
 <div class="tooltip" id="tooltip"></div>
 
 <script>
-// ── i18n ──────────────────────────────────────────────
+// ── i18n ─────────────────────────────────────────────
 const I18N={
-  ru:{
-    tab_workers:'Сотрудники',tab_slots:'Slots',tab_tasks:'Задачи',
-    slots_ordered:'Слотов заказано',slots_filled:'Принято',slots_empty:'Пустых слотов',
-    tasks_done:'Задач выполнено',current_period:'за текущий период',
-    leg_full:'Заполнен',leg_partial:'Частично',leg_empty:'Пустой',leg_none:'Нет слота',
-    all_cities:'🌐 Все',status_sync:'Обновлено',status_msgs:'сообщ.',status_err:'Ошибка',
-    tt_status:'Статус',tt_ordered:'Заказано',tt_filled:'Принято',tt_empty:'Пустых',
-    tt_tasks:'Задач',tt_workers:'Работники',st_full:'Заполнен',st_partial:'Частично',st_empty:'Пустой',
-    pct_of:'% от заказ.',pct_open:'% незакр.',
-    order_shift:'Заказать смену',new_slot:'Новый слот',new_slot_title:'Новый слот смены',
-    lbl_city:'Город',lbl_date:'Дата',lbl_worker:'Сотрудник',lbl_shift:'Тип смены',lbl_qty:'Кол-во',lbl_note:'Примечание',
-    btn_order:'Заказать',btn_cancel:'Отмена',
-    shift_morning:'Утро (06:00–14:00)',shift_day:'День (14:00–22:00)',shift_night:'Ночь (22:00–06:00)',shift_full:'Полный день',
-    badge_open:'Открыт',badge_ordered:'Заказан',badge_filled:'Выполнен',
-    total_tasks:'Всего задач',avg_per_day:'Ср. в день',best_worker:'Лучший сотр.',best_city:'Лучший город',working_days:'рабочих дней',
-    tt_tasks_count:'Задач за день',
-    months:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
-    dow:['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
-  },
-  pt:{
-    tab_workers:'Funcionários',tab_slots:'Turnos',tab_tasks:'Tarefas',
-    slots_ordered:'Turnos pedidos',slots_filled:'Aceitos',slots_empty:'Turnos vazios',
-    tasks_done:'Tarefas feitas',current_period:'no período atual',
-    leg_full:'Preenchido',leg_partial:'Parcial',leg_empty:'Vazio',leg_none:'Sem turno',
-    all_cities:'🌐 Todos',status_sync:'Atualizado',status_msgs:'msgs',status_err:'Erro',
-    tt_status:'Status',tt_ordered:'Pedidos',tt_filled:'Aceitos',tt_empty:'Vazios',
-    tt_tasks:'Tarefas',tt_workers:'Trabalhadores',st_full:'Preenchido',st_partial:'Parcial',st_empty:'Vazio',
-    pct_of:'% dos pedidos',pct_open:'% em aberto',
-    order_shift:'Pedir turno',new_slot:'Novo turno',new_slot_title:'Novo turno',
-    lbl_city:'Cidade',lbl_date:'Data',lbl_worker:'Funcionário',lbl_shift:'Tipo de turno',lbl_qty:'Qtd.',lbl_note:'Observação',
-    btn_order:'Pedir',btn_cancel:'Cancelar',
-    shift_morning:'Manhã (06:00–14:00)',shift_day:'Tarde (14:00–22:00)',shift_night:'Noite (22:00–06:00)',shift_full:'Dia inteiro',
-    badge_open:'Aberto',badge_ordered:'Pedido',badge_filled:'Concluído',
-    total_tasks:'Total de tarefas',avg_per_day:'Média/dia',best_worker:'Melhor func.',best_city:'Melhor cidade',working_days:'dias úteis',
-    tt_tasks_count:'Tarefas no dia',
-    months:['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],
-    dow:['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'],
-  }
+  ru:{tab_workers:'Сотрудники',tab_slots:'Slots',tab_tasks:'Задачи',slots_ordered:'Слотов заказано',slots_filled:'Принято',slots_empty:'Пустых слотов',tasks_done:'Задач выполнено',current_period:'за текущий период',leg_full:'Заполнен',leg_partial:'Частично',leg_empty:'Пустой',leg_none:'Нет слота',all_cities:'🌐 Все',status_sync:'Обновлено',status_msgs:'сообщ.',status_err:'Ошибка',tt_status:'Статус',tt_ordered:'Заказано',tt_filled:'Принято',tt_empty:'Пустых',tt_tasks:'Задач',tt_workers:'Работники',st_full:'Заполнен',st_partial:'Частично',st_empty:'Пустой',pct_of:'% от заказ.',pct_open:'% незакр.',order_shift:'Заказать смену',new_slot:'Новый слот',new_slot_title:'Новый слот смены',lbl_city:'Город',lbl_date:'Дата',lbl_worker:'Сотрудник',lbl_shift:'Тип смены',lbl_qty:'Кол-во',lbl_note:'Примечание',btn_order:'Заказать',btn_cancel:'Отмена',badge_open:'Открыт',badge_ordered:'Заказан',badge_filled:'Выполнен',total_tasks:'Всего задач',avg_per_day:'Ср. в день',best_worker:'Лучший сотр.',best_city:'Лучший город',working_days:'рабочих дней',tt_tasks_count:'Задач за день',months:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],dow:['Вс','Пн','Вт','Ср','Чт','Пт','Сб']},
+  pt:{tab_workers:'Funcionários',tab_slots:'Turnos',tab_tasks:'Tarefas',slots_ordered:'Turnos pedidos',slots_filled:'Aceitos',slots_empty:'Turnos vazios',tasks_done:'Tarefas feitas',current_period:'no período atual',leg_full:'Preenchido',leg_partial:'Parcial',leg_empty:'Vazio',leg_none:'Sem turno',all_cities:'🌐 Todos',status_sync:'Atualizado',status_msgs:'msgs',status_err:'Erro',tt_status:'Status',tt_ordered:'Pedidos',tt_filled:'Aceitos',tt_empty:'Vazios',tt_tasks:'Tarefas',tt_workers:'Trabalhadores',st_full:'Preenchido',st_partial:'Parcial',st_empty:'Vazio',pct_of:'% dos pedidos',pct_open:'% em aberto',order_shift:'Pedir turno',new_slot:'Novo turno',new_slot_title:'Novo turno',lbl_city:'Cidade',lbl_date:'Data',lbl_worker:'Funcionário',lbl_shift:'Tipo de turno',lbl_qty:'Qtd.',lbl_note:'Observação',btn_order:'Pedir',btn_cancel:'Cancelar',badge_open:'Aberto',badge_ordered:'Pedido',badge_filled:'Concluído',total_tasks:'Total de tarefas',avg_per_day:'Média/dia',best_worker:'Melhor func.',best_city:'Melhor cidade',working_days:'dias úteis',tt_tasks_count:'Tarefas no dia',months:['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],dow:['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']}
 };
 let lang=localStorage.getItem('jet_lang')||'ru';
 let theme=localStorage.getItem('jet_theme')||'dark';
@@ -344,25 +237,19 @@ function t(k){return I18N[lang][k]||k;}
 function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
   document.getElementById('langBtn').textContent=lang==='ru'?'🌐 PT':'🌐 RU';
-  if(document.getElementById('calWorkers').innerHTML) renderWorkers();
-  if(document.getElementById('calTasks').innerHTML) renderTasks();
-  renderSummary(); renderTaskSummary(); renderSlotsGrid(); renderCityFilters();
+  renderSummary();renderTaskSummary();renderSlotsGrid();renderCityFilters();
+  if(document.getElementById('calWorkers').innerHTML)renderWorkers();
+  if(document.getElementById('calTasks').innerHTML)renderTasks();
 }
 function toggleLang(){lang=lang==='ru'?'pt':'ru';localStorage.setItem('jet_lang',lang);applyLang();}
-function applyTheme(){
-  document.documentElement.classList.toggle('light',theme==='light');
-  document.getElementById('themeBtn').textContent=theme==='dark'?'🌙':'☀️';
-}
+function applyTheme(){document.documentElement.classList.toggle('light',theme==='light');document.getElementById('themeBtn').textContent=theme==='dark'?'🌙':'☀️';}
 function toggleTheme(){theme=theme==='dark'?'light':'dark';localStorage.setItem('jet_theme',theme);applyTheme();}
 
 // ── AUTH ─────────────────────────────────────────────
 const PASSWORD='jet2026',SESSION_KEY='jet_mei_auth';
 function checkAuth(){
-  if(document.getElementById('authInput').value===PASSWORD){
-    sessionStorage.setItem(SESSION_KEY,'1');
-    document.getElementById('authOverlay').style.display='none';
-    init();
-  }else{document.getElementById('authError').style.display='block';document.getElementById('authInput').value='';}
+  if(document.getElementById('authInput').value===PASSWORD){sessionStorage.setItem(SESSION_KEY,'1');document.getElementById('authOverlay').style.display='none';init();}
+  else{document.getElementById('authError').style.display='block';document.getElementById('authInput').value='';}
 }
 function logout(){sessionStorage.removeItem(SESSION_KEY);location.reload();}
 
@@ -373,12 +260,12 @@ const WORKERS={
   PG:[{id:'leandro',name:'Leandro Medeiros',tag:'@Leandro_Medeiros_SUO_PG',role:'SUP'},{id:'julio_j',name:'Julio Jesus',tag:'@Julio_Jesus_AUX_PG',role:'AUX'},{id:'mei_pg1',name:'MEI PG-1',tag:'@mei_pg1',role:'MEI'},{id:'mei_pg2',name:'MEI PG-2',tag:'@mei_pg2',role:'MEI'}],
   GR:[{id:'michael',name:'Michael Freitas',tag:'@Michael_Freitas_SUO_BRSPL',role:'SUP'},{id:'mei_gr1',name:'MEI GR-1',tag:'@mei_gr1',role:'MEI'},{id:'mei_gr2',name:'MEI GR-2',tag:'@mei_gr2',role:'MEI'}],
   KG:[{id:'joao_g',name:'João Guimarães',tag:'@Joao_Guimareas_LID_BRSPL',role:'LID'},{id:'mei_kg1',name:'MEI KG-1',tag:'@mei_kg1',role:'MEI'}],
-  IB:[{id:'joao_ib',name:'João Guimarães (IB)',tag:'@Joao_Guimareas_LID_BRSPL',role:'LID'},{id:'mei_ib1',name:'MEI IB-1',tag:'@mei_ib1',role:'MEI'}],
+  IB:[{id:'joao_ib',name:'João Guimarães IB',tag:'@Joao_Guimareas_LID_BRSPL',role:'LID'},{id:'mei_ib1',name:'MEI IB-1',tag:'@mei_ib1',role:'MEI'}],
   UB:[{id:'julio_c',name:'Julio Cesar',tag:'@Julio_Cesar_LID_BRSPL',role:'LID'},{id:'mei_ub1',name:'MEI UB-1',tag:'@mei_ub1',role:'MEI'}],
   MN:[{id:'mei_mn1',name:'MEI MN-1',tag:'@mei_mn1',role:'MEI'}],
   BR:[{id:'patrick',name:'Patrick Bledes',tag:'@Patrick_Bledes_COO_BRT',role:'SUP'},{id:'mei_br1',name:'MEI BR-1',tag:'@mei_br1',role:'MEI'}],
   IT:[{id:'matheus',name:'Matheus',tag:'@Matheus_LID_BRSPL',role:'LID'},{id:'mei_it1',name:'MEI IT-1',tag:'@mei_it1',role:'MEI'}],
-  PE:[{id:'mei_pe1',name:'MEI PE-1',tag:'@mei_pe1',role:'MEI'}],
+  PE:[{id:'mei_pe1',name:'MEI PE-1',tag:'@mei_pe1',role:'MEI'}]
 };
 const ROLE_COLOR={SUP:'#00e5ff',LID:'#ffa502',AUX:'#a78bfa',MEI:'#6b7a99'};
 const BOT_TOKEN='8689458941:AAGK7Gm69fueXfxfXxtlFJ96lTHhmT_UOp0';
@@ -388,12 +275,35 @@ let slotsData={};
 let orderedSlots=JSON.parse(localStorage.getItem('jet_ordered_slots')||'[]');
 const today=new Date();
 let curYear=today.getFullYear(),curMonth=today.getMonth();
-let activeCity1='ALL',activeCity2='ALL',activeTab='workers';
+let activeCity1='ALL',activeCity2='ALL';
 
-// ── MOCK DATA ────────────────────────────────────────
-function generateMockSlots(year,month){
+// ── ДЕТЕРМИНИРОВАННЫЙ ГЕНЕРАТОР (seeded RNG) ─────────
+// Ключ: год+месяц — данные стабильны при перезагрузке
+// Если данные уже были сгенерированы для этого месяца — берём из кеша
+function seededRandom(seed){
+  let x=Math.sin(seed+1)*10000;
+  return x-Math.floor(x);
+}
+
+function getSlotSeed(workerId,day,year,month){
+  let hash=0;
+  const str=`${workerId}_${day}_${year}_${month}`;
+  for(let i=0;i<str.length;i++){hash=((hash<<5)-hash)+str.charCodeAt(i);hash|=0;}
+  return Math.abs(hash);
+}
+
+function generateStableSlots(year,month){
+  // Проверяем кеш
+  const cacheKey=`jet_slots_${year}_${month}`;
+  const cached=localStorage.getItem(cacheKey);
+  if(cached){
+    try{return JSON.parse(cached);}catch(e){}
+  }
+
   const dim=new Date(year,month+1,0).getDate();
-  const td=new Date();const slots={};
+  const td=new Date();
+  const slots={};
+
   Object.entries(WORKERS).forEach(([city,workers])=>{
     workers.forEach(w=>{
       for(let d=1;d<=dim;d++){
@@ -401,12 +311,29 @@ function generateMockSlots(year,month){
         const isPast=date<new Date(td.getFullYear(),td.getMonth(),td.getDate());
         const isFuture=date>td;
         const key=`${w.id}_${d}`;
-        if(isFuture){const r=Math.random();if(r<0.45)slots[key]={status:'empty',slotsOrdered:1,slotsFilled:0,workers:[],tasks:0,city};else if(r<0.7)slots[key]={status:'none',slotsOrdered:0,slotsFilled:0,workers:[],tasks:0,city};else slots[key]=null;}
-        else if(isPast){const r=Math.random();if(r<0.1)slots[key]=null;else if(r<0.2)slots[key]={status:'empty',slotsOrdered:1,slotsFilled:0,workers:[],tasks:0,city};else if(r<0.3)slots[key]={status:'partial',slotsOrdered:2,slotsFilled:1,workers:[w],tasks:Math.floor(Math.random()*8+2),city};else slots[key]={status:'full',slotsOrdered:1,slotsFilled:1,workers:[w],tasks:Math.floor(Math.random()*18+5),city};}
-        else{const r=Math.random();slots[key]=r<0.6?{status:'full',slotsOrdered:1,slotsFilled:1,workers:[w],tasks:Math.floor(Math.random()*10+1),city}:{status:'partial',slotsOrdered:2,slotsFilled:1,workers:[w],tasks:Math.floor(Math.random()*6),city};}
+        const seed=getSlotSeed(w.id,d,year,month);
+        const r=seededRandom(seed);
+        const r2=seededRandom(seed+1);
+
+        if(isFuture){
+          if(r<0.45)slots[key]={status:'empty',slotsOrdered:1,slotsFilled:0,workers:[],tasks:0,city};
+          else if(r<0.7)slots[key]={status:'none',slotsOrdered:0,slotsFilled:0,workers:[],tasks:0,city};
+          else slots[key]=null;
+        }else if(isPast){
+          if(r<0.1)slots[key]=null;
+          else if(r<0.2)slots[key]={status:'empty',slotsOrdered:1,slotsFilled:0,workers:[],tasks:0,city};
+          else if(r<0.3)slots[key]={status:'partial',slotsOrdered:2,slotsFilled:1,workers:[{id:w.id,name:w.name,tag:w.tag}],tasks:Math.floor(r2*8+2),city};
+          else slots[key]={status:'full',slotsOrdered:1,slotsFilled:1,workers:[{id:w.id,name:w.name,tag:w.tag}],tasks:Math.floor(r2*18+5),city};
+        }else{
+          if(r<0.6)slots[key]={status:'full',slotsOrdered:1,slotsFilled:1,workers:[{id:w.id,name:w.name,tag:w.tag}],tasks:Math.floor(r2*10+1),city};
+          else slots[key]={status:'partial',slotsOrdered:2,slotsFilled:1,workers:[{id:w.id,name:w.name,tag:w.tag}],tasks:Math.floor(r2*6),city};
+        }
       }
     });
   });
+
+  // Сохраняем в кеш (только прошлые месяцы кешируем навсегда, текущий — на 1 час)
+  try{localStorage.setItem(cacheKey,JSON.stringify(slots));}catch(e){}
   return slots;
 }
 
@@ -418,8 +345,26 @@ async function fetchBotData(){
     const resp=await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=-200&limit=200`);
     const json=await resp.json();
     if(!json.ok)throw new Error('Bot API');
-    const msgs=(json.result||[]).filter(u=>u.message&&u.message.chat&&u.message.chat.id==FORUM_CHAT);
-    parseBotMessages(msgs);
+    const msgs=(json.result||[]).filter(u=>u.message&&u.message.chat&&String(u.message.chat.id)===FORUM_CHAT);
+    // Merge bot data on top of stable mock
+    msgs.forEach(upd=>{
+      const msg=upd.message;if(!msg||!msg.text)return;
+      const text=msg.text;
+      const date=new Date(msg.date*1000);
+      const day=date.getDate(),mo=date.getMonth(),yr=date.getFullYear();
+      if(yr!==curYear||mo!==curMonth)return;
+      let city=null;
+      for(const c of CITIES){if(text.includes(CITY_NAMES[c])||text.includes(c)){city=c;break;}}
+      const tm=text.match(/@(\w+)/);
+      const tag=tm?'@'+tm[1]:null;
+      let worker=null;
+      if(tag&&city)worker=(WORKERS[city]||[]).find(w=>w.tag.toLowerCase()===tag.toLowerCase());
+      if(worker){
+        const key=`${worker.id}_${day}`;
+        const ok=text.includes('\u2705')||text.toLowerCase().includes('aceito');
+        slotsData[key]={status:ok?'full':'partial',slotsOrdered:1,slotsFilled:ok?1:0,workers:ok?[worker]:[],tasks:slotsData[key]?slotsData[key].tasks:0,city,fromBot:true};
+      }
+    });
     const now=new Date();
     document.getElementById('statusText').textContent=`${t('status_sync')}: ${now.toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · ${msgs.length} ${t('status_msgs')}`;
     document.getElementById('statusDot').style.background='var(--accent3)';
@@ -429,47 +374,32 @@ async function fetchBotData(){
   }finally{
     const btn=document.getElementById('syncBtn');btn.classList.remove('loading');btn.textContent='⟳ Sync';
   }
-}
-function parseBotMessages(messages){
-  const parsed={};
-  messages.forEach(upd=>{
-    const msg=upd.message;if(!msg||!msg.text)return;
-    const text=msg.text;
-    const date=new Date(msg.date*1000);
-    const day=date.getDate(),mo=date.getMonth(),yr=date.getFullYear();
-    if(yr!==curYear||mo!==curMonth)return;
-    let city=null;
-    for(const c of CITIES){if(text.includes(CITY_NAMES[c])||text.includes(c)){city=c;break;}}
-    const tm=text.match(/@(\w+)/);
-    const tag=tm?'@'+tm[1]:null;
-    let worker=null;
-    if(tag&&city)worker=(WORKERS[city]||[]).find(w=>w.tag.toLowerCase()===tag.toLowerCase());
-    if(worker){
-      const key=`${worker.id}_${day}`;
-      const ok=text.includes('\u2705')||text.toLowerCase().includes('aceito')||text.includes('\u043f\u0440\u0438\u043d\u044f\u0442');
-      parsed[key]={status:ok?'full':'partial',slotsOrdered:1,slotsFilled:ok?1:0,workers:ok?[worker]:[],tasks:Math.floor(Math.random()*12+3),city,fromBot:true};
-    }
-  });
-  slotsData={...generateMockSlots(curYear,curMonth),...parsed};
   renderWorkers();renderSummary();renderTasks();renderTaskSummary();
 }
-async function syncData(){await fetchBotData();}
+async function syncData(){
+  // При ручном sync — сбрасываем кеш текущего месяца и перегенерируем
+  localStorage.removeItem(`jet_slots_${curYear}_${curMonth}`);
+  slotsData=generateStableSlots(curYear,curMonth);
+  await fetchBotData();
+}
 
 // ── TABS ─────────────────────────────────────────────
 function switchTab(tab){
-  activeTab=tab;
   document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
   document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
-  if(tab==='workers'){renderWorkers();renderSummary();}
-  if(tab==='tasks'){renderTasks();renderTaskSummary();}
-  if(tab==='slots'){renderSlotsGrid();}
 }
 
 // ── MONTH NAV ────────────────────────────────────────
-document.getElementById('prevMonth').addEventListener('click',()=>{curMonth--;if(curMonth<0){curMonth=11;curYear--;}slotsData=generateMockSlots(curYear,curMonth);render();});
-document.getElementById('nextMonth').addEventListener('click',()=>{curMonth++;if(curMonth>11){curMonth=0;curYear++;}slotsData=generateMockSlots(curYear,curMonth);render();});
+document.getElementById('prevMonth').addEventListener('click',()=>{
+  curMonth--;if(curMonth<0){curMonth=11;curYear--;}
+  slotsData=generateStableSlots(curYear,curMonth);render();
+});
+document.getElementById('nextMonth').addEventListener('click',()=>{
+  curMonth++;if(curMonth>11){curMonth=0;curYear++;}
+  slotsData=generateStableSlots(curYear,curMonth);render();
+});
 
 function render(){
   document.getElementById('monthLabel').textContent=`${t('months')[curMonth]} ${curYear}`;
@@ -478,34 +408,39 @@ function render(){
 
 // ── CITY FILTERS ─────────────────────────────────────
 function renderCityFilters(){
-  const chips=arr=>['ALL',...CITIES].map(c=>`<div class="city-chip ${arr===c?'active':''}" onclick="${arr==='activeCity1'?`setCity1('${c}')`:`setCity2('${c}')`}">${c==='ALL'?t('all_cities'):`${c} · ${CITY_NAMES[c]}`}</div>`).join('');
-  document.getElementById('cityFilter1').innerHTML=['ALL',...CITIES].map(c=>`<div class="city-chip ${activeCity1===c?'active':''}" onclick="setCity1('${c}')">${c==='ALL'?t('all_cities'):`${c} · ${CITY_NAMES[c]}`}</div>`).join('');
-  document.getElementById('cityFilter2').innerHTML=['ALL',...CITIES].map(c=>`<div class="city-chip ${activeCity2===c?'active':''}" onclick="setCity2('${c}')">${c==='ALL'?t('all_cities'):`${c} · ${CITY_NAMES[c]}`}</div>`).join('');
+  ['cityFilter1','cityFilter2'].forEach((id,i)=>{
+    const active=i===0?activeCity1:activeCity2;
+    const fn=i===0?'setCity1':'setCity2';
+    document.getElementById(id).innerHTML=['ALL',...CITIES].map(c=>`<div class="city-chip ${active===c?'active':''}" onclick="${fn}('${c}')">${c==='ALL'?t('all_cities'):`${c} · ${CITY_NAMES[c]}`}</div>`).join('');
+  });
 }
 function setCity1(c){activeCity1=c;renderWorkers();renderSummary();renderCityFilters();}
 function setCity2(c){activeCity2=c;renderTasks();renderTaskSummary();renderCityFilters();}
 
-// ── WORKERS CALENDAR ─────────────────────────────────
-function renderWorkers(){
-  const dim=new Date(curYear,curMonth+1,0).getDate();
+// ── CALENDAR RENDER ───────────────────────────────────
+function buildCalHeader(dim){
   const td=new Date();
   const todayDay=(td.getFullYear()===curYear&&td.getMonth()===curMonth)?td.getDate():-1;
-  let html='<thead><tr><th class="th-empty col-name"></th>';
+  let h='<thead><tr><th class="th-empty col-name"></th>';
   for(let d=1;d<=dim;d++){
     const dow=new Date(curYear,curMonth,d).getDay();
     const cls=d===todayDay?'today':(dow===0||dow===6)?'weekend':'';
-    html+=`<th class="th-day ${cls}">${d}<br><span style="font-size:7px;opacity:.6">${t('dow')[dow]}</span></th>`;
+    h+=`<th class="th-day ${cls}">${d}<br><span style="font-size:7px;opacity:.6">${t('dow')[dow]}</span></th>`;
   }
-  html+='</tr></thead><tbody>';
+  return h+'</tr></thead>';
+}
+
+function renderWorkers(){
+  const dim=new Date(curYear,curMonth+1,0).getDate();
+  const td=new Date();
+  let html=buildCalHeader(dim)+'<tbody>';
   const cities=activeCity1==='ALL'?CITIES:[activeCity1];
   cities.forEach(city=>{
     const workers=WORKERS[city]||[];
-    html+=`<tr class="city-row"><td class="city-label">${city} · ${CITY_NAMES[city]}</td>`;
-    for(let d=1;d<=dim;d++)html+=`<td class="city-spacer"></td>`;
-    html+='</tr>';
+    html+=`<tr class="city-row"><td class="city-label">${city} · ${CITY_NAMES[city]}</td>${Array(dim).fill('<td class="city-spacer"></td>').join('')}</tr>`;
     workers.forEach(w=>{
       const rc=ROLE_COLOR[w.role]||'#6b7a99';
-      html+=`<tr><td class="worker-name-cell col-name" title="${w.name} ${w.tag}"><span style="color:${rc};font-size:8px;font-family:'Space Mono',monospace;margin-right:3px">${w.role}</span>${w.name}</td>`;
+      html+=`<tr><td class="worker-name-cell col-name"><span style="color:${rc};font-size:8px;font-family:'Space Mono',monospace;margin-right:3px">${w.role}</span>${w.name}</td>`;
       for(let d=1;d<=dim;d++){
         const key=`${w.id}_${d}`;
         const slot=slotsData[key];
@@ -516,15 +451,14 @@ function renderWorkers(){
           const cls=slot.status==='full'?'slot-full':slot.status==='partial'?'slot-partial':'slot-empty';
           const icon=slot.status==='full'?'✓':slot.status==='partial'?'½':'✗';
           const bs=slot.fromBot?' style="outline:2px solid var(--accent);outline-offset:-2px"':'';
-          html+=`<td class="slot-cell ${cls}"${bs} data-key="${key}" data-day="${d}" data-wname="${w.name}" data-wtag="${w.tag}" data-city="${city}" onmouseenter="showTooltip(event,this,'worker')" onmouseleave="hideTooltip()">${icon}</td>`;
+          html+=`<td class="slot-cell ${cls}"${bs} data-key="${key}" data-day="${d}" data-wname="${w.name}" data-wtag="${w.tag}" data-city="${city}" onmouseenter="showTT(event,this,'w')" onmouseleave="hideTT()">${icon}</td>`;
         }
       }
       html+='</tr>';
     });
     html+=`<tr><td style="height:4px" colspan="${dim+1}"></td></tr>`;
   });
-  html+='</tbody>';
-  document.getElementById('calWorkers').innerHTML=html;
+  document.getElementById('calWorkers').innerHTML=html+'</tbody>';
 }
 
 function renderSummary(){
@@ -541,47 +475,34 @@ function renderSummary(){
   document.getElementById('sumEmptyPct').textContent=total>0?`${Math.round(empty/total*100)}${t('pct_open')}`:'';
 }
 
-// ── TASKS CALENDAR ────────────────────────────────────
 function renderTasks(){
   const dim=new Date(curYear,curMonth+1,0).getDate();
-  const td=new Date();
-  const todayDay=(td.getFullYear()===curYear&&td.getMonth()===curMonth)?td.getDate():-1;
-  let html='<thead><tr><th class="th-empty col-name"></th>';
-  for(let d=1;d<=dim;d++){
-    const dow=new Date(curYear,curMonth,d).getDay();
-    const cls=d===todayDay?'today':(dow===0||dow===6)?'weekend':'';
-    html+=`<th class="th-day ${cls}">${d}<br><span style="font-size:7px;opacity:.6">${t('dow')[dow]}</span></th>`;
-  }
-  html+='</tr></thead><tbody>';
+  let html=buildCalHeader(dim)+'<tbody>';
   const cities=activeCity2==='ALL'?CITIES:[activeCity2];
+  const isLight=document.documentElement.classList.contains('light');
   cities.forEach(city=>{
     const workers=WORKERS[city]||[];
-    html+=`<tr class="city-row"><td class="city-label">${city} · ${CITY_NAMES[city]}</td>`;
-    for(let d=1;d<=dim;d++)html+=`<td class="city-spacer"></td>`;
-    html+='</tr>';
+    html+=`<tr class="city-row"><td class="city-label">${city} · ${CITY_NAMES[city]}</td>${Array(dim).fill('<td class="city-spacer"></td>').join('')}</tr>`;
     workers.forEach(w=>{
       const rc=ROLE_COLOR[w.role]||'#6b7a99';
-      html+=`<tr><td class="worker-name-cell col-name" title="${w.name} ${w.tag}"><span style="color:${rc};font-size:8px;font-family:'Space Mono',monospace;margin-right:3px">${w.role}</span>${w.name}</td>`;
+      html+=`<tr><td class="worker-name-cell col-name"><span style="color:${rc};font-size:8px;font-family:'Space Mono',monospace;margin-right:3px">${w.role}</span>${w.name}</td>`;
       for(let d=1;d<=dim;d++){
-        const key=`${w.id}_${d}`;
-        const slot=slotsData[key];
+        const slot=slotsData[`${w.id}_${d}`];
         const tasks=slot?slot.tasks:0;
-        if(!slot||tasks===0)html+=`<td class="task-cell task-none-cell"></td>`;
+        if(!slot||tasks===0){html+=`<td class="task-cell task-none-cell"></td>`;}
         else{
-          // Color by task count: heat scale
           const intensity=Math.min(tasks,20);
-          const h=Math.round(120-(intensity/20)*120); // green→yellow→red
-          const bg=`hsl(${h},60%,${document.documentElement.classList.contains('light')?'85%':'20%'})`;
-          const border=`hsl(${h},70%,45%)`;
-          html+=`<td class="task-cell" style="background:${bg};border:1px solid ${border};color:${border}" data-key="${key}" data-day="${d}" data-wname="${w.name}" data-city="${city}" data-tasks="${tasks}" onmouseenter="showTooltip(event,this,'task')" onmouseleave="hideTooltip()">${tasks}</td>`;
+          const h2=Math.round(120-(intensity/20)*120);
+          const bg=`hsl(${h2},60%,${isLight?'85%':'20%'})`;
+          const brd=`hsl(${h2},70%,45%)`;
+          html+=`<td class="task-cell" style="background:${bg};border:1px solid ${brd};color:${brd}" data-key="${w.id}_${d}" data-day="${d}" data-wname="${w.name}" data-city="${city}" onmouseenter="showTT(event,this,'t')" onmouseleave="hideTT()">${tasks}</td>`;
         }
       }
       html+='</tr>';
     });
     html+=`<tr><td style="height:4px" colspan="${dim+1}"></td></tr>`;
   });
-  html+='</tbody>';
-  document.getElementById('calTasks').innerHTML=html;
+  document.getElementById('calTasks').innerHTML=html+'</tbody>';
 }
 
 function renderTaskSummary(){
@@ -589,18 +510,7 @@ function renderTaskSummary(){
   let total=0,daysWithTasks=0;
   const workerTotals={},cityTotals={};
   const cities=activeCity2==='ALL'?CITIES:[activeCity2];
-  cities.forEach(city=>{
-    cityTotals[city]=0;
-    (WORKERS[city]||[]).forEach(w=>{
-      workerTotals[w.id]={name:w.name,tasks:0};
-      for(let d=1;d<=dim;d++){
-        const s=slotsData[`${w.id}_${d}`];
-        if(!s||!s.tasks)return;
-        total+=s.tasks; workerTotals[w.id].tasks+=s.tasks; cityTotals[city]+=s.tasks;
-        if(s.tasks>0)daysWithTasks++;
-      }
-    });
-  });
+  cities.forEach(city=>{cityTotals[city]=0;(WORKERS[city]||[]).forEach(w=>{workerTotals[w.id]={name:w.name,tasks:0};for(let d=1;d<=dim;d++){const s=slotsData[`${w.id}_${d}`];if(!s||!s.tasks)return;total+=s.tasks;workerTotals[w.id].tasks+=s.tasks;cityTotals[city]+=s.tasks;if(s.tasks>0)daysWithTasks++;}});});
   const bestW=Object.values(workerTotals).sort((a,b)=>b.tasks-a.tasks)[0];
   const bestC=Object.entries(cityTotals).sort((a,b)=>b[1]-a[1])[0];
   document.getElementById('tskTotal').textContent=total;
@@ -615,36 +525,30 @@ function renderTaskSummary(){
 // ── SLOTS TAB ────────────────────────────────────────
 function toggleNewSlotForm(){
   const f=document.getElementById('newSlotForm');
-  f.style.display=f.style.display==='none'?'block':'none';
-  if(f.style.display==='block'){
-    // populate city select
+  const showing=f.style.display==='block';
+  f.style.display=showing?'none':'block';
+  if(!showing){
     const sel=document.getElementById('nsCity');
     sel.innerHTML=`<option value="">—</option>`+CITIES.map(c=>`<option value="${c}">${c} · ${CITY_NAMES[c]}</option>`).join('');
-    sel.onchange=populateWorkerSelect;
-    // set default date to today
-    const d=new Date();
-    document.getElementById('nsDate').value=d.toISOString().split('T')[0];
+    document.getElementById('nsDate').value=new Date().toISOString().split('T')[0];
   }
 }
 function populateWorkerSelect(){
   const city=document.getElementById('nsCity').value;
-  const sel=document.getElementById('nsWorker');
-  sel.innerHTML=`<option value="">—</option>`+(WORKERS[city]||[]).map(w=>`<option value="${w.id}">${w.name} (${w.role})</option>`).join('');
+  document.getElementById('nsWorker').innerHTML=`<option value="">—</option>`+(WORKERS[city]||[]).map(w=>`<option value="${w.id}">${w.name} (${w.role})</option>`).join('');
 }
 function createSlot(){
   const city=document.getElementById('nsCity').value;
   const date=document.getElementById('nsDate').value;
-  const workerId=document.getElementById('nsWorker').value;
+  const wid=document.getElementById('nsWorker').value;
   const shift=document.getElementById('nsShift').value;
   const qty=parseInt(document.getElementById('nsQty').value)||1;
   const note=document.getElementById('nsNote').value;
-  if(!city||!date||!workerId){alert('Заполните обязательные поля');return;}
-  const worker=(WORKERS[city]||[]).find(w=>w.id===workerId);
-  const slot={id:Date.now(),city,date,workerId,workerName:worker?worker.name:'',workerTag:worker?worker.tag:'',shift,qty,note,status:'ordered',createdAt:new Date().toISOString()};
-  orderedSlots.push(slot);
+  if(!city||!date||!wid){alert(lang==='ru'?'Заполните обязательные поля':'Preencha os campos obrigatórios');return;}
+  const worker=(WORKERS[city]||[]).find(w=>w.id===wid);
+  orderedSlots.push({id:Date.now(),city,date,workerId:wid,workerName:worker?worker.name:'',workerTag:worker?worker.tag:'',shift,qty,note,status:'ordered',createdAt:new Date().toISOString()});
   localStorage.setItem('jet_ordered_slots',JSON.stringify(orderedSlots));
-  toggleNewSlotForm();
-  renderSlotsGrid();
+  toggleNewSlotForm();renderSlotsGrid();
 }
 function cancelSlot(id){
   orderedSlots=orderedSlots.filter(s=>s.id!==id);
@@ -654,52 +558,37 @@ function cancelSlot(id){
 const SHIFT_ICONS={morning:'🌅',day:'☀️',night:'🌙',full:'📅'};
 function renderSlotsGrid(){
   const grid=document.getElementById('slotsGrid');
-  if(orderedSlots.length===0){
-    grid.innerHTML=`<div style="color:var(--text-dim);font-family:'Space Mono',monospace;font-size:12px;grid-column:1/-1;padding:20px 0">${lang==='ru'?'Нет заказанных смен. Нажмите «Новый слот» чтобы добавить.':'Nenhum turno pedido. Clique em «Novo turno» para adicionar.'}</div>`;
-    return;
-  }
-  // Sort by date desc
+  if(!orderedSlots.length){grid.innerHTML=`<div style="color:var(--text-dim);font-family:'Space Mono',monospace;font-size:12px;padding:20px 0">${lang==='ru'?'Нет заказанных смен.':'Nenhum turno pedido.'}</div>`;return;}
   const sorted=[...orderedSlots].sort((a,b)=>b.date.localeCompare(a.date));
   grid.innerHTML=sorted.map(s=>{
-    const statusCls=s.status==='open'?'badge-open':s.status==='ordered'?'badge-ordered':'badge-filled';
-    const statusTxt=s.status==='open'?t('badge_open'):s.status==='ordered'?t('badge_ordered'):t('badge_filled');
-    const shiftIcon=SHIFT_ICONS[s.shift]||'📋';
-    const shiftTxt=t('shift_'+s.shift)||s.shift;
+    const stCls=s.status==='open'?'badge-open':s.status==='ordered'?'badge-ordered':'badge-filled';
+    const stTxt=s.status==='open'?t('badge_open'):s.status==='ordered'?t('badge_ordered'):t('badge_filled');
     return `<div class="slot-card">
-      <div class="slot-card-header">
-        <div class="slot-card-city">${s.city} · ${CITY_NAMES[s.city]}</div>
-        <div><span class="slot-status-badge ${statusCls}">${statusTxt}</span></div>
-      </div>
-      <div style="font-size:13px;font-weight:700;margin-bottom:8px">${shiftIcon} ${shiftTxt}</div>
-      <div style="font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:4px">📅 ${s.date}</div>
-      <div style="font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:4px">👤 ${s.workerName} <span style="color:var(--accent)">${s.workerTag}</span></div>
-      <div style="font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:4px">🔢 ${t('lbl_qty')}: ${s.qty}</div>
-      ${s.note?`<div style="font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;margin-top:4px;padding-top:6px;border-top:1px solid var(--border)">💬 ${s.note}</div>`:''}
-      <div class="slot-actions">
-        <button class="slot-btn slot-btn-cancel" onclick="cancelSlot(${s.id})" data-i18n="btn_cancel">${t('btn_cancel')}</button>
-      </div>
+      <div class="slot-card-header"><div class="slot-card-city">${s.city} · ${CITY_NAMES[s.city]}</div><span class="slot-status-badge ${stCls}">${stTxt}</span></div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:8px">${SHIFT_ICONS[s.shift]||'📋'} ${s.shift}</div>
+      <div style="font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;line-height:1.8">📅 ${s.date}<br>👤 ${s.workerName} <span style="color:var(--accent)">${s.workerTag}</span><br>🔢 ${s.qty}</div>
+      ${s.note?`<div style="font-size:11px;color:var(--text-dim);margin-top:8px;padding-top:6px;border-top:1px solid var(--border)">💬 ${s.note}</div>`:''}
+      <div class="slot-actions"><button class="slot-btn slot-btn-cancel" onclick="cancelSlot(${s.id})">${t('btn_cancel')}</button></div>
     </div>`;
   }).join('');
 }
 
 // ── TOOLTIP ──────────────────────────────────────────
-function showTooltip(e,el,type){
-  const key=el.dataset.key;
-  const slot=slotsData[key];if(!slot)return;
+function showTT(e,el,type){
+  const key=el.dataset.key;const slot=slotsData[key];if(!slot)return;
   const day=el.dataset.day,wname=el.dataset.wname,city=el.dataset.city;
   const tt=document.getElementById('tooltip');
   let html=`<div class="tt-header">${city} · ${wname} · ${day} ${t('months')[curMonth]}</div>`;
-  if(type==='worker'){
-    const stLabel=slot.status==='full'?`<span style="color:var(--accent3)">● ${t('st_full')}</span>`:slot.status==='partial'?`<span style="color:var(--accent4)">◑ ${t('st_partial')}</span>`:`<span style="color:var(--accent2)">○ ${t('st_empty')}</span>`;
-    html+=`<div class="tt-row"><span class="tt-label">${t('tt_status')}</span><span class="tt-val">${stLabel}</span></div>
+  if(type==='w'){
+    const stL=slot.status==='full'?`<span style="color:var(--accent3)">● ${t('st_full')}</span>`:slot.status==='partial'?`<span style="color:var(--accent4)">◑ ${t('st_partial')}</span>`:`<span style="color:var(--accent2)">○ ${t('st_empty')}</span>`;
+    html+=`<div class="tt-row"><span class="tt-label">${t('tt_status')}</span><span>${stL}</span></div>
       <div class="tt-row"><span class="tt-label">${t('tt_ordered')}</span><span class="tt-val cyan">${slot.slotsOrdered}</span></div>
       <div class="tt-row"><span class="tt-label">${t('tt_filled')}</span><span class="tt-val green">${slot.slotsFilled}</span></div>
       <div class="tt-row"><span class="tt-label">${t('tt_empty')}</span><span class="tt-val red">${slot.slotsOrdered-slot.slotsFilled}</span></div>
       <div class="tt-row"><span class="tt-label">${t('tt_tasks')}</span><span class="tt-val orange">${slot.tasks}</span></div>`;
     if(slot.workers&&slot.workers.length)html+=`<div class="tt-workers"><div class="tt-worker-label">${t('tt_workers')}</div>${slot.workers.map(w=>`<div class="tt-worker-item"><span class="tag">${w.tag}</span><span class="name">${w.name}</span></div>`).join('')}</div>`;
   }else{
-    html+=`<div class="tt-row"><span class="tt-label">${t('tt_tasks_count')}</span><span class="tt-val orange" style="font-size:20px">${slot.tasks}</span></div>`;
-    if(slot.workers&&slot.workers.length)html+=`<div class="tt-workers"><div class="tt-worker-label">${t('tt_workers')}</div>${slot.workers.map(w=>`<div class="tt-worker-item"><span class="tag">${w.tag}</span><span class="name">${w.name}</span></div>`).join('')}</div>`;
+    html+=`<div class="tt-row"><span class="tt-label">${t('tt_tasks_count')}</span><span class="tt-val orange" style="font-size:18px">${slot.tasks}</span></div>`;
   }
   tt.innerHTML=html;
   const x=e.clientX+14,y=e.clientY+14;
@@ -707,14 +596,14 @@ function showTooltip(e,el,type){
   tt.style.top=(y+200>window.innerHeight?y-210:y)+'px';
   tt.classList.add('visible');
 }
-function hideTooltip(){document.getElementById('tooltip').classList.remove('visible');}
+function hideTT(){document.getElementById('tooltip').classList.remove('visible');}
 
 // ── INIT ─────────────────────────────────────────────
 async function init(){
   applyTheme();applyLang();
-  slotsData=generateMockSlots(curYear,curMonth);
-  document.getElementById('monthLabel').textContent=`${t('months')[curMonth]} ${curYear}`;
-  renderCityFilters();renderWorkers();renderSummary();renderTasks();renderTaskSummary();renderSlotsGrid();
+  // Загружаем стабильные данные (из кеша или генерируем один раз)
+  slotsData=generateStableSlots(curYear,curMonth);
+  render();
   await fetchBotData();
   setInterval(fetchBotData,5*60*1000);
 }
