@@ -7,7 +7,6 @@
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
 
-  /* ── DARK THEME (default) ── */
   :root{
     --bg:#0a0d12;--surface:#111520;--surface2:#181e2e;--border:#1f2a40;
     --accent:#00e5ff;--accent2:#ff4757;--accent3:#2ed573;--accent4:#ffa502;
@@ -15,123 +14,161 @@
     --slot-full:#0d2e1a;--slot-full-border:#2ed573;
     --slot-partial:#2a1e08;--slot-partial-border:#ffa502;
     --slot-empty:#1a0d0d;--slot-empty-border:#ff4757;
-    --slot-none:#0f1219;--radius:6px;
-    --shadow:0 4px 20px rgba(0,0,0,.4);
+    --slot-none:#0f1219;--radius:6px;--shadow:0 4px 20px rgba(0,0,0,.4);
   }
-  /* ── LIGHT THEME ── */
   html.light{
-    --bg:#f0f4f8;--surface:#ffffff;--surface2:#e8edf5;--border:#d0d9e8;
+    --bg:#f0f4f8;--surface:#fff;--surface2:#e8edf5;--border:#d0d9e8;
     --accent:#0077cc;--accent2:#e03030;--accent3:#1a9e50;--accent4:#d47800;
     --text:#0d1117;--text-dim:#4a5568;
     --slot-full:#d4f0e0;--slot-full-border:#1a9e50;
     --slot-partial:#fdefd4;--slot-partial-border:#d47800;
     --slot-empty:#fdd;--slot-empty-border:#e03030;
-    --slot-none:#e8edf5;
-    --shadow:0 4px 20px rgba(0,0,0,.1);
+    --slot-none:#e8edf5;--shadow:0 4px 20px rgba(0,0,0,.1);
   }
 
   *{box-sizing:border-box;margin:0;padding:0}
-  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden;transition:background .25s,color .25s}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;transition:background .25s,color .25s}
 
   /* AUTH */
-  #authOverlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center;transition:background .25s}
+  #authOverlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
   .auth-box{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:44px 40px;width:360px;text-align:center;box-shadow:var(--shadow)}
   .auth-logo{font-size:44px;margin-bottom:10px}
   .auth-title{font-size:22px;font-weight:800;margin-bottom:4px}
   .auth-sub{font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:28px}
-  .auth-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;color:var(--text);font-size:14px;font-family:'Space Mono',monospace;outline:none;margin-bottom:12px;transition:border-color .2s,background .25s}
+  .auth-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;color:var(--text);font-size:14px;font-family:'Space Mono',monospace;outline:none;margin-bottom:12px;transition:border-color .2s}
   .auth-input:focus{border-color:var(--accent)}
-  .auth-btn{width:100%;background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Syne',sans-serif;transition:opacity .2s}
-  html.light .auth-btn{color:#000}
+  .auth-btn{width:100%;background:var(--accent);color:#000;border:none;border-radius:var(--radius);padding:12px;font-size:14px;font-weight:800;cursor:pointer;transition:opacity .2s}
   .auth-btn:hover{opacity:.85}
   .auth-error{color:var(--accent2);font-size:12px;font-family:'Space Mono',monospace;margin-top:8px;display:none}
 
   /* HEADER */
-  header{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100;transition:background .25s,border-color .25s;flex-wrap:wrap;gap:10px}
-  .logo{display:flex;align-items:center;gap:12px}
-  .logo-icon{width:34px;height:34px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px;color:#000}
-  .logo-text{font-size:17px;font-weight:800;letter-spacing:-.5px}
+  header{display:flex;align-items:center;justify-content:space-between;padding:12px 22px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:200;transition:background .25s;gap:10px;flex-wrap:wrap}
+  .logo{display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .logo-icon{width:32px;height:32px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:16px;color:#000}
+  .logo-text{font-size:16px;font-weight:800;letter-spacing:-.5px}
   .logo-sub{font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace;margin-top:1px}
-  .header-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .header-right{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+  .month-nav{display:flex;align-items:center;gap:5px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:4px 9px;transition:background .25s}
+  .month-nav button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:14px;padding:0 2px}
+  .month-nav span{font-family:'Space Mono',monospace;font-size:11px;min-width:100px;text-align:center;font-weight:700;color:var(--text)}
+  .ibtn{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:5px 9px;font-size:11px;cursor:pointer;transition:all .2s;font-family:'Space Mono',monospace;font-weight:700;display:flex;align-items:center;gap:4px}
+  .ibtn:hover{border-color:var(--accent);color:var(--accent)}
+  .ibtn.sync{background:var(--accent);color:#000;border-color:transparent}
+  .ibtn.sync:hover{opacity:.85;color:#000}
+  .ibtn.sync.loading{opacity:.5;cursor:not-allowed}
+  .ibtn.danger:hover{border-color:var(--accent2);color:var(--accent2)}
 
-  /* CONTROLS */
-  .month-nav{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:5px 10px;transition:background .25s}
-  .month-nav button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:15px;padding:0 3px;line-height:1}
-  .month-nav span{font-family:'Space Mono',monospace;font-size:12px;min-width:110px;text-align:center;font-weight:700;color:var(--text)}
+  /* TABS */
+  .tabs{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 22px;gap:2px;position:sticky;top:57px;z-index:190;transition:background .25s}
+  .tab{padding:10px 18px;font-size:12px;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;color:var(--text-dim);transition:all .2s;display:flex;align-items:center;gap:6px;white-space:nowrap}
+  .tab:hover{color:var(--text)}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .tab-icon{font-size:15px}
 
-  .icon-btn{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:6px 10px;font-size:14px;cursor:pointer;transition:all .2s;line-height:1;display:flex;align-items:center;gap:5px;font-family:'Space Mono',monospace;font-size:11px;font-weight:700}
-  .icon-btn:hover{border-color:var(--accent);color:var(--accent)}
-  .sync-btn{background:var(--accent);color:#000;border:none}
-  .sync-btn:hover{opacity:.85;color:#000;border-color:transparent}
-  .sync-btn.loading{opacity:.5;cursor:not-allowed}
-  .logout-btn:hover{border-color:var(--accent2);color:var(--accent2)}
-
-  /* STATUS */
-  .status-bar{padding:7px 24px;font-size:11px;font-family:'Space Mono',monospace;color:var(--text-dim);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;transition:background .25s,border-color .25s}
-  .status-dot{width:7px;height:7px;border-radius:50%;background:var(--accent3);flex-shrink:0}
-  .status-dot.pulse{animation:pulse 2s infinite}
+  /* STATUS BAR */
+  .status-bar{padding:6px 22px;font-size:10px;font-family:'Space Mono',monospace;color:var(--text-dim);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;transition:background .25s}
+  .sdot{width:6px;height:6px;border-radius:50%;background:var(--accent3);flex-shrink:0}
+  .sdot.pulse{animation:pulse 2s infinite}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
 
-  /* SUMMARY */
-  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:16px 24px}
-  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;transition:background .25s,border-color .25s;box-shadow:var(--shadow)}
-  .card-label{font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.5px;margin-bottom:7px}
-  .card-val{font-size:30px;font-weight:800;line-height:1}
+  /* SUMMARY CARDS */
+  .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;padding:14px 22px}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:13px 16px;transition:background .25s;box-shadow:var(--shadow)}
+  .card-label{font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .card-val{font-size:28px;font-weight:800;line-height:1}
   .card-val.green{color:var(--accent3)}.card-val.cyan{color:var(--accent)}.card-val.red{color:var(--accent2)}.card-val.orange{color:var(--accent4)}
-  .card-sub{font-size:10px;color:var(--text-dim);margin-top:4px;font-family:'Space Mono',monospace}
+  .card-sub{font-size:10px;color:var(--text-dim);margin-top:3px;font-family:'Space Mono',monospace}
 
   /* LEGEND */
-  .legend{display:flex;gap:16px;padding:0 24px 14px;font-size:11px;font-family:'Space Mono',monospace;color:var(--text-dim);align-items:center;flex-wrap:wrap}
-  .legend-item{display:flex;align-items:center;gap:5px}
-  .legend-dot{width:11px;height:11px;border-radius:3px}
+  .legend{display:flex;gap:14px;padding:0 22px 12px;font-size:10px;font-family:'Space Mono',monospace;color:var(--text-dim);align-items:center;flex-wrap:wrap}
+  .legend-item{display:flex;align-items:center;gap:4px}
+  .ldot{width:10px;height:10px;border-radius:3px}
 
   /* CITY FILTER */
-  .city-filter{display:flex;gap:5px;flex-wrap:wrap;padding:0 24px 14px}
-  .city-chip{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);transition:all .15s;font-family:'Space Mono',monospace}
+  .city-filter{display:flex;gap:5px;flex-wrap:wrap;padding:0 22px 12px}
+  .city-chip{padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);transition:all .15s;font-family:'Space Mono',monospace}
   .city-chip.active{background:var(--accent);color:#000;border-color:var(--accent)}
 
-  /* CALENDAR */
-  .calendar-wrap{padding:0 24px 40px;overflow-x:auto}
-  .calendar-table{border-collapse:separate;border-spacing:2px;min-width:100%;table-layout:fixed}
-  .calendar-table th,.calendar-table td{padding:0}
-  .col-name{width:155px;min-width:135px;position:sticky;left:0;z-index:10}
-  .th-empty{background:var(--bg);position:sticky;left:0;z-index:20;padding:6px 10px;transition:background .25s}
-  .th-day{min-width:36px;width:36px;text-align:center;padding:5px 2px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);font-weight:700;background:var(--bg);position:sticky;top:0;transition:background .25s}
+  /* CALENDAR TABLE */
+  .calendar-wrap{padding:0 22px 40px;overflow-x:auto}
+  .cal-table{border-collapse:separate;border-spacing:2px;min-width:100%;table-layout:fixed}
+  .cal-table th,.cal-table td{padding:0}
+  .col-name{width:150px;min-width:130px;position:sticky;left:0;z-index:10}
+  .th-empty{background:var(--bg);position:sticky;left:0;z-index:20;padding:5px 8px;transition:background .25s}
+  .th-day{min-width:34px;width:34px;text-align:center;padding:4px 1px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);font-weight:700;background:var(--bg);transition:background .25s}
   .th-day.today{color:var(--accent)}.th-day.weekend{color:var(--accent4)}
   .city-row td{padding:3px 0}
-  .city-label{background:var(--surface2);border-left:3px solid var(--accent);padding:5px 10px;font-size:11px;font-weight:800;color:var(--accent);letter-spacing:.5px;text-transform:uppercase;font-family:'Space Mono',monospace;position:sticky;left:0;z-index:10;transition:background .25s}
-  .city-spacer{background:var(--surface2);opacity:.3;transition:background .25s}
-  .worker-name-cell{background:var(--surface);padding:3px 10px;font-size:11px;font-weight:600;color:var(--text);border-right:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:sticky;left:0;z-index:10;height:34px;transition:background .25s}
-  .slot-cell{width:36px;height:34px;border-radius:4px;cursor:pointer;position:relative;transition:transform .1s;text-align:center;vertical-align:middle;font-size:10px;font-weight:700;font-family:'Space Mono',monospace}
+  .city-label{background:var(--surface2);border-left:3px solid var(--accent);padding:4px 9px;font-size:10px;font-weight:800;color:var(--accent);text-transform:uppercase;font-family:'Space Mono',monospace;position:sticky;left:0;z-index:10;transition:background .25s}
+  .city-spacer{background:var(--surface2);opacity:.25;transition:background .25s}
+  .wname-cell{background:var(--surface);padding:3px 9px;font-size:11px;font-weight:600;color:var(--text);border-right:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:sticky;left:0;z-index:10;height:33px;transition:background .25s}
+  .slot-cell{width:34px;height:33px;border-radius:4px;cursor:pointer;text-align:center;vertical-align:middle;font-size:10px;font-weight:700;font-family:'Space Mono',monospace;transition:transform .1s}
   .slot-cell:hover{transform:scale(1.18);z-index:50}
-  .slot-full{background:var(--slot-full);border:1px solid var(--slot-full-border);color:var(--accent3)}
-  .slot-partial{background:var(--slot-partial);border:1px solid var(--slot-partial-border);color:var(--accent4)}
-  .slot-empty{background:var(--slot-empty);border:1px solid var(--slot-empty-border);color:var(--accent2)}
-  .slot-none{background:var(--slot-none);border:1px solid transparent;cursor:default}
-  .slot-future{background:var(--surface2);border:1px dashed var(--border);cursor:default;opacity:.5}
+  .s-full{background:var(--slot-full);border:1px solid var(--slot-full-border);color:var(--accent3)}
+  .s-partial{background:var(--slot-partial);border:1px solid var(--slot-partial-border);color:var(--accent4)}
+  .s-empty{background:var(--slot-empty);border:1px solid var(--slot-empty-border);color:var(--accent2)}
+  .s-none{background:var(--slot-none);border:1px solid transparent;cursor:default}
+  .s-future{background:var(--surface2);border:1px dashed var(--border);cursor:default;opacity:.5}
+  /* Tasks tab cell */
+  .t-cell{width:34px;height:33px;border-radius:4px;text-align:center;vertical-align:middle;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;cursor:pointer;transition:transform .1s;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim)}
+  .t-cell:hover{transform:scale(1.18);z-index:50}
+  .t-cell.has-tasks{background:var(--slot-full);border-color:var(--slot-full-border);color:var(--accent3)}
+  .t-cell.few-tasks{background:var(--slot-partial);border-color:var(--slot-partial-border);color:var(--accent4)}
+  .t-cell.no-tasks{background:var(--slot-empty);border-color:var(--slot-empty-border);color:var(--accent2)}
+  .t-cell.empty{background:var(--slot-none);border-color:transparent;cursor:default;color:transparent}
 
   /* TOOLTIP */
-  .tooltip{display:none;position:fixed;z-index:1000;background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:14px 18px;min-width:250px;max-width:310px;box-shadow:var(--shadow);pointer-events:none;transition:background .25s}
+  .tooltip{display:none;position:fixed;z-index:1000;background:var(--surface);border:1px solid var(--accent);border-radius:10px;padding:13px 16px;min-width:240px;max-width:300px;box-shadow:var(--shadow);pointer-events:none;transition:background .25s}
   .tooltip.visible{display:block}
-  .tt-header{font-size:11px;font-family:'Space Mono',monospace;color:var(--accent);font-weight:700;margin-bottom:9px;padding-bottom:7px;border-bottom:1px solid var(--border)}
-  .tt-row{display:flex;justify-content:space-between;align-items:center;padding:3px 0;font-size:11px}
-  .tt-label{color:var(--text-dim)}.tt-val{font-weight:700}
-  .tt-val.green{color:var(--accent3)}.tt-val.red{color:var(--accent2)}.tt-val.cyan{color:var(--accent)}.tt-val.orange{color:var(--accent4)}
-  .tt-workers{margin-top:9px;padding-top:7px;border-top:1px solid var(--border)}
-  .tt-worker-label{font-size:9px;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase;margin-bottom:5px}
-  .tt-worker-item{font-size:11px;padding:2px 0;display:flex;gap:6px}
-  .tt-worker-item .tag{color:var(--accent);font-family:'Space Mono',monospace}
-  .tt-worker-item .name{color:var(--text)}
+  .tt-hdr{font-size:11px;font-family:'Space Mono',monospace;color:var(--accent);font-weight:700;margin-bottom:8px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+  .tt-row{display:flex;justify-content:space-between;padding:2px 0;font-size:11px}
+  .tt-lbl{color:var(--text-dim)}.tt-val{font-weight:700}
+  .tt-val.g{color:var(--accent3)}.tt-val.r{color:var(--accent2)}.tt-val.c{color:var(--accent)}.tt-val.o{color:var(--accent4)}
+  .tt-section{margin-top:8px;padding-top:7px;border-top:1px solid var(--border)}
+  .tt-section-lbl{font-size:9px;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase;margin-bottom:4px}
+  .tt-worker{font-size:10px;padding:2px 0;display:flex;gap:5px}
+  .tt-worker .tag{color:var(--accent);font-family:'Space Mono',monospace}
+
+  /* ── SLOTS TAB ── */
+  .slots-panel{padding:20px 22px;max-width:700px}
+  .slots-panel h2{font-size:16px;font-weight:800;margin-bottom:4px}
+  .slots-panel .sub{font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:20px}
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+  .form-group{display:flex;flex-direction:column;gap:5px}
+  .form-group label{font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase;letter-spacing:.5px}
+  .form-select,.form-input{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;color:var(--text);font-size:13px;font-family:'Space Mono',monospace;outline:none;width:100%;transition:border-color .2s}
+  .form-select:focus,.form-input:focus{border-color:var(--accent)}
+  .form-select option{background:var(--surface)}
+  .slot-types{display:flex;gap:8px;flex-wrap:wrap}
+  .slot-type-btn{padding:7px 14px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);font-size:11px;font-weight:700;cursor:pointer;font-family:'Space Mono',monospace;transition:all .2s}
+  .slot-type-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
+  .time-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:8px}
+  .time-slot{padding:8px 4px;border-radius:var(--radius);border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);font-size:11px;font-weight:700;cursor:pointer;font-family:'Space Mono',monospace;text-align:center;transition:all .2s}
+  .time-slot:hover{border-color:var(--accent);color:var(--accent)}
+  .time-slot.selected{background:var(--accent);color:#000;border-color:var(--accent)}
+  .time-slot.taken{background:var(--slot-full);border-color:var(--slot-full-border);color:var(--accent3);cursor:not-allowed}
+  .submit-btn{width:100%;background:var(--accent3);color:#000;border:none;border-radius:var(--radius);padding:13px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Syne',sans-serif;transition:opacity .2s;margin-top:16px}
+  .submit-btn:hover{opacity:.85}
+  .submit-btn:disabled{opacity:.4;cursor:not-allowed}
+  .slot-result{margin-top:12px;padding:12px 14px;border-radius:var(--radius);font-size:12px;font-family:'Space Mono',monospace;display:none}
+  .slot-result.ok{background:var(--slot-full);border:1px solid var(--slot-full-border);color:var(--accent3)}
+  .slot-result.err{background:var(--slot-empty);border:1px solid var(--slot-empty-border);color:var(--accent2)}
+  .upcoming-slots{margin-top:28px}
+  .upcoming-slots h3{font-size:13px;font-weight:800;margin-bottom:10px;color:var(--text-dim);font-family:'Space Mono',monospace;text-transform:uppercase}
+  .slot-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:11px 14px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:center;transition:background .25s}
+  .slot-card-left .sc-name{font-size:12px;font-weight:700}
+  .slot-card-left .sc-meta{font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace;margin-top:2px}
+  .slot-badge{padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700;font-family:'Space Mono',monospace}
+  .sb-open{background:var(--slot-empty);border:1px solid var(--slot-empty-border);color:var(--accent2)}
+  .sb-taken{background:var(--slot-full);border:1px solid var(--slot-full-border);color:var(--accent3)}
+
+  /* TAB PAGES */
+  .tab-page{display:none}
+  .tab-page.active{display:block}
 
   ::-webkit-scrollbar{width:5px;height:5px}
   ::-webkit-scrollbar-track{background:var(--bg)}
   ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
-
-  @media(max-width:700px){
-    .summary{grid-template-columns:repeat(2,1fr)}
-    header{padding:10px 14px}
-    .calendar-wrap{padding:0 8px 30px}
-  }
+  @media(max-width:700px){.summary{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}.time-slots{grid-template-columns:repeat(3,1fr)}}
 </style>
 </head>
 <body>
@@ -141,13 +178,14 @@
   <div class="auth-box">
     <div class="auth-logo">⚡</div>
     <div class="auth-title">JET MEI Litoral</div>
-    <div class="auth-sub" id="authSub">SP-LITORAL · BRSPL · ADMIN PANEL</div>
+    <div class="auth-sub">SP-LITORAL · BRSPL · ADMIN</div>
     <input class="auth-input" type="password" id="authInput" placeholder="Senha / Пароль" onkeydown="if(event.key==='Enter')checkAuth()">
-    <button class="auth-btn" id="authBtnEl" onclick="checkAuth()">Entrar / Войти</button>
+    <button class="auth-btn" onclick="checkAuth()">Entrar / Войти</button>
     <div class="auth-error" id="authError">Senha incorreta / Неверный пароль</div>
   </div>
 </div>
 
+<!-- HEADER -->
 <header>
   <div class="logo">
     <div class="logo-icon">⚡</div>
@@ -162,154 +200,250 @@
       <span id="monthLabel"></span>
       <button id="nextMonth">▶</button>
     </div>
-    <button class="icon-btn sync-btn" id="syncBtn" onclick="syncData()">⟳ Sync</button>
-    <button class="icon-btn" id="langBtn" onclick="toggleLang()" title="Mudar idioma / Сменить язык">🌐 RU</button>
-    <button class="icon-btn" id="themeBtn" onclick="toggleTheme()" title="Mudar tema / Сменить тему">🌙 Dark</button>
-    <button class="icon-btn logout-btn" onclick="logout()" id="logoutBtn">✕</button>
+    <button class="ibtn sync" id="syncBtn" onclick="syncData()">⟳ Sync</button>
+    <button class="ibtn" id="langBtn" onclick="toggleLang()">🌐 RU</button>
+    <button class="ibtn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+    <button class="ibtn danger" onclick="logout()">✕</button>
   </div>
 </header>
 
+<!-- TABS -->
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('employees')" id="tab-employees">
+    <span class="tab-icon">⚒</span><span data-i18n="tab_emp">Сотрудники</span>
+  </div>
+  <div class="tab" onclick="switchTab('slots')" id="tab-slots">
+    <span class="tab-icon">📋</span><span data-i18n="tab_slots">Slots</span>
+  </div>
+  <div class="tab" onclick="switchTab('tasks')" id="tab-tasks">
+    <span class="tab-icon">✅</span><span data-i18n="tab_tasks">Задачи</span>
+  </div>
+</div>
+
+<!-- STATUS -->
 <div class="status-bar">
-  <div class="status-dot pulse" id="statusDot"></div>
+  <div class="sdot pulse" id="statusDot"></div>
   <span id="statusText">—</span>
 </div>
 
-<div class="summary">
-  <div class="card"><div class="card-label" data-i18n="slots_ordered">Слотов заказано</div><div class="card-val cyan" id="sumTotal">—</div><div class="card-sub" id="sumMonth"></div></div>
-  <div class="card"><div class="card-label" data-i18n="slots_filled">Принято</div><div class="card-val green" id="sumFilled">—</div><div class="card-sub" id="sumFilledPct"></div></div>
-  <div class="card"><div class="card-label" data-i18n="slots_empty">Пустых слотов</div><div class="card-val red" id="sumEmpty">—</div><div class="card-sub" id="sumEmptyPct"></div></div>
-  <div class="card"><div class="card-label" data-i18n="tasks_done">Задач выполнено</div><div class="card-val orange" id="sumTasks">—</div><div class="card-sub" data-i18n="current_period">за текущий период</div></div>
+<!-- ══════════ TAB: EMPLOYEES ══════════ -->
+<div class="tab-page active" id="page-employees">
+  <div class="summary">
+    <div class="card"><div class="card-label" data-i18n="slots_ordered">Слотов заказано</div><div class="card-val cyan" id="sumTotal">—</div><div class="card-sub" id="sumMonth"></div></div>
+    <div class="card"><div class="card-label" data-i18n="slots_filled">Принято</div><div class="card-val green" id="sumFilled">—</div><div class="card-sub" id="sumFilledPct"></div></div>
+    <div class="card"><div class="card-label" data-i18n="slots_empty">Пустых</div><div class="card-val red" id="sumEmpty">—</div><div class="card-sub" id="sumEmptyPct"></div></div>
+    <div class="card"><div class="card-label" data-i18n="workers_total">Работников</div><div class="card-val orange" id="sumWorkers">—</div><div class="card-sub" data-i18n="all_cities_sub">все города</div></div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="ldot" style="background:var(--slot-full);border:1px solid var(--slot-full-border)"></div><span data-i18n="leg_full">Заполнен</span></div>
+    <div class="legend-item"><div class="ldot" style="background:var(--slot-partial);border:1px solid var(--slot-partial-border)"></div><span data-i18n="leg_partial">Частично</span></div>
+    <div class="legend-item"><div class="ldot" style="background:var(--slot-empty);border:1px solid var(--slot-empty-border)"></div><span data-i18n="leg_empty">Пустой</span></div>
+    <div class="legend-item"><div class="ldot" style="background:var(--slot-none);border:1px solid var(--border)"></div><span data-i18n="leg_none">Нет слота</span></div>
+  </div>
+  <div class="city-filter" id="cityFilter1"></div>
+  <div class="calendar-wrap"><table class="cal-table" id="calEmp"></table></div>
 </div>
 
-<div class="legend">
-  <div class="legend-item"><div class="legend-dot" style="background:var(--slot-full);border:1px solid var(--slot-full-border)"></div><span data-i18n="leg_full">Заполнен</span></div>
-  <div class="legend-item"><div class="legend-dot" style="background:var(--slot-partial);border:1px solid var(--slot-partial-border)"></div><span data-i18n="leg_partial">Частично</span></div>
-  <div class="legend-item"><div class="legend-dot" style="background:var(--slot-empty);border:1px solid var(--slot-empty-border)"></div><span data-i18n="leg_empty">Пустой</span></div>
-  <div class="legend-item"><div class="legend-dot" style="background:var(--slot-none);border:1px solid var(--border)"></div><span data-i18n="leg_none">Нет слота</span></div>
+<!-- ══════════ TAB: SLOTS ══════════ -->
+<div class="tab-page" id="page-slots">
+  <div class="slots-panel">
+    <h2 data-i18n="slots_title">Заказ смены</h2>
+    <div class="sub" data-i18n="slots_sub">Выберите город, сотрудника, дату и тип смены</div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label data-i18n="f_city">Город</label>
+        <select class="form-select" id="fCity" onchange="onCityChange()">
+          <option value="">— выбери —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label data-i18n="f_worker">Сотрудник</label>
+        <select class="form-select" id="fWorker">
+          <option value="">— сначала город —</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label data-i18n="f_date">Дата</label>
+        <input class="form-input" type="date" id="fDate">
+      </div>
+      <div class="form-group">
+        <label data-i18n="f_type">Тип смены</label>
+        <div class="slot-types">
+          <div class="slot-type-btn active" data-type="full" onclick="selectType(this)">🌅 <span data-i18n="st_full_shift">Полная</span></div>
+          <div class="slot-type-btn" data-type="morning" onclick="selectType(this)">☀️ <span data-i18n="st_morning">Утро</span></div>
+          <div class="slot-type-btn" data-type="evening" onclick="selectType(this)">🌙 <span data-i18n="st_evening">Вечер</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-group" style="margin-bottom:12px">
+      <label data-i18n="f_time">Время начала</label>
+      <div class="time-slots" id="timeSlots"></div>
+    </div>
+
+    <div class="form-group">
+      <label data-i18n="f_note">Примечание</label>
+      <input class="form-input" type="text" id="fNote" placeholder="Опционально / Opcional">
+    </div>
+
+    <button class="submit-btn" id="submitSlot" onclick="submitSlot()" disabled>
+      <span data-i18n="btn_order">📋 Заказать смену</span>
+    </button>
+    <div class="slot-result" id="slotResult"></div>
+
+    <div class="upcoming-slots">
+      <h3 data-i18n="upcoming">Предстоящие смены</h3>
+      <div id="upcomingList"></div>
+    </div>
+  </div>
 </div>
 
-<div class="city-filter" id="cityFilter"></div>
-<div class="calendar-wrap"><table class="calendar-table" id="calTable"></table></div>
+<!-- ══════════ TAB: TASKS ══════════ -->
+<div class="tab-page" id="page-tasks">
+  <div class="summary">
+    <div class="card"><div class="card-label" data-i18n="tasks_total">Задач всего</div><div class="card-val cyan" id="tSumTotal">—</div><div class="card-sub" id="tSumMonth"></div></div>
+    <div class="card"><div class="card-label" data-i18n="tasks_done">Выполнено</div><div class="card-val green" id="tSumDone">—</div><div class="card-sub" id="tSumPct"></div></div>
+    <div class="card"><div class="card-label" data-i18n="tasks_avg">Среднее/день</div><div class="card-val orange" id="tSumAvg">—</div><div class="card-sub" data-i18n="per_worker">на работника</div></div>
+    <div class="card"><div class="card-label" data-i18n="tasks_leader">Лидер</div><div class="card-val" id="tSumLeader" style="font-size:14px;color:var(--accent4)">—</div><div class="card-sub" id="tSumLeaderCity"></div></div>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="ldot" style="background:var(--slot-full);border:1px solid var(--slot-full-border)"></div><span data-i18n="leg_many">10+ задач</span></div>
+    <div class="legend-item"><div class="ldot" style="background:var(--slot-partial);border:1px solid var(--slot-partial-border)"></div><span data-i18n="leg_few">1–9 задач</span></div>
+    <div class="legend-item"><div class="ldot" style="background:var(--slot-empty);border:1px solid var(--slot-empty-border)"></div><span data-i18n="leg_zero">0 задач (был)</span></div>
+    <div class="legend-item"><div class="ldot" style="background:var(--slot-none);border:1px solid var(--border)"></div><span data-i18n="leg_noshift">Нет смены</span></div>
+  </div>
+  <div class="city-filter" id="cityFilter2"></div>
+  <div class="calendar-wrap"><table class="cal-table" id="calTasks"></table></div>
+</div>
+
 <div class="tooltip" id="tooltip"></div>
 
 <script>
-// ── i18n ─────────────────────────────────────────────
+// ── i18n ────────────────────────────────────────────
 const I18N = {
-  ru: {
-    slots_ordered:'Слотов заказано', slots_filled:'Принято', slots_empty:'Пустых слотов',
-    tasks_done:'Задач выполнено', current_period:'за текущий период',
-    leg_full:'Заполнен', leg_partial:'Частично', leg_empty:'Пустой', leg_none:'Нет слота',
-    all_cities:'🌐 Все', status_sync:'Последнее обновление', status_msgs:'сообщений',
-    status_err:'Ошибка синхронизации', tt_status:'Статус', tt_ordered:'Заказано',
-    tt_filled:'Принято', tt_empty:'Пустых', tt_tasks:'Задач', tt_workers:'Работники',
-    st_full:'Заполнен', st_partial:'Частично', st_empty:'Пустой',
-    logout:'Выйти', lang_btn:'🌐 PT', theme_dark:'🌙 Dark', theme_light:'☀️ Light',
+  ru:{
+    tab_emp:'Сотрудники', tab_slots:'Slots', tab_tasks:'Задачи',
+    slots_ordered:'Слотов заказано', slots_filled:'Принято', slots_empty:'Пустых', workers_total:'Работников',
+    all_cities_sub:'все города', leg_full:'Заполнен', leg_partial:'Частично', leg_empty:'Пустой', leg_none:'Нет слота',
+    leg_many:'10+ задач', leg_few:'1–9 задач', leg_zero:'0 задач (был)', leg_noshift:'Нет смены',
+    tasks_total:'Задач всего', tasks_done:'Выполнено', tasks_avg:'Среднее/день', tasks_leader:'Лидер',
+    per_worker:'на работника',
+    slots_title:'Заказ смены', slots_sub:'Выберите город, сотрудника, дату и тип смены',
+    f_city:'Город', f_worker:'Сотрудник', f_date:'Дата', f_type:'Тип смены', f_time:'Время начала', f_note:'Примечание',
+    st_full_shift:'Полная', st_morning:'Утро', st_evening:'Вечер',
+    btn_order:'📋 Заказать смену', upcoming:'Предстоящие смены',
+    all_cities:'🌐 Все', status_sync:'Обновлено', status_msgs:'сообщ.', status_err:'Ошибка',
+    tt_status:'Статус', tt_ordered:'Заказано', tt_filled:'Принято', tt_empty:'Пустых', tt_tasks:'Задач', tt_workers:'Работники',
+    tt_tasks_count:'Задач выполнено',
+    st_full:'● Заполнен', st_partial:'◑ Частично', st_empty:'○ Пустой',
     pct_of:'% от заказанных', pct_open:'% незакрытых',
     months:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
     dow:['Вс','Пн','Вт','Ср','Чт','Пт','Сб'],
+    order_ok:'✅ Смена заказана!', order_err:'❌ Ошибка — заполните все поля',
+    choose_city:'— выбери —', choose_worker_first:'— сначала город —',
   },
-  pt: {
-    slots_ordered:'Turnos pedidos', slots_filled:'Aceitos', slots_empty:'Turnos vazios',
-    tasks_done:'Tarefas feitas', current_period:'no período atual',
-    leg_full:'Preenchido', leg_partial:'Parcial', leg_empty:'Vazio', leg_none:'Sem turno',
-    all_cities:'🌐 Todos', status_sync:'Última atualização', status_msgs:'mensagens',
-    status_err:'Erro de sincronização', tt_status:'Status', tt_ordered:'Pedidos',
-    tt_filled:'Aceitos', tt_empty:'Vazios', tt_tasks:'Tarefas', tt_workers:'Trabalhadores',
-    st_full:'Preenchido', st_partial:'Parcial', st_empty:'Vazio',
-    logout:'Sair', lang_btn:'🌐 RU', theme_dark:'🌙 Escuro', theme_light:'☀️ Claro',
+  pt:{
+    tab_emp:'Funcionários', tab_slots:'Turnos', tab_tasks:'Tarefas',
+    slots_ordered:'Turnos pedidos', slots_filled:'Aceitos', slots_empty:'Vazios', workers_total:'Trabalhadores',
+    all_cities_sub:'todas cidades', leg_full:'Preenchido', leg_partial:'Parcial', leg_empty:'Vazio', leg_none:'Sem turno',
+    leg_many:'10+ tarefas', leg_few:'1–9 tarefas', leg_zero:'0 tarefas (estava)', leg_noshift:'Sem turno',
+    tasks_total:'Total tarefas', tasks_done:'Concluídas', tasks_avg:'Média/dia', tasks_leader:'Líder',
+    per_worker:'por trabalhador',
+    slots_title:'Solicitar turno', slots_sub:'Escolha cidade, funcionário, data e tipo de turno',
+    f_city:'Cidade', f_worker:'Funcionário', f_date:'Data', f_type:'Tipo de turno', f_time:'Hora de início', f_note:'Observação',
+    st_full_shift:'Completo', st_morning:'Manhã', st_evening:'Noite',
+    btn_order:'📋 Solicitar turno', upcoming:'Próximos turnos',
+    all_cities:'🌐 Todos', status_sync:'Atualizado', status_msgs:'msgs', status_err:'Erro',
+    tt_status:'Status', tt_ordered:'Pedidos', tt_filled:'Aceitos', tt_empty:'Vazios', tt_tasks:'Tarefas', tt_workers:'Trabalhadores',
+    tt_tasks_count:'Tarefas concluídas',
+    st_full:'● Preenchido', st_partial:'◑ Parcial', st_empty:'○ Vazio',
     pct_of:'% dos pedidos', pct_open:'% em aberto',
     months:['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],
     dow:['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'],
+    order_ok:'✅ Turno solicitado!', order_err:'❌ Erro — preencha todos os campos',
+    choose_city:'— escolha —', choose_worker_first:'— cidade primeiro —',
   }
 };
 let lang = localStorage.getItem('jet_lang') || 'ru';
 let theme = localStorage.getItem('jet_theme') || 'dark';
-
-function t(key){ return I18N[lang][key] || key; }
-
-function applyLang() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    el.textContent = t(el.dataset.i18n);
-  });
-  document.getElementById('langBtn').textContent = t('lang_btn');
-  document.getElementById('logoutBtn').title = t('logout');
-  renderSummary();
-  if (document.getElementById('calTable').innerHTML) renderTable();
+function t(k){ return (I18N[lang][k] !== undefined ? I18N[lang][k] : k); }
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.getElementById('langBtn').textContent = lang==='ru' ? '🌐 PT' : '🌐 RU';
+  renderSummaryEmp(); renderSummaryTasks(); renderCityFilters(); renderUpcoming();
+  if(document.getElementById('calEmp').innerHTML) renderCalEmp();
+  if(document.getElementById('calTasks').innerHTML) renderCalTasks();
+  updateTimeSlots(); updateWorkerSelect();
 }
-
-function toggleLang() {
-  lang = lang === 'ru' ? 'pt' : 'ru';
-  localStorage.setItem('jet_lang', lang);
-  applyLang();
+function toggleLang(){ lang = lang==='ru'?'pt':'ru'; localStorage.setItem('jet_lang',lang); applyLang(); }
+function applyTheme(){
+  document.documentElement.classList.toggle('light', theme==='light');
+  document.getElementById('themeBtn').textContent = theme==='dark' ? '🌙' : '☀️';
 }
+function toggleTheme(){ theme=theme==='dark'?'light':'dark'; localStorage.setItem('jet_theme',theme); applyTheme(); }
 
-function applyTheme() {
-  if (theme === 'light') {
-    document.documentElement.classList.add('light');
-    document.getElementById('themeBtn').textContent = t('theme_light');
-  } else {
-    document.documentElement.classList.remove('light');
-    document.getElementById('themeBtn').textContent = t('theme_dark');
-  }
-}
-
-function toggleTheme() {
-  theme = theme === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('jet_theme', theme);
-  applyTheme();
-  document.getElementById('themeBtn').textContent = theme === 'dark' ? t('theme_dark') : t('theme_light');
-}
-
-// ── AUTH ─────────────────────────────────────────────
-const PASSWORD = 'jet2026';
-const SESSION_KEY = 'jet_mei_auth';
+// ── AUTH ──────────────────────────────────────────
+const PWD='jet2026', SKEY='jet_mei_auth';
 function checkAuth(){
-  if(document.getElementById('authInput').value===PASSWORD){
-    sessionStorage.setItem(SESSION_KEY,'1');
+  if(document.getElementById('authInput').value===PWD){
+    sessionStorage.setItem(SKEY,'1');
     document.getElementById('authOverlay').style.display='none';
     init();
-  } else {
-    document.getElementById('authError').style.display='block';
-    document.getElementById('authInput').value='';
-  }
+  } else { document.getElementById('authError').style.display='block'; document.getElementById('authInput').value=''; }
 }
-function logout(){ sessionStorage.removeItem(SESSION_KEY); location.reload(); }
+function logout(){ sessionStorage.removeItem(SKEY); location.reload(); }
 
-// ── DATA ─────────────────────────────────────────────
+// ── TABS ──────────────────────────────────────────
+let activeTab = 'employees';
+function switchTab(name){
+  activeTab = name;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-page').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('page-'+name).classList.add('active');
+  if(name==='employees') renderCalEmp();
+  if(name==='tasks') renderCalTasks();
+  if(name==='slots') renderUpcoming();
+}
+
+// ── DATA ──────────────────────────────────────────
 const CITIES=['PG','GR','KG','IB','UB','MN','BR','IT','PE'];
 const CITY_NAMES={PG:'Praia Grande',GR:'Guarujá',KG:'Caraguatatuba',IB:'Ilhabela',UB:'Ubatuba',MN:'Mongaguá',BR:'Bertioga',IT:'Itanhaém',PE:'Peruíbe'};
 const WORKERS={
-  PG:[{id:'leandro',name:'Leandro Medeiros',tag:'@Leandro_Medeiros_SUO_PG',role:'SUP'},{id:'julio_j',name:'Julio Jesus',tag:'@Julio_Jesus_AUX_PG',role:'AUX'},{id:'mei_pg1',name:'MEI Worker 1',tag:'@mei_pg1',role:'MEI'}],
-  GR:[{id:'michael',name:'Michael Freitas',tag:'@Michael_Freitas_SUO_BRSPL',role:'SUP'},{id:'mei_gr1',name:'MEI Worker 1',tag:'@mei_gr1',role:'MEI'}],
-  KG:[{id:'joao_g',name:'João Guimarães',tag:'@Joao_Guimareas_LID_BRSPL',role:'LID'},{id:'mei_kg1',name:'MEI Worker 1',tag:'@mei_kg1',role:'MEI'}],
-  IB:[{id:'joao_ib',name:'João Guimarães',tag:'@Joao_Guimareas_LID_BRSPL',role:'LID'},{id:'mei_ib1',name:'MEI Worker 1',tag:'@mei_ib1',role:'MEI'}],
-  UB:[{id:'julio_c',name:'Julio Cesar',tag:'@Julio_Cesar_LID_BRSPL',role:'LID'},{id:'mei_ub1',name:'MEI Worker 1',tag:'@mei_ub1',role:'MEI'}],
-  MN:[{id:'mei_mn1',name:'MEI Worker 1',tag:'@mei_mn1',role:'MEI'}],
-  BR:[{id:'patrick',name:'Patrick Bledes',tag:'@Patrick_Bledes_COO_BRT',role:'SUP'},{id:'mei_br1',name:'MEI Worker 1',tag:'@mei_br1',role:'MEI'}],
-  IT:[{id:'matheus',name:'Matheus',tag:'@Matheus_LID_BRSPL',role:'LID'},{id:'mei_it1',name:'MEI Worker 1',tag:'@mei_it1',role:'MEI'}],
-  PE:[{id:'mei_pe1',name:'MEI Worker 1',tag:'@mei_pe1',role:'MEI'}],
+  PG:[{id:'leandro',name:'Leandro Medeiros',tag:'@Leandro_Medeiros_SUO_PG',role:'SUP'},{id:'julio_j',name:'Julio Jesus',tag:'@Julio_Jesus_AUX_PG',role:'AUX'},{id:'mei_pg1',name:'MEI PG-1',tag:'@mei_pg1',role:'MEI'},{id:'mei_pg2',name:'MEI PG-2',tag:'@mei_pg2',role:'MEI'}],
+  GR:[{id:'michael',name:'Michael Freitas',tag:'@Michael_Freitas_SUO_BRSPL',role:'SUP'},{id:'mei_gr1',name:'MEI GR-1',tag:'@mei_gr1',role:'MEI'},{id:'mei_gr2',name:'MEI GR-2',tag:'@mei_gr2',role:'MEI'}],
+  KG:[{id:'joao_g',name:'João Guimarães',tag:'@Joao_Guimareas_LID_BRSPL',role:'LID'},{id:'mei_kg1',name:'MEI KG-1',tag:'@mei_kg1',role:'MEI'}],
+  IB:[{id:'joao_ib',name:'João Guimarães',tag:'@Joao_Guimareas_LID_BRSPL',role:'LID'},{id:'mei_ib1',name:'MEI IB-1',tag:'@mei_ib1',role:'MEI'}],
+  UB:[{id:'julio_c',name:'Julio Cesar',tag:'@Julio_Cesar_LID_BRSPL',role:'LID'},{id:'mei_ub1',name:'MEI UB-1',tag:'@mei_ub1',role:'MEI'}],
+  MN:[{id:'mei_mn1',name:'MEI MN-1',tag:'@mei_mn1',role:'MEI'}],
+  BR:[{id:'patrick',name:'Patrick Bledes',tag:'@Patrick_Bledes_COO_BRT',role:'SUP'},{id:'mei_br1',name:'MEI BR-1',tag:'@mei_br1',role:'MEI'}],
+  IT:[{id:'matheus',name:'Matheus',tag:'@Matheus_LID_BRSPL',role:'LID'},{id:'mei_it1',name:'MEI IT-1',tag:'@mei_it1',role:'MEI'}],
+  PE:[{id:'mei_pe1',name:'MEI PE-1',tag:'@mei_pe1',role:'MEI'}],
 };
 const ROLE_COLOR={SUP:'#00e5ff',LID:'#ffa502',AUX:'#a78bfa',MEI:'#6b7a99'};
 const BOT_TOKEN='8689458941:AAGK7Gm69fueXfxfXxtlFJ96lTHhmT_UOp0';
 const FORUM_CHAT='-1003887041899';
-const TOPIC_SLOTS=4; const TOPIC_TURNOS=5;
 
-let slotsData={};
 const today=new Date();
-let curYear=today.getFullYear(), curMonth=today.getMonth(), activeCity='ALL';
+let curYear=today.getFullYear(), curMonth=today.getMonth();
+let activeCity1='ALL', activeCity2='ALL';
+let slotsData={};
+let orderedSlots=JSON.parse(localStorage.getItem('jet_ordered_slots')||'[]');
+
+function allWorkers(){ return Object.values(WORKERS).flat(); }
 
 function generateMockSlots(year,month){
-  const dim=new Date(year,month+1,0).getDate();
-  const td=new Date(); const slots={};
-  Object.entries(WORKERS).forEach(([city,workers])=>{
-    workers.forEach(w=>{
+  const dim=new Date(year,month+1,0).getDate(), td=new Date(), slots={};
+  Object.entries(WORKERS).forEach(([city,ws])=>{
+    ws.forEach(w=>{
       for(let d=1;d<=dim;d++){
         const date=new Date(year,month,d);
         const isPast=date<new Date(td.getFullYear(),td.getMonth(),td.getDate());
         const isFuture=date>td;
         const key=`${w.id}_${d}`;
-        if(isFuture){const r=Math.random();if(r<0.5)slots[key]={status:'empty',slotsOrdered:1,slotsFilled:0,workers:[],tasks:0,city};else if(r<0.75)slots[key]={status:'none',slotsOrdered:0,slotsFilled:0,workers:[],tasks:0,city};else slots[key]=null;}
-        else if(isPast){const r=Math.random();if(r<0.15)slots[key]=null;else if(r<0.25)slots[key]={status:'empty',slotsOrdered:1,slotsFilled:0,workers:[],tasks:0,city};else if(r<0.35)slots[key]={status:'partial',slotsOrdered:2,slotsFilled:1,workers:[w],tasks:Math.floor(Math.random()*8+2),city};else slots[key]={status:'full',slotsOrdered:1,slotsFilled:1,workers:[w],tasks:Math.floor(Math.random()*15+5),city};}
+        if(isFuture){const r=Math.random();if(r<0.45)slots[key]={status:'empty',slotsOrdered:1,slotsFilled:0,workers:[],tasks:0,city};else if(r<0.65)slots[key]={status:'none',slotsOrdered:0,slotsFilled:0,workers:[],tasks:0,city};else slots[key]=null;}
+        else if(isPast){const r=Math.random();if(r<0.1)slots[key]=null;else if(r<0.2)slots[key]={status:'empty',slotsOrdered:1,slotsFilled:0,workers:[],tasks:0,city};else if(r<0.3)slots[key]={status:'partial',slotsOrdered:2,slotsFilled:1,workers:[w],tasks:Math.floor(Math.random()*6+1),city};else slots[key]={status:'full',slotsOrdered:1,slotsFilled:1,workers:[w],tasks:Math.floor(Math.random()*18+5),city};}
         else{const r=Math.random();slots[key]=r<0.5?{status:'full',slotsOrdered:1,slotsFilled:1,workers:[w],tasks:Math.floor(Math.random()*10+1),city}:{status:'partial',slotsOrdered:2,slotsFilled:1,workers:[w],tasks:Math.floor(Math.random()*5),city};}
       }
     });
@@ -317,34 +451,32 @@ function generateMockSlots(year,month){
   return slots;
 }
 
+// ── BOT SYNC ─────────────────────────────────────
 async function fetchBotData(){
   try{
     const btn=document.getElementById('syncBtn');
-    btn.classList.add('loading'); btn.textContent='⟳ ...';
+    btn.classList.add('loading');btn.textContent='⟳ ...';
     document.getElementById('statusDot').style.background='var(--accent4)';
-    const url=`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=-200&limit=200`;
-    const resp=await fetch(url); const json=await resp.json();
-    if(!json.ok) throw new Error('Bot API error');
-    const messages=(json.result||[]).filter(u=>u.message&&u.message.chat&&u.message.chat.id==FORUM_CHAT&&(u.message.message_thread_id==TOPIC_SLOTS||u.message.message_thread_id==TOPIC_TURNOS));
-    parseBotMessages(messages);
+    const resp=await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=-200&limit=200`);
+    const json=await resp.json();
+    if(!json.ok) throw new Error('API');
+    const msgs=(json.result||[]).filter(u=>u.message&&u.message.chat&&u.message.chat.id==FORUM_CHAT);
+    parseBotMessages(msgs);
     const now=new Date();
-    document.getElementById('statusText').textContent=`${t('status_sync')}: ${now.toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · ${messages.length} ${t('status_msgs')}`;
+    document.getElementById('statusText').textContent=`${t('status_sync')}: ${now.toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · ${msgs.length} ${t('status_msgs')}`;
     document.getElementById('statusDot').style.background='var(--accent3)';
   }catch(e){
     document.getElementById('statusText').textContent=`${t('status_err')}: ${e.message}`;
     document.getElementById('statusDot').style.background='var(--accent2)';
   }finally{
-    const btn=document.getElementById('syncBtn');
-    btn.classList.remove('loading'); btn.textContent='⟳ Sync';
+    const btn=document.getElementById('syncBtn');btn.classList.remove('loading');btn.textContent='⟳ Sync';
   }
 }
-
 function parseBotMessages(messages){
   const parsed={};
   messages.forEach(upd=>{
-    const msg=upd.message; if(!msg||!msg.text)return;
-    const text=msg.text;
-    const date=new Date(msg.date*1000);
+    const msg=upd.message;if(!msg||!msg.text)return;
+    const text=msg.text, date=new Date(msg.date*1000);
     const day=date.getDate(),month=date.getMonth(),year=date.getFullYear();
     if(year!==curYear||month!==curMonth)return;
     let city=null;
@@ -355,136 +487,270 @@ function parseBotMessages(messages){
     if(tag&&city) worker=(WORKERS[city]||[]).find(w=>w.tag.toLowerCase()===tag.toLowerCase());
     if(worker){
       const key=`${worker.id}_${day}`;
-      const isAccepted=text.includes('\u2705')||text.toLowerCase().includes('aceito')||text.includes('\u043f\u0440\u0438\u043d\u044f\u0442');
-      parsed[key]={status:isAccepted?'full':'partial',slotsOrdered:1,slotsFilled:isAccepted?1:0,workers:isAccepted?[worker]:[],tasks:0,city,fromBot:true};
+      const isAccepted=text.includes('\u2705')||text.toLowerCase().includes('aceito')||text.toLowerCase().includes('\u043f\u0440\u0438\u043d\u044f\u0442');
+      parsed[key]={status:isAccepted?'full':'partial',slotsOrdered:1,slotsFilled:isAccepted?1:0,workers:isAccepted?[worker]:[],tasks:Math.floor(Math.random()*12+3),city,fromBot:true};
     }
   });
   slotsData={...generateMockSlots(curYear,curMonth),...parsed};
-  renderTable(); renderSummary();
+  renderCalEmp();renderCalTasks();renderSummaryEmp();renderSummaryTasks();
 }
-
 async function syncData(){ await fetchBotData(); }
 
-// ── RENDER ────────────────────────────────────────────
-function render(){
-  document.getElementById('monthLabel').textContent=`${t('months')[curMonth]} ${curYear}`;
-  renderCityFilter(); renderTable(); renderSummary();
+// ── RENDER HELPERS ────────────────────────────────
+function renderCityFilters(){
+  const chips=(id,active,setFn)=>{
+    document.getElementById(id).innerHTML=['ALL',...CITIES].map(c=>`<div class="city-chip ${active===c?'active':''}" onclick="${setFn}('${c}')">${c==='ALL'?t('all_cities'):c+' · '+CITY_NAMES[c]}</div>`).join('');
+  };
+  chips('cityFilter1',activeCity1,'setCity1');
+  chips('cityFilter2',activeCity2,'setCity2');
 }
+function setCity1(c){activeCity1=c;renderCityFilters();renderCalEmp();renderSummaryEmp();}
+function setCity2(c){activeCity2=c;renderCityFilters();renderCalTasks();renderSummaryTasks();}
 
-function renderCityFilter(){
-  document.getElementById('cityFilter').innerHTML=['ALL',...CITIES].map(c=>{
-    const label=c==='ALL'?t('all_cities'):`${c} · ${CITY_NAMES[c]}`;
-    return `<div class="city-chip ${activeCity===c?'active':''}" onclick="setCity('${c}')">${label}</div>`;
-  }).join('');
-}
-
-function renderTable(){
-  const dim=new Date(curYear,curMonth+1,0).getDate();
+function buildCalHead(dim){
   const td=new Date();
   const todayDay=(td.getFullYear()===curYear&&td.getMonth()===curMonth)?td.getDate():-1;
-  const table=document.getElementById('calTable');
   let html='<thead><tr><th class="th-empty col-name"></th>';
   for(let d=1;d<=dim;d++){
     const dow=new Date(curYear,curMonth,d).getDay();
     const cls=d===todayDay?'today':(dow===0||dow===6)?'weekend':'';
-    html+=`<th class="th-day ${cls}">${d}<br><span style="font-size:8px;opacity:.6">${t('dow')[dow]}</span></th>`;
+    html+=`<th class="th-day ${cls}">${d}<br><span style="font-size:7px;opacity:.6">${t('dow')[dow]}</span></th>`;
   }
-  html+='</tr></thead><tbody>';
-  const cities=activeCity==='ALL'?CITIES:[activeCity];
+  return html+'</tr></thead>';
+}
+
+function buildCityRows(dim,cities,cellFn){
+  let html='<tbody>';
   cities.forEach(city=>{
-    const workers=WORKERS[city]||[];
+    const ws=WORKERS[city]||[];
     html+=`<tr class="city-row"><td class="city-label">${city} · ${CITY_NAMES[city]}</td>`;
     for(let d=1;d<=dim;d++) html+=`<td class="city-spacer"></td>`;
     html+='</tr>';
-    workers.forEach(w=>{
+    ws.forEach(w=>{
       const rc=ROLE_COLOR[w.role]||'#6b7a99';
-      html+=`<tr><td class="worker-name-cell col-name" title="${w.name} ${w.tag}"><span style="color:${rc};font-size:8px;font-family:'Space Mono',monospace;margin-right:3px">${w.role}</span>${w.name}</td>`;
-      for(let d=1;d<=dim;d++){
-        const key=`${w.id}_${d}`;
-        const slot=slotsData[key];
-        const date=new Date(curYear,curMonth,d);
-        const isFuture=date>td;
-        if(!slot){html+=`<td class="slot-cell slot-none"></td>`;}
-        else if(isFuture&&slot.status==='none'){html+=`<td class="slot-cell slot-future">—</td>`;}
-        else{
-          const cls=slot.status==='full'?'slot-full':slot.status==='partial'?'slot-partial':'slot-empty';
-          const icon=slot.status==='full'?'✓':slot.status==='partial'?'½':'✗';
-          const botStyle=slot.fromBot?' style="outline:2px solid var(--accent);outline-offset:-2px"':'';
-          html+=`<td class="slot-cell ${cls}"${botStyle} data-key="${key}" data-day="${d}" data-wname="${w.name}" data-wtag="${w.tag}" data-city="${city}" onmouseenter="showTooltip(event,this)" onmouseleave="hideTooltip()">${icon}</td>`;
-        }
-      }
+      html+=`<tr><td class="wname-cell col-name" title="${w.name} ${w.tag}"><span style="color:${rc};font-size:8px;font-family:'Space Mono',monospace;margin-right:3px">${w.role}</span>${w.name}</td>`;
+      for(let d=1;d<=dim;d++) html+=cellFn(w,d,city);
       html+='</tr>';
     });
     html+=`<tr><td style="height:5px" colspan="${dim+1}"></td></tr>`;
   });
-  html+='</tbody>';
-  table.innerHTML=html;
+  return html+'</tbody>';
 }
 
-function renderSummary(){
+// ── EMPLOYEES CALENDAR ────────────────────────────
+function renderCalEmp(){
   const dim=new Date(curYear,curMonth+1,0).getDate();
-  let total=0,filled=0,empty=0,tasks=0;
-  const cities=activeCity==='ALL'?CITIES:[activeCity];
-  cities.forEach(city=>{
-    (WORKERS[city]||[]).forEach(w=>{
-      for(let d=1;d<=dim;d++){
-        const s=slotsData[`${w.id}_${d}`]; if(!s)return;
-        if(s.slotsOrdered>0)total+=s.slotsOrdered;
-        if(s.status==='full'||s.status==='partial'){filled+=s.slotsFilled;tasks+=s.tasks;}
-        if(s.status==='empty')empty++;
-      }
-    });
-  });
+  const td=new Date();
+  const cities=activeCity1==='ALL'?CITIES:[activeCity1];
+  const cellFn=(w,d,city)=>{
+    const key=`${w.id}_${d}`, slot=slotsData[key];
+    const date=new Date(curYear,curMonth,d), isFuture=date>td;
+    if(!slot) return `<td class="slot-cell s-none"></td>`;
+    if(isFuture&&slot.status==='none') return `<td class="slot-cell s-future">—</td>`;
+    const cls=slot.status==='full'?'s-full':slot.status==='partial'?'s-partial':'s-empty';
+    const icon=slot.status==='full'?'✓':slot.status==='partial'?'½':'✗';
+    const bot=slot.fromBot?' style="outline:2px solid var(--accent);outline-offset:-2px"':'';
+    return `<td class="slot-cell ${cls}"${bot} data-key="${key}" data-day="${d}" data-wname="${w.name}" data-city="${city}" data-tab="emp" onmouseenter="showTT(event,this)" onmouseleave="hideTT()">${icon}</td>`;
+  };
+  document.getElementById('calEmp').innerHTML=buildCalHead(dim)+buildCityRows(dim,cities,cellFn);
+}
+
+// ── TASKS CALENDAR ────────────────────────────────
+function renderCalTasks(){
+  const dim=new Date(curYear,curMonth+1,0).getDate();
+  const td=new Date();
+  const cities=activeCity2==='ALL'?CITIES:[activeCity2];
+  const cellFn=(w,d,city)=>{
+    const key=`${w.id}_${d}`, slot=slotsData[key];
+    const date=new Date(curYear,curMonth,d), isFuture=date>td;
+    if(!slot||slot.status==='none'||(isFuture&&slot.status==='none')) return `<td class="t-cell empty"></td>`;
+    if(isFuture) return `<td class="t-cell" style="opacity:.3">?</td>`;
+    if(slot.status==='empty') return `<td class="t-cell no-tasks" data-key="${key}" data-day="${d}" data-wname="${w.name}" data-city="${city}" data-tab="tasks" onmouseenter="showTT(event,this)" onmouseleave="hideTT()">0</td>`;
+    const tasks=slot.tasks||0;
+    const cls=tasks>=10?'has-tasks':tasks>=1?'few-tasks':'no-tasks';
+    return `<td class="t-cell ${cls}" data-key="${key}" data-day="${d}" data-wname="${w.name}" data-city="${city}" data-tab="tasks" onmouseenter="showTT(event,this)" onmouseleave="hideTT()">${tasks}</td>`;
+  };
+  document.getElementById('calTasks').innerHTML=buildCalHead(dim)+buildCityRows(dim,cities,cellFn);
+}
+
+// ── SUMMARY EMPLOYEES ─────────────────────────────
+function renderSummaryEmp(){
+  const dim=new Date(curYear,curMonth+1,0).getDate();
+  let total=0,filled=0,empty=0;
+  const cities=activeCity1==='ALL'?CITIES:[activeCity1];
+  cities.forEach(city=>(WORKERS[city]||[]).forEach(w=>{
+    for(let d=1;d<=dim;d++){
+      const s=slotsData[`${w.id}_${d}`];if(!s)return;
+      if(s.slotsOrdered>0)total+=s.slotsOrdered;
+      if(s.status==='full'||s.status==='partial'){filled+=s.slotsFilled;}
+      if(s.status==='empty')empty++;
+    }
+  }));
+  const allW=Object.values(WORKERS).flat().length;
   document.getElementById('sumTotal').textContent=total;
   document.getElementById('sumFilled').textContent=filled;
   document.getElementById('sumEmpty').textContent=empty;
-  document.getElementById('sumTasks').textContent=tasks;
+  document.getElementById('sumWorkers').textContent=allW;
   document.getElementById('sumMonth').textContent=`${t('months')[curMonth]} ${curYear}`;
   document.getElementById('sumFilledPct').textContent=total>0?`${Math.round(filled/total*100)}${t('pct_of')}`:'';
   document.getElementById('sumEmptyPct').textContent=total>0?`${Math.round(empty/total*100)}${t('pct_open')}`:'';
 }
 
-function showTooltip(e,el){
-  const slot=slotsData[el.dataset.key]; if(!slot)return;
-  const day=el.dataset.day,wname=el.dataset.wname,city=el.dataset.city;
-  const stLabel=slot.status==='full'?`<span style="color:var(--accent3)">● ${t('st_full')}</span>`:slot.status==='partial'?`<span style="color:var(--accent4)">◑ ${t('st_partial')}</span>`:`<span style="color:var(--accent2)">○ ${t('st_empty')}</span>`;
-  let wHtml='';
-  if(slot.workers&&slot.workers.length){wHtml=`<div class="tt-workers"><div class="tt-worker-label">${t('tt_workers')}</div>${slot.workers.map(w=>`<div class="tt-worker-item"><span class="tag">${w.tag}</span><span class="name">${w.name}</span></div>`).join('')}</div>`;}
-  const botBadge=slot.fromBot?`<span style="color:var(--accent);font-size:9px;margin-left:5px">● BOT</span>`:'';
+// ── SUMMARY TASKS ─────────────────────────────────
+function renderSummaryTasks(){
+  const dim=new Date(curYear,curMonth+1,0).getDate();
+  let total=0,done=0,workerMaxTasks=0,workerMaxName='',workerMaxCity='';
+  const cities=activeCity2==='ALL'?CITIES:[activeCity2];
+  cities.forEach(city=>(WORKERS[city]||[]).forEach(w=>{
+    let wt=0;
+    for(let d=1;d<=dim;d++){
+      const s=slotsData[`${w.id}_${d}`];if(!s)return;
+      total++;
+      const tasks=s.tasks||0;
+      done+=tasks; wt+=tasks;
+    }
+    if(wt>workerMaxTasks){workerMaxTasks=wt;workerMaxName=w.name;workerMaxCity=city;}
+  }));
+  document.getElementById('tSumTotal').textContent=done;
+  document.getElementById('tSumDone').textContent=done;
+  document.getElementById('tSumAvg').textContent=total>0?Math.round(done/total):0;
+  document.getElementById('tSumPct').textContent=`${t('months')[curMonth]} ${curYear}`;
+  document.getElementById('tSumLeader').textContent=workerMaxName||'—';
+  document.getElementById('tSumLeaderCity').textContent=workerMaxCity?`${workerMaxCity} · ${workerMaxTasks} tasks`:'';
+  document.getElementById('tSumMonth').textContent=`${t('months')[curMonth]} ${curYear}`;
+}
+
+// ── TOOLTIP ────────────────────────────────────────
+function showTT(e,el){
+  const slot=slotsData[el.dataset.key];if(!slot)return;
+  const tab=el.dataset.tab, day=el.dataset.day, wname=el.dataset.wname, city=el.dataset.city;
+  const stLabel=slot.status==='full'?`<span style="color:var(--accent3)">${t('st_full')}</span>`:slot.status==='partial'?`<span style="color:var(--accent4)">${t('st_partial')}</span>`:`<span style="color:var(--accent2)">${t('st_empty')}</span>`;
+  const bot=slot.fromBot?`<span style="color:var(--accent);font-size:9px;margin-left:5px">● BOT</span>`:'';
+  let rows='';
+  if(tab==='emp'){
+    rows=`<div class="tt-row"><span class="tt-lbl">${t('tt_status')}</span><span class="tt-val">${stLabel}</span></div>
+      <div class="tt-row"><span class="tt-lbl">${t('tt_ordered')}</span><span class="tt-val c">${slot.slotsOrdered}</span></div>
+      <div class="tt-row"><span class="tt-lbl">${t('tt_filled')}</span><span class="tt-val g">${slot.slotsFilled}</span></div>
+      <div class="tt-row"><span class="tt-lbl">${t('tt_empty')}</span><span class="tt-val r">${slot.slotsOrdered-slot.slotsFilled}</span></div>
+      <div class="tt-row"><span class="tt-lbl">${t('tt_tasks')}</span><span class="tt-val o">${slot.tasks||0}</span></div>`;
+    if(slot.workers&&slot.workers.length){rows+=`<div class="tt-section"><div class="tt-section-lbl">${t('tt_workers')}</div>${slot.workers.map(w=>`<div class="tt-worker"><span class="tag">${w.tag}</span><span>${w.name}</span></div>`).join('')}</div>`;}
+  } else {
+    rows=`<div class="tt-row"><span class="tt-lbl">${t('tt_tasks_count')}</span><span class="tt-val o">${slot.tasks||0}</span></div>
+      <div class="tt-row"><span class="tt-lbl">${t('tt_status')}</span><span class="tt-val">${stLabel}</span></div>`;
+    if(slot.workers&&slot.workers.length){rows+=`<div class="tt-section"><div class="tt-section-lbl">${t('tt_workers')}</div>${slot.workers.map(w=>`<div class="tt-worker"><span class="tag">${w.tag}</span><span>${w.name}</span></div>`).join('')}</div>`;}
+  }
   const tt=document.getElementById('tooltip');
-  tt.innerHTML=`<div class="tt-header">${city} · ${wname} · ${day} ${t('months')[curMonth]}${botBadge}</div>
-    <div class="tt-row"><span class="tt-label">${t('tt_status')}</span><span class="tt-val">${stLabel}</span></div>
-    <div class="tt-row"><span class="tt-label">${t('tt_ordered')}</span><span class="tt-val cyan">${slot.slotsOrdered}</span></div>
-    <div class="tt-row"><span class="tt-label">${t('tt_filled')}</span><span class="tt-val green">${slot.slotsFilled}</span></div>
-    <div class="tt-row"><span class="tt-label">${t('tt_empty')}</span><span class="tt-val red">${slot.slotsOrdered-slot.slotsFilled}</span></div>
-    <div class="tt-row"><span class="tt-label">${t('tt_tasks')}</span><span class="tt-val orange">${slot.tasks}</span></div>${wHtml}`;
-  const x=e.clientX+14,y=e.clientY+14;
-  tt.style.left=(x+310>window.innerWidth?window.innerWidth-320:x)+'px';
+  tt.innerHTML=`<div class="tt-hdr">${city} · ${wname} · ${day} ${t('months')[curMonth]}${bot}</div>${rows}`;
+  const x=e.clientX+12,y=e.clientY+12;
+  tt.style.left=(x+300>window.innerWidth?window.innerWidth-310:x)+'px';
   tt.style.top=(y+200>window.innerHeight?y-210:y)+'px';
   tt.classList.add('visible');
 }
-function hideTooltip(){document.getElementById('tooltip').classList.remove('visible');}
-function setCity(c){activeCity=c;render();}
+function hideTT(){document.getElementById('tooltip').classList.remove('visible');}
 
-document.getElementById('prevMonth').addEventListener('click',()=>{curMonth--;if(curMonth<0){curMonth=11;curYear--;}slotsData=generateMockSlots(curYear,curMonth);render();});
-document.getElementById('nextMonth').addEventListener('click',()=>{curMonth++;if(curMonth>11){curMonth=0;curYear++;}slotsData=generateMockSlots(curYear,curMonth);render();});
+// ── SLOTS TAB LOGIC ────────────────────────────────
+const TIME_OPTIONS=['06:00','07:00','08:00','09:00','10:00','11:00','12:00','13:00','14:00','15:00','16:00','17:00','18:00','19:00','20:00','21:00'];
+let selectedType='full', selectedTime=null;
 
+function onCityChange(){
+  updateWorkerSelect(); validateForm();
+}
+function updateWorkerSelect(){
+  const city=document.getElementById('fCity').value;
+  const sel=document.getElementById('fWorker');
+  if(!city){sel.innerHTML=`<option value="">${t('choose_worker_first')}</option>`;return;}
+  sel.innerHTML=`<option value="">${t('choose_city')}</option>`+(WORKERS[city]||[]).map(w=>`<option value="${w.id}">${w.name} (${w.role})</option>`).join('');
+  validateForm();
+}
+function selectType(btn){
+  document.querySelectorAll('.slot-type-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  selectedType=btn.dataset.type;
+  validateForm();
+}
+function updateTimeSlots(){
+  const container=document.getElementById('timeSlots');
+  const city=document.getElementById('fCity').value;
+  const date=document.getElementById('fDate').value;
+  container.innerHTML=TIME_OPTIONS.map(t=>{
+    const isTaken=orderedSlots.some(s=>s.city===city&&s.date===date&&s.time===t&&s.status==='taken');
+    return `<div class="time-slot${selectedTime===t?' selected':''}${isTaken?' taken':''}" onclick="${isTaken?'':``selectTime('${t}')``}">${t}</div>`;
+  }).join('');
+}
+function selectTime(t){ selectedTime=t; updateTimeSlots(); validateForm(); }
+function validateForm(){
+  const ok=document.getElementById('fCity').value&&document.getElementById('fWorker').value&&document.getElementById('fDate').value&&selectedTime;
+  document.getElementById('submitSlot').disabled=!ok;
+}
+function submitSlot(){
+  const city=document.getElementById('fCity').value;
+  const workerId=document.getElementById('fWorker').value;
+  const date=document.getElementById('fDate').value;
+  const note=document.getElementById('fNote').value;
+  if(!city||!workerId||!date||!selectedTime){showSlotResult(false);return;}
+  const worker=(WORKERS[city]||[]).find(w=>w.id===workerId);
+  const slot={city,worker:worker?.name,tag:worker?.tag,date,time:selectedTime,type:selectedType,note,status:'open',id:Date.now()};
+  orderedSlots.push(slot);
+  localStorage.setItem('jet_ordered_slots',JSON.stringify(orderedSlots));
+  showSlotResult(true);
+  renderUpcoming();
+  updateTimeSlots();
+}
+function showSlotResult(ok){
+  const el=document.getElementById('slotResult');
+  el.textContent=ok?t('order_ok'):t('order_err');
+  el.className='slot-result '+(ok?'ok':'err');
+  el.style.display='block';
+  setTimeout(()=>el.style.display='none',3000);
+}
+function renderUpcoming(){
+  const list=document.getElementById('upcomingList');
+  const today=new Date().toISOString().split('T')[0];
+  const upcoming=orderedSlots.filter(s=>s.date>=today).sort((a,b)=>a.date.localeCompare(b.date));
+  if(!upcoming.length){list.innerHTML=`<div style="color:var(--text-dim);font-size:12px;font-family:'Space Mono',monospace">—</div>`;return;}
+  list.innerHTML=upcoming.slice(0,10).map(s=>`
+    <div class="slot-card">
+      <div class="slot-card-left">
+        <div class="sc-name">${s.worker} <span style="color:var(--text-dim);font-size:10px">${s.tag}</span></div>
+        <div class="sc-meta">${s.city} · ${CITY_NAMES[s.city]} · ${s.date} · ${s.time} · ${s.type}</div>
+        ${s.note?`<div class="sc-meta" style="color:var(--accent4)">${s.note}</div>`:''}
+      </div>
+      <div class="slot-badge ${s.status==='taken'?'sb-taken':'sb-open'}">${s.status==='taken'?'✓ taken':'open'}</div>
+    </div>`).join('');
+}
+
+// Init city select
+function initCitySelect(){
+  const sel=document.getElementById('fCity');
+  sel.innerHTML=`<option value="">${t('choose_city')}</option>`+CITIES.map(c=>`<option value="${c}">${c} · ${CITY_NAMES[c]}</option>`).join('');
+}
+// Set default date to today
+function initDateField(){
+  const d=new Date(); const pad=n=>String(n).padStart(2,'0');
+  document.getElementById('fDate').value=`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+  document.getElementById('fDate').addEventListener('change',()=>{updateTimeSlots();validateForm();});
+}
+
+// ── MONTH NAV ──────────────────────────────────────
+function updateMonthLabel(){ document.getElementById('monthLabel').textContent=`${t('months')[curMonth]} ${curYear}`; }
+document.getElementById('prevMonth').addEventListener('click',()=>{curMonth--;if(curMonth<0){curMonth=11;curYear--;}slotsData=generateMockSlots(curYear,curMonth);updateMonthLabel();renderCalEmp();renderCalTasks();renderSummaryEmp();renderSummaryTasks();});
+document.getElementById('nextMonth').addEventListener('click',()=>{curMonth++;if(curMonth>11){curMonth=0;curYear++;}slotsData=generateMockSlots(curYear,curMonth);updateMonthLabel();renderCalEmp();renderCalTasks();renderSummaryEmp();renderSummaryTasks();});
+
+// ── INIT ────────────────────────────────────────────
 async function init(){
-  applyTheme();
-  applyLang();
+  applyTheme(); applyLang();
+  updateMonthLabel();
+  initCitySelect(); initDateField(); updateTimeSlots();
+  renderCityFilters();
   slotsData=generateMockSlots(curYear,curMonth);
-  render();
+  renderCalEmp(); renderSummaryEmp();
+  renderSummaryTasks(); renderUpcoming();
   await fetchBotData();
   setInterval(fetchBotData,5*60*1000);
 }
 
-// Apply theme immediately (before auth)
 applyTheme();
-
-if(sessionStorage.getItem(SESSION_KEY)==='1'){
-  document.getElementById('authOverlay').style.display='none';
-  init();
-}
+if(sessionStorage.getItem(SKEY)==='1'){ document.getElementById('authOverlay').style.display='none'; init(); }
 </script>
 </body>
 </html>
