@@ -9,15 +9,34 @@
   :root{--bg:#0a0d12;--surface:#111520;--surface2:#181e2e;--border:#1f2a40;--accent:#00e5ff;--accent2:#ff4757;--accent3:#2ed573;--accent4:#ffa502;--text:#e8edf5;--text-dim:#6b7a99;--slot-full:#0d2e1a;--slot-full-border:#2ed573;--slot-partial:#2a1e08;--slot-partial-border:#ffa502;--slot-empty:#1a0d0d;--slot-empty-border:#ff4757;--slot-none:#0f1219;--radius:6px}
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;overflow-x:hidden}
+
+  /* AUTH OVERLAY */
+  #authOverlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
+  .auth-box{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:40px;width:360px;text-align:center}
+  .auth-logo{font-size:40px;margin-bottom:12px}
+  .auth-title{font-size:22px;font-weight:800;margin-bottom:4px}
+  .auth-sub{font-size:12px;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:28px}
+  .auth-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 16px;color:var(--text);font-size:14px;font-family:'Space Mono',monospace;outline:none;margin-bottom:12px;transition:border-color .2s}
+  .auth-input:focus{border-color:var(--accent)}
+  .auth-btn{width:100%;background:var(--accent);color:#000;border:none;border-radius:var(--radius);padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Syne',sans-serif;transition:opacity .2s}
+  .auth-btn:hover{opacity:.85}
+  .auth-error{color:var(--accent2);font-size:12px;font-family:'Space Mono',monospace;margin-top:8px;display:none}
+
   header{display:flex;align-items:center;justify-content:space-between;padding:18px 28px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:100}
   .logo{display:flex;align-items:center;gap:12px}
   .logo-icon{width:36px;height:36px;background:var(--accent);border-radius:8px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:18px;color:#000}
   .logo-text{font-size:18px;font-weight:800;letter-spacing:-.5px}
   .logo-sub{font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;margin-top:1px}
-  .header-controls{display:flex;align-items:center;gap:12px}
+  .header-right{display:flex;align-items:center;gap:12px}
   .month-nav{display:flex;align-items:center;gap:8px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:6px 12px}
   .month-nav button{background:none;border:none;color:var(--accent);cursor:pointer;font-size:16px;padding:0 4px;line-height:1}
   .month-nav span{font-family:'Space Mono',monospace;font-size:13px;min-width:120px;text-align:center;font-weight:700;color:var(--text)}
+  .logout-btn{background:none;border:1px solid var(--border);border-radius:var(--radius);color:var(--text-dim);padding:6px 12px;font-size:11px;cursor:pointer;font-family:'Space Mono',monospace;transition:all .15s}
+  .logout-btn:hover{border-color:var(--accent2);color:var(--accent2)}
+  .sync-btn{background:var(--accent);border:none;border-radius:var(--radius);color:#000;padding:6px 14px;font-size:11px;font-weight:700;cursor:pointer;font-family:'Space Mono',monospace;transition:opacity .2s}
+  .sync-btn:hover{opacity:.8}
+  .sync-btn.loading{opacity:.5;cursor:not-allowed}
+
   .city-filter{display:flex;gap:6px;flex-wrap:wrap}
   .city-chip{padding:4px 10px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);transition:all .15s;font-family:'Space Mono',monospace}
   .city-chip.active{background:var(--accent);color:#000;border-color:var(--accent)}
@@ -38,7 +57,7 @@
   .city-label{background:var(--surface2);border-left:3px solid var(--accent);padding:6px 12px;font-size:12px;font-weight:800;color:var(--accent);letter-spacing:.5px;text-transform:uppercase;font-family:'Space Mono',monospace;position:sticky;left:0;z-index:10}
   .city-spacer{background:var(--surface2);opacity:.3}
   .worker-name-cell{background:var(--surface);padding:4px 12px;font-size:12px;font-weight:600;color:var(--text);border-right:1px solid var(--border);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;position:sticky;left:0;z-index:10;height:36px}
-  .slot-cell{width:38px;height:36px;border-radius:4px;cursor:pointer;position:relative;transition:transform .1s,opacity .1s;text-align:center;vertical-align:middle;font-size:10px;font-weight:700;font-family:'Space Mono',monospace}
+  .slot-cell{width:38px;height:36px;border-radius:4px;cursor:pointer;position:relative;transition:transform .1s;text-align:center;vertical-align:middle;font-size:10px;font-weight:700;font-family:'Space Mono',monospace}
   .slot-cell:hover{transform:scale(1.15);z-index:50}
   .slot-full{background:var(--slot-full);border:1px solid var(--slot-full-border);color:var(--accent3)}
   .slot-partial{background:var(--slot-partial);border:1px solid var(--slot-partial-border);color:var(--accent4)}
@@ -59,12 +78,29 @@
   .legend{display:flex;gap:20px;padding:0 28px 16px;font-size:11px;font-family:'Space Mono',monospace;color:var(--text-dim);align-items:center}
   .legend-item{display:flex;align-items:center;gap:6px}
   .legend-dot{width:12px;height:12px;border-radius:3px}
+  .status-bar{padding:8px 28px;font-size:11px;font-family:'Space Mono',monospace;color:var(--text-dim);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--accent3)}
+  .status-dot.live{animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
   ::-webkit-scrollbar{width:6px;height:6px}
   ::-webkit-scrollbar-track{background:var(--bg)}
   ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
 </style>
 </head>
 <body>
+
+<!-- AUTH OVERLAY -->
+<div id="authOverlay">
+  <div class="auth-box">
+    <div class="auth-logo">⚡</div>
+    <div class="auth-title">JET MEI Litoral</div>
+    <div class="auth-sub">SP-LITORAL · BRSPL · ADMIN PANEL</div>
+    <input class="auth-input" type="password" id="authInput" placeholder="Введите пароль" onkeydown="if(event.key==='Enter')checkAuth()">
+    <button class="auth-btn" onclick="checkAuth()">Войти</button>
+    <div class="auth-error" id="authError">Неверный пароль</div>
+  </div>
+</div>
+
 <header>
   <div class="logo">
     <div class="logo-icon">⚡</div>
@@ -73,176 +109,394 @@
       <div class="logo-sub">SP-LITORAL · BRSPL</div>
     </div>
   </div>
-  <div class="header-controls">
+  <div class="header-right">
     <div class="month-nav">
       <button id="prevMonth">◀</button>
       <span id="monthLabel"></span>
       <button id="nextMonth">▶</button>
     </div>
+    <button class="sync-btn" id="syncBtn" onclick="syncData()">⟳ Sync</button>
+    <button class="logout-btn" onclick="logout()">Выйти</button>
   </div>
 </header>
+
+<div class="status-bar">
+  <div class="status-dot live" id="statusDot"></div>
+  <span id="statusText">Последнее обновление: —</span>
+</div>
+
 <div class="summary">
   <div class="card"><div class="card-label">Слотов заказано</div><div class="card-val cyan" id="sumTotal">—</div><div class="card-sub" id="sumMonth"></div></div>
-  <div class="card"><div class="card-label">Принято (заполнено)</div><div class="card-val green" id="sumFilled">—</div><div class="card-sub" id="sumFilledPct"></div></div>
+  <div class="card"><div class="card-label">Принято</div><div class="card-val green" id="sumFilled">—</div><div class="card-sub" id="sumFilledPct"></div></div>
   <div class="card"><div class="card-label">Пустых слотов</div><div class="card-val red" id="sumEmpty">—</div><div class="card-sub" id="sumEmptyPct"></div></div>
   <div class="card"><div class="card-label">Задач выполнено</div><div class="card-val orange" id="sumTasks">—</div><div class="card-sub">за текущий период</div></div>
 </div>
+
 <div class="legend">
   <div class="legend-item"><div class="legend-dot" style="background:#0d2e1a;border:1px solid #2ed573"></div> Заполнен</div>
   <div class="legend-item"><div class="legend-dot" style="background:#2a1e08;border:1px solid #ffa502"></div> Частично</div>
   <div class="legend-item"><div class="legend-dot" style="background:#1a0d0d;border:1px solid #ff4757"></div> Пустой</div>
   <div class="legend-item"><div class="legend-dot" style="background:#0f1219;border:1px solid #1f2a40"></div> Нет слота</div>
 </div>
+
 <div class="city-filter" style="padding:0 28px 16px" id="cityFilter"></div>
 <div class="calendar-wrap"><table class="calendar-table" id="calTable"></table></div>
 <div class="tooltip" id="tooltip"></div>
+
 <script>
-const CITIES=['PG','GR','KG','IB','UB','MN','BR','IT','PE'];
-const CITY_NAMES={PG:'Praia Grande',GR:'Guarujá',KG:'Caraguatatuba',IB:'Ilhabela',UB:'Ubatuba',MN:'Mongaguá',BR:'Bertioga',IT:'Itanhaém',PE:'Peruíbe'};
-const WORKERS={
-  PG:[{id:'w1',name:'Carlos Silva',tag:'@carlos_pg'},{id:'w2',name:'Ana Lima',tag:'@ana_pg'},{id:'w3',name:'Pedro Souza',tag:'@pedro_pg'}],
-  GR:[{id:'w4',name:'João Santos',tag:'@joao_gr'},{id:'w5',name:'Maria Costa',tag:'@maria_gr'}],
-  KG:[{id:'w6',name:'Rafael Alves',tag:'@rafael_kg'},{id:'w7',name:'Lucas Ferreira',tag:'@lucas_kg'}],
-  IB:[{id:'w8',name:'Fernanda Rocha',tag:'@fernanda_ib'},{id:'w9',name:'Bruno Neves',tag:'@bruno_ib'}],
-  UB:[{id:'w10',name:'Thiago Carmo',tag:'@thiago_ub'},{id:'w11',name:'Juliana Melo',tag:'@juliana_ub'}],
-  MN:[{id:'w12',name:'Diego Campos',tag:'@diego_mn'}],
-  BR:[{id:'w13',name:'Rodrigo Dias',tag:'@rodrigo_br'},{id:'w14',name:'Camila Torres',tag:'@camila_br'}],
-  IT:[{id:'w15',name:'Marcos Pinto',tag:'@marcos_it'},{id:'w16',name:'Larissa Mota',tag:'@larissa_it'}],
-  PE:[{id:'w17',name:'Felipe Gomes',tag:'@felipe_pe'}]
+// ── AUTH ──────────────────────────────────────────────
+const PASSWORD = 'jet2026';
+const SESSION_KEY = 'jet_mei_auth';
+
+function checkAuth() {
+  const val = document.getElementById('authInput').value;
+  if (val === PASSWORD) {
+    sessionStorage.setItem(SESSION_KEY, '1');
+    document.getElementById('authOverlay').style.display = 'none';
+    init();
+  } else {
+    document.getElementById('authError').style.display = 'block';
+    document.getElementById('authInput').value = '';
+  }
+}
+function logout() {
+  sessionStorage.removeItem(SESSION_KEY);
+  location.reload();
+}
+
+// ── REAL WORKERS (из бота) ───────────────────────────
+const CITIES = ['PG','GR','KG','IB','UB','MN','BR','IT','PE'];
+const CITY_NAMES = {PG:'Praia Grande',GR:'Guarujá',KG:'Caraguatatuba',IB:'Ilhabela',UB:'Ubatuba',MN:'Mongaguá',BR:'Bertioga',IT:'Itanhaém',PE:'Peruíbe'};
+
+// Supervisors + реальные MEI-работники из базы бота
+const WORKERS = {
+  PG: [
+    {id:'leandro',  name:'Leandro Medeiros', tag:'@Leandro_Medeiros_SUO_PG', role:'SUP'},
+    {id:'julio_j',  name:'Julio Jesus',       tag:'@Julio_Jesus_AUX_PG',     role:'AUX'},
+    {id:'mei_pg1',  name:'MEI Worker 1',      tag:'@mei_pg1',                role:'MEI'},
+  ],
+  GR: [
+    {id:'michael',  name:'Michael Freitas',   tag:'@Michael_Freitas_SUO_BRSPL', role:'SUP'},
+    {id:'mei_gr1',  name:'MEI Worker 1',      tag:'@mei_gr1',                   role:'MEI'},
+  ],
+  KG: [
+    {id:'joao_g',   name:'João Guimarães',    tag:'@Joao_Guimareas_LID_BRSPL',  role:'LID'},
+    {id:'mei_kg1',  name:'MEI Worker 1',      tag:'@mei_kg1',                   role:'MEI'},
+  ],
+  IB: [
+    {id:'joao_ib',  name:'João Guimarães',    tag:'@Joao_Guimareas_LID_BRSPL',  role:'LID'},
+    {id:'mei_ib1',  name:'MEI Worker 1',      tag:'@mei_ib1',                   role:'MEI'},
+  ],
+  UB: [
+    {id:'julio_c',  name:'Julio Cesar',       tag:'@Julio_Cesar_LID_BRSPL',     role:'LID'},
+    {id:'mei_ub1',  name:'MEI Worker 1',      tag:'@mei_ub1',                   role:'MEI'},
+  ],
+  MN: [
+    {id:'mei_mn1',  name:'MEI Worker 1',      tag:'@mei_mn1',                   role:'MEI'},
+  ],
+  BR: [
+    {id:'patrick',  name:'Patrick Bledes',    tag:'@Patrick_Bledes_COO_BRT',    role:'SUP'},
+    {id:'mei_br1',  name:'MEI Worker 1',      tag:'@mei_br1',                   role:'MEI'},
+  ],
+  IT: [
+    {id:'matheus',  name:'Matheus',           tag:'@Matheus_LID_BRSPL',         role:'LID'},
+    {id:'mei_it1',  name:'MEI Worker 1',      tag:'@mei_it1',                   role:'MEI'},
+  ],
+  PE: [
+    {id:'mei_pe1',  name:'MEI Worker 1',      tag:'@mei_pe1',                   role:'MEI'},
+  ],
 };
-function generateSlots(year,month){
-  const dim=new Date(year,month+1,0).getDate();
-  const today=new Date();
-  const slots={};
-  Object.entries(WORKERS).forEach(([city,workers])=>{
-    workers.forEach(w=>{
-      for(let d=1;d<=dim;d++){
-        const date=new Date(year,month,d);
-        const isPast=date<new Date(today.getFullYear(),today.getMonth(),today.getDate());
-        const isFuture=date>today;
-        const key=`${w.id}_${d}`;
-        if(isFuture){
-          const r=Math.random();
-          if(r<0.5)slots[key]={status:'empty',slotsOrdered:1,slotsFilled:0,workers:[],tasks:0,city};
-          else if(r<0.75)slots[key]={status:'none',slotsOrdered:0,slotsFilled:0,workers:[],tasks:0,city};
-          else slots[key]=null;
-        }else if(isPast){
-          const r=Math.random();
-          if(r<0.15)slots[key]=null;
-          else if(r<0.25)slots[key]={status:'empty',slotsOrdered:1,slotsFilled:0,workers:[],tasks:0,city};
-          else if(r<0.35)slots[key]={status:'partial',slotsOrdered:2,slotsFilled:1,workers:[w],tasks:Math.floor(Math.random()*8+2),city};
-          else slots[key]={status:'full',slotsOrdered:1,slotsFilled:1,workers:[w],tasks:Math.floor(Math.random()*15+5),city};
-        }else{
-          const r=Math.random();
-          slots[key]=r<0.5?{status:'full',slotsOrdered:1,slotsFilled:1,workers:[w],tasks:Math.floor(Math.random()*10+1),city}:{status:'partial',slotsOrdered:2,slotsFilled:1,workers:[w],tasks:Math.floor(Math.random()*5),city};
+
+// ── BOT DATA FETCH ───────────────────────────────────
+// Читаем слоты из Telegram форума через proxy
+// Топики: Slots aceitos=4, Turnos=5
+// Чат: -1003887041899
+const BOT_TOKEN = '8689458941:AAGK7Gm69fueXfxfXxtlFJ96lTHhmT_UOp0';
+const FORUM_CHAT = '-1003887041899';
+const TOPIC_SLOTS = 4;   // Slots aceitos
+const TOPIC_TURNOS = 5;  // Turnos
+
+let slotsData = {};
+let lastSync = null;
+
+async function fetchBotData() {
+  try {
+    document.getElementById('syncBtn').classList.add('loading');
+    document.getElementById('syncBtn').textContent = '⟳ ...';
+    document.getElementById('statusDot').style.background = 'var(--accent4)';
+
+    const url = `https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=-200&limit=200`;
+    const resp = await fetch(url);
+    const json = await resp.json();
+
+    if (!json.ok) throw new Error('Bot API error');
+
+    const messages = json.result || [];
+    const slotMessages = messages.filter(u =>
+      u.message &&
+      u.message.chat &&
+      u.message.chat.id == FORUM_CHAT &&
+      (u.message.message_thread_id == TOPIC_SLOTS || u.message.message_thread_id == TOPIC_TURNOS)
+    );
+
+    parseBotMessages(slotMessages);
+    lastSync = new Date();
+    document.getElementById('statusText').textContent = `Последнее обновление: ${lastSync.toLocaleTimeString('ru-RU')} · ${slotMessages.length} сообщений`;
+    document.getElementById('statusDot').style.background = 'var(--accent3)';
+
+  } catch(e) {
+    console.error('Bot fetch error:', e);
+    document.getElementById('statusText').textContent = `Ошибка синхронизации: ${e.message}`;
+    document.getElementById('statusDot').style.background = 'var(--accent2)';
+  } finally {
+    document.getElementById('syncBtn').classList.remove('loading');
+    document.getElementById('syncBtn').textContent = '⟳ Sync';
+  }
+}
+
+function parseBotMessages(messages) {
+  // Парсим сообщения бота о принятых слотах
+  // Формат от MEI_JET_bot: "✅ Слот принят: [дата] [город] @username"
+  // Или fallback — mock данные если бот не даёт нужный формат
+  const parsed = {};
+
+  messages.forEach(upd => {
+    const msg = upd.message;
+    if (!msg || !msg.text) return;
+    const text = msg.text;
+    const date = new Date(msg.date * 1000);
+    const day = date.getDate();
+    const month = date.getMonth();
+    const year = date.getFullYear();
+
+    if (year !== curYear || month !== curMonth) return;
+
+    // Detect city from text
+    let city = null;
+    for (const c of CITIES) {
+      if (text.includes(CITY_NAMES[c]) || text.includes(c)) { city = c; break; }
+    }
+
+    // Detect username
+    const tagMatch = text.match(/@(\w+)/);
+    const tag = tagMatch ? '@' + tagMatch[1] : null;
+
+    // Find worker by tag
+    let worker = null;
+    if (tag && city) {
+      worker = (WORKERS[city] || []).find(w => w.tag.toLowerCase() === tag.toLowerCase());
+    }
+
+    if (worker) {
+      const key = `${worker.id}_${day}`;
+      const isAccepted = text.includes('✅') || text.includes('aceito') || text.includes('принят');
+      parsed[key] = {
+        status: isAccepted ? 'full' : 'partial',
+        slotsOrdered: 1,
+        slotsFilled: isAccepted ? 1 : 0,
+        workers: isAccepted ? [worker] : [],
+        tasks: 0,
+        city,
+        fromBot: true
+      };
+    }
+  });
+
+  // Merge with existing (bot data overwrites mock for matched keys)
+  const mockData = generateMockSlots(curYear, curMonth);
+  slotsData = {...mockData, ...parsed};
+  renderTable();
+  renderSummary();
+}
+
+async function syncData() {
+  await fetchBotData();
+}
+
+// ── MOCK FALLBACK ─────────────────────────────────────
+function generateMockSlots(year, month) {
+  const dim = new Date(year, month+1, 0).getDate();
+  const today = new Date();
+  const slots = {};
+  Object.entries(WORKERS).forEach(([city, workers]) => {
+    workers.forEach(w => {
+      for (let d = 1; d <= dim; d++) {
+        const date = new Date(year, month, d);
+        const isPast = date < new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const isFuture = date > today;
+        const key = `${w.id}_${d}`;
+        if (isFuture) {
+          const r = Math.random();
+          if (r < 0.5) slots[key] = {status:'empty', slotsOrdered:1, slotsFilled:0, workers:[], tasks:0, city};
+          else if (r < 0.75) slots[key] = {status:'none', slotsOrdered:0, slotsFilled:0, workers:[], tasks:0, city};
+          else slots[key] = null;
+        } else if (isPast) {
+          const r = Math.random();
+          if (r < 0.15) slots[key] = null;
+          else if (r < 0.25) slots[key] = {status:'empty', slotsOrdered:1, slotsFilled:0, workers:[], tasks:0, city};
+          else if (r < 0.35) slots[key] = {status:'partial', slotsOrdered:2, slotsFilled:1, workers:[w], tasks:Math.floor(Math.random()*8+2), city};
+          else slots[key] = {status:'full', slotsOrdered:1, slotsFilled:1, workers:[w], tasks:Math.floor(Math.random()*15+5), city};
+        } else {
+          const r = Math.random();
+          slots[key] = r < 0.5
+            ? {status:'full', slotsOrdered:1, slotsFilled:1, workers:[w], tasks:Math.floor(Math.random()*10+1), city}
+            : {status:'partial', slotsOrdered:2, slotsFilled:1, workers:[w], tasks:Math.floor(Math.random()*5), city};
         }
       }
     });
   });
   return slots;
 }
-const today=new Date();
-let curYear=today.getFullYear(),curMonth=today.getMonth(),activeCity='ALL',slotsData={};
-function refreshData(){slotsData=generateSlots(curYear,curMonth);}
-const MONTHS_RU=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
-const DOW_RU=['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
-function render(){renderMonthLabel();renderCityFilter();renderTable();renderSummary();}
-function renderMonthLabel(){document.getElementById('monthLabel').textContent=`${MONTHS_RU[curMonth]} ${curYear}`;}
-function renderCityFilter(){
-  const wrap=document.getElementById('cityFilter');
-  const all=['ALL',...CITIES];
-  wrap.innerHTML=all.map(c=>{
-    const label=c==='ALL'?'🌐 Все':`${c} · ${CITY_NAMES[c]}`;
+
+// ── STATE ─────────────────────────────────────────────
+const today = new Date();
+let curYear = today.getFullYear(), curMonth = today.getMonth(), activeCity = 'ALL';
+
+// ── RENDER ────────────────────────────────────────────
+const MONTHS_RU = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const DOW_RU = ['Вс','Пн','Вт','Ср','Чт','Пт','Сб'];
+const ROLE_COLOR = {SUP:'#00e5ff', LID:'#ffa502', AUX:'#a78bfa', MEI:'#6b7a99'};
+
+function render() {
+  document.getElementById('monthLabel').textContent = `${MONTHS_RU[curMonth]} ${curYear}`;
+  renderCityFilter();
+  renderTable();
+  renderSummary();
+}
+
+function renderCityFilter() {
+  const wrap = document.getElementById('cityFilter');
+  wrap.innerHTML = ['ALL', ...CITIES].map(c => {
+    const label = c === 'ALL' ? '🌐 Все' : `${c} · ${CITY_NAMES[c]}`;
     return `<div class="city-chip ${activeCity===c?'active':''}" onclick="setCity('${c}')">${label}</div>`;
   }).join('');
 }
-function renderTable(){
-  const dim=new Date(curYear,curMonth+1,0).getDate();
-  const todayDate=new Date();
-  const todayDay=(todayDate.getFullYear()===curYear&&todayDate.getMonth()===curMonth)?todayDate.getDate():-1;
-  const table=document.getElementById('calTable');
-  let html='<thead><tr>';
-  html+=`<th class="th-empty col-name"></th>`;
-  for(let d=1;d<=dim;d++){
-    const dow=new Date(curYear,curMonth,d).getDay();
-    const cls=d===todayDay?'today':(dow===0||dow===6)?'weekend':'';
-    html+=`<th class="th-day ${cls}">${d}<br><span style="font-size:9px;opacity:.6">${DOW_RU[dow]}</span></th>`;
+
+function renderTable() {
+  const dim = new Date(curYear, curMonth+1, 0).getDate();
+  const todayDate = new Date();
+  const todayDay = (todayDate.getFullYear()===curYear && todayDate.getMonth()===curMonth) ? todayDate.getDate() : -1;
+  const table = document.getElementById('calTable');
+  let html = '<thead><tr>';
+  html += `<th class="th-empty col-name"></th>`;
+  for (let d = 1; d <= dim; d++) {
+    const dow = new Date(curYear, curMonth, d).getDay();
+    const cls = d===todayDay ? 'today' : (dow===0||dow===6) ? 'weekend' : '';
+    html += `<th class="th-day ${cls}">${d}<br><span style="font-size:9px;opacity:.6">${DOW_RU[dow]}</span></th>`;
   }
-  html+='</tr></thead><tbody>';
-  const citiesToShow=activeCity==='ALL'?CITIES:[activeCity];
-  citiesToShow.forEach(city=>{
-    const workers=WORKERS[city]||[];
-    html+=`<tr class="city-row"><td class="city-label">${city} · ${CITY_NAMES[city]}</td>`;
-    for(let d=1;d<=dim;d++)html+=`<td class="city-spacer"></td>`;
-    html+='</tr>';
-    workers.forEach(w=>{
-      html+='<tr>';
-      html+=`<td class="worker-name-cell col-name" title="${w.name} ${w.tag}">${w.name}</td>`;
-      for(let d=1;d<=dim;d++){
-        const key=`${w.id}_${d}`;
-        const slot=slotsData[key];
-        const date=new Date(curYear,curMonth,d);
-        const isFuture=date>todayDate;
-        if(!slot){html+=`<td class="slot-cell slot-none"></td>`;}
-        else if(isFuture&&slot.status==='none'){html+=`<td class="slot-cell slot-future">—</td>`;}
-        else{
-          const cls=slot.status==='full'?'slot-full':slot.status==='partial'?'slot-partial':'slot-empty';
-          const icon=slot.status==='full'?'✓':slot.status==='partial'?'½':'✗';
-          html+=`<td class="slot-cell ${cls}" data-key="${key}" data-day="${d}" data-wname="${w.name}" data-wtag="${w.tag}" data-city="${city}" onmouseenter="showTooltip(event,this)" onmouseleave="hideTooltip()" onclick="showTooltip(event,this,true)">${icon}</td>`;
+  html += '</tr></thead><tbody>';
+  const citiesToShow = activeCity === 'ALL' ? CITIES : [activeCity];
+  citiesToShow.forEach(city => {
+    const workers = WORKERS[city] || [];
+    html += `<tr class="city-row"><td class="city-label">${city} · ${CITY_NAMES[city]}</td>`;
+    for (let d = 1; d <= dim; d++) html += `<td class="city-spacer"></td>`;
+    html += '</tr>';
+    workers.forEach(w => {
+      const roleClr = ROLE_COLOR[w.role] || '#6b7a99';
+      html += '<tr>';
+      html += `<td class="worker-name-cell col-name" title="${w.name} ${w.tag}">
+        <span style="color:${roleClr};font-size:9px;font-family:'Space Mono',monospace;margin-right:4px">${w.role}</span>${w.name}
+      </td>`;
+      for (let d = 1; d <= dim; d++) {
+        const key = `${w.id}_${d}`;
+        const slot = slotsData[key];
+        const date = new Date(curYear, curMonth, d);
+        const isFuture = date > todayDate;
+        if (!slot) { html += `<td class="slot-cell slot-none"></td>`; }
+        else if (isFuture && slot.status === 'none') { html += `<td class="slot-cell slot-future">—</td>`; }
+        else {
+          const cls = slot.status==='full' ? 'slot-full' : slot.status==='partial' ? 'slot-partial' : 'slot-empty';
+          const icon = slot.status==='full' ? '✓' : slot.status==='partial' ? '½' : '✗';
+          const botMark = slot.fromBot ? ' style="outline:2px solid var(--accent);outline-offset:-2px"' : '';
+          html += `<td class="slot-cell ${cls}"${botMark} data-key="${key}" data-day="${d}" data-wname="${w.name}" data-wtag="${w.tag}" data-city="${city}" onmouseenter="showTooltip(event,this)" onmouseleave="hideTooltip()">${icon}</td>`;
         }
       }
-      html+='</tr>';
+      html += '</tr>';
     });
-    html+=`<tr><td style="height:6px" colspan="${dim+1}"></td></tr>`;
+    html += `<tr><td style="height:6px" colspan="${dim+1}"></td></tr>`;
   });
-  html+='</tbody>';
-  table.innerHTML=html;
+  html += '</tbody>';
+  table.innerHTML = html;
 }
-function renderSummary(){
-  const dim=new Date(curYear,curMonth+1,0).getDate();
-  let total=0,filled=0,empty=0,tasks=0;
-  const citiesToShow=activeCity==='ALL'?CITIES:[activeCity];
-  citiesToShow.forEach(city=>{
-    (WORKERS[city]||[]).forEach(w=>{
-      for(let d=1;d<=dim;d++){
-        const slot=slotsData[`${w.id}_${d}`];
-        if(!slot)return;
-        if(slot.slotsOrdered>0)total+=slot.slotsOrdered;
-        if(slot.status==='full'||slot.status==='partial'){filled+=slot.slotsFilled;tasks+=slot.tasks;}
-        if(slot.status==='empty')empty+=1;
+
+function renderSummary() {
+  const dim = new Date(curYear, curMonth+1, 0).getDate();
+  let total=0, filled=0, empty=0, tasks=0;
+  const citiesToShow = activeCity==='ALL' ? CITIES : [activeCity];
+  citiesToShow.forEach(city => {
+    (WORKERS[city]||[]).forEach(w => {
+      for (let d=1; d<=dim; d++) {
+        const slot = slotsData[`${w.id}_${d}`];
+        if (!slot) return;
+        if (slot.slotsOrdered > 0) total += slot.slotsOrdered;
+        if (slot.status==='full'||slot.status==='partial') { filled += slot.slotsFilled; tasks += slot.tasks; }
+        if (slot.status==='empty') empty++;
       }
     });
   });
-  document.getElementById('sumTotal').textContent=total;
-  document.getElementById('sumFilled').textContent=filled;
-  document.getElementById('sumEmpty').textContent=empty;
-  document.getElementById('sumTasks').textContent=tasks;
-  document.getElementById('sumMonth').textContent=`${MONTHS_RU[curMonth]} ${curYear}`;
-  document.getElementById('sumFilledPct').textContent=total>0?`${Math.round(filled/total*100)}% от заказанных`:'';
-  document.getElementById('sumEmptyPct').textContent=total>0?`${Math.round(empty/total*100)}% незакрытых`:'';
+  document.getElementById('sumTotal').textContent = total;
+  document.getElementById('sumFilled').textContent = filled;
+  document.getElementById('sumEmpty').textContent = empty;
+  document.getElementById('sumTasks').textContent = tasks;
+  document.getElementById('sumMonth').textContent = `${MONTHS_RU[curMonth]} ${curYear}`;
+  document.getElementById('sumFilledPct').textContent = total>0 ? `${Math.round(filled/total*100)}% от заказанных` : '';
+  document.getElementById('sumEmptyPct').textContent = total>0 ? `${Math.round(empty/total*100)}% незакрытых` : '';
 }
-function showTooltip(e,el,pinned=false){
-  const key=el.dataset.key;
-  const slot=slotsData[key];
-  if(!slot)return;
-  const day=el.dataset.day,wname=el.dataset.wname,wtag=el.dataset.wtag,city=el.dataset.city;
-  const statusLabel=slot.status==='full'?'<span style="color:#2ed573">● Заполнен</span>':slot.status==='partial'?'<span style="color:#ffa502">◑ Частично</span>':'<span style="color:#ff4757">○ Пустой</span>';
-  let workersHtml='';
-  if(slot.workers&&slot.workers.length>0){
-    workersHtml=`<div class="tt-workers"><div class="tt-worker-label">Работники</div>${slot.workers.map(w=>`<div class="tt-worker-item"><span class="tag">${w.tag}</span><span class="name">${w.name}</span></div>`).join('')}</div>`;
+
+// ── TOOLTIP ───────────────────────────────────────────
+function showTooltip(e, el) {
+  const key = el.dataset.key;
+  const slot = slotsData[key];
+  if (!slot) return;
+  const day=el.dataset.day, wname=el.dataset.wname, wtag=el.dataset.wtag, city=el.dataset.city;
+  const statusLabel = slot.status==='full'
+    ? '<span style="color:#2ed573">● Заполнен</span>'
+    : slot.status==='partial'
+    ? '<span style="color:#ffa502">◑ Частично</span>'
+    : '<span style="color:#ff4757">○ Пустой</span>';
+  let workersHtml = '';
+  if (slot.workers && slot.workers.length > 0) {
+    workersHtml = `<div class="tt-workers"><div class="tt-worker-label">Работники</div>${slot.workers.map(w=>`<div class="tt-worker-item"><span class="tag">${w.tag}</span><span class="name">${w.name}</span></div>`).join('')}</div>`;
   }
-  const tt=document.getElementById('tooltip');
-  tt.innerHTML=`<div class="tt-header">${city} · ${wname} · ${day} ${MONTHS_RU[curMonth]}</div><div class="tt-row"><span class="tt-label">Статус</span><span class="tt-val">${statusLabel}</span></div><div class="tt-row"><span class="tt-label">Заказано слотов</span><span class="tt-val cyan">${slot.slotsOrdered}</span></div><div class="tt-row"><span class="tt-label">Принято</span><span class="tt-val green">${slot.slotsFilled}</span></div><div class="tt-row"><span class="tt-label">Пустых</span><span class="tt-val red">${slot.slotsOrdered-slot.slotsFilled}</span></div><div class="tt-row"><span class="tt-label">Задач выполнено</span><span class="tt-val orange">${slot.tasks}</span></div>${workersHtml}`;
-  const x=e.clientX+14,y=e.clientY+14,tw=320,th=200,vw=window.innerWidth,vh=window.innerHeight;
-  tt.style.left=(x+tw>vw?vw-tw-10:x)+'px';
-  tt.style.top=(y+th>vh?y-th-20:y)+'px';
+  const botBadge = slot.fromBot ? '<span style="color:var(--accent);font-size:10px;margin-left:6px">● BOT</span>' : '';
+  const tt = document.getElementById('tooltip');
+  tt.innerHTML = `
+    <div class="tt-header">${city} · ${wname} · ${day} ${MONTHS_RU[curMonth]}${botBadge}</div>
+    <div class="tt-row"><span class="tt-label">Статус</span><span class="tt-val">${statusLabel}</span></div>
+    <div class="tt-row"><span class="tt-label">Заказано</span><span class="tt-val cyan">${slot.slotsOrdered}</span></div>
+    <div class="tt-row"><span class="tt-label">Принято</span><span class="tt-val green">${slot.slotsFilled}</span></div>
+    <div class="tt-row"><span class="tt-label">Пустых</span><span class="tt-val red">${slot.slotsOrdered-slot.slotsFilled}</span></div>
+    <div class="tt-row"><span class="tt-label">Задач</span><span class="tt-val orange">${slot.tasks}</span></div>
+    ${workersHtml}`;
+  const x=e.clientX+14, y=e.clientY+14;
+  tt.style.left = (x+320>window.innerWidth ? window.innerWidth-330 : x) + 'px';
+  tt.style.top  = (y+200>window.innerHeight ? y-210 : y) + 'px';
   tt.classList.add('visible');
 }
-function hideTooltip(){document.getElementById('tooltip').classList.remove('visible');}
-function setCity(c){activeCity=c;refreshData();render();}
-document.getElementById('prevMonth').addEventListener('click',()=>{curMonth--;if(curMonth<0){curMonth=11;curYear--;}refreshData();render();});
-document.getElementById('nextMonth').addEventListener('click',()=>{curMonth++;if(curMonth>11){curMonth=0;curYear++;}refreshData();render();});
-refreshData();render();
+function hideTooltip() { document.getElementById('tooltip').classList.remove('visible'); }
+function setCity(c) { activeCity=c; render(); }
+
+document.getElementById('prevMonth').addEventListener('click', () => {
+  curMonth--; if (curMonth<0){curMonth=11;curYear--;} slotsData=generateMockSlots(curYear,curMonth); render();
+});
+document.getElementById('nextMonth').addEventListener('click', () => {
+  curMonth++; if (curMonth>11){curMonth=0;curYear++;} slotsData=generateMockSlots(curYear,curMonth); render();
+});
+
+// ── INIT ──────────────────────────────────────────────
+async function init() {
+  slotsData = generateMockSlots(curYear, curMonth);
+  render();
+  await fetchBotData(); // загружаем реальные данные сразу
+  // Автосинк каждые 5 минут
+  setInterval(fetchBotData, 5 * 60 * 1000);
+}
+
+// Проверяем сессию при загрузке
+if (sessionStorage.getItem(SESSION_KEY) === '1') {
+  document.getElementById('authOverlay').style.display = 'none';
+  init();
+}
 </script>
 </body>
 </html>
