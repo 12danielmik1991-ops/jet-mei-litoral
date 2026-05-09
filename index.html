@@ -268,8 +268,9 @@ const WORKERS={
   PE:[{id:'mei_pe1',name:'MEI PE-1',tag:'@mei_pe1',role:'MEI'}]
 };
 const ROLE_COLOR={SUP:'#00e5ff',LID:'#ffa502',AUX:'#a78bfa',MEI:'#6b7a99'};
-const BOT_TOKEN='8689458941:AAGK7Gm69fueXfxfXxtlFJ96lTHhmT_UOp0';
-const FORUM_CHAT='-1003887041899';
+const API_BASE='https://jet-mei-bot-production.up.railway.app';
+const API_KEY='jet2026panel';
+// FORUM_CHAT removed — using REST API now
 
 let slotsData={};
 let orderedSlots=JSON.parse(localStorage.getItem('jet_ordered_slots')||'[]');
@@ -339,42 +340,108 @@ function generateStableSlots(year,month){
 
 // ── BOT SYNC ────────────────────────────────────────
 async function fetchBotData(){
+  const btn=document.getElementById('syncBtn');
+  btn.classList.add('loading');btn.textContent='⟳ ...';
+  document.getElementById('statusDot').style.background='var(--accent4)';
   try{
-    const btn=document.getElementById('syncBtn');btn.classList.add('loading');btn.textContent='⟳ ...';
-    document.getElementById('statusDot').style.background='var(--accent4)';
-    const resp=await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/getUpdates?offset=-200&limit=200`);
-    const json=await resp.json();
-    if(!json.ok)throw new Error('Bot API');
-    const msgs=(json.result||[]).filter(u=>u.message&&u.message.chat&&String(u.message.chat.id)===FORUM_CHAT);
-    // Merge bot data on top of stable mock
-    msgs.forEach(upd=>{
-      const msg=upd.message;if(!msg||!msg.text)return;
-      const text=msg.text;
-      const date=new Date(msg.date*1000);
-      const day=date.getDate(),mo=date.getMonth(),yr=date.getFullYear();
-      if(yr!==curYear||mo!==curMonth)return;
-      let city=null;
-      for(const c of CITIES){if(text.includes(CITY_NAMES[c])||text.includes(c)){city=c;break;}}
-      const tm=text.match(/@(\w+)/);
-      const tag=tm?'@'+tm[1]:null;
-      let worker=null;
-      if(tag&&city)worker=(WORKERS[city]||[]).find(w=>w.tag.toLowerCase()===tag.toLowerCase());
-      if(worker){
-        const key=`${worker.id}_${day}`;
-        const ok=text.includes('\u2705')||text.toLowerCase().includes('aceito');
-        slotsData[key]={status:ok?'full':'partial',slotsOrdered:1,slotsFilled:ok?1:0,workers:ok?[worker]:[],tasks:slotsData[key]?slotsData[key].tasks:0,city,fromBot:true};
+    const headers={'X-API-Key':API_KEY};
+    // Параллельно грузим слоты и задачи
+    const [slotsResp, statsResp, workersResp] = await Promise.all([
+      fetch(`${API_BASE}/api/slots?year=${curYear}&month=${curMonth+1}&cluster=BRSPL`,{headers}),
+      fetch(`${API_BASE}/api/stats?year=${curYear}&month=${curMonth+1}&cluster=BRSPL`,{headers}),
+      fetch(`${API_BASE}/api/workers?cluster=BRSPL`,{headers}),
+    ]);
+
+    if(!slotsResp.ok) throw new Error(`Slots API ${slotsResp.status}`);
+    const slotsJson   = await slotsResp.json();
+    const statsJson   = statsResp.ok ? await statsResp.json() : {tasks:[]};
+    const workersJson = workersResp.ok ? await workersResp.json() : {workers:[]};
+
+    // Обновляем реальных работников если пришли из API
+    if(workersJson.workers && workersJson.workers.length > 0){
+      mergeRealWorkers(workersJson.workers);
+    }
+
+    // Строим slotsData из реальных слотов
+    const newSlots = {};
+    (slotsJson.slots || []).forEach(s => {
+      const d = new Date(s.data);
+      const day = d.getDate();
+      // Ищем worker по городу
+      const city = s.cidade;
+      const cityWorkers = WORKERS[city] || [];
+      // Если есть acceptances — берём первого
+      const acc = s.acceptances || [];
+      const workerMatches = acc.map(a => {
+        return cityWorkers.find(w => w.tag && w.tag.replace('@','').toLowerCase() === (a.tg_username||'').toLowerCase())
+          || {id: `mei_${a.mei_id}`, name: a.name||'MEI', tag: `@${a.tg_username||a.mei_id}`, role:'MEI'};
+      });
+      const filled = parseInt(s.filled_count||0);
+      const ordered = Math.max(filled, 1);
+      const status = filled >= ordered ? 'full' : filled > 0 ? 'partial' : 'empty';
+      // Ключ: используем первого matched worker или создаём по city+day
+      const wid = workerMatches.length > 0 ? workerMatches[0].id : `slot_${s.id}`;
+      const key = `${wid}_${day}`;
+      newSlots[key] = {
+        status, slotsOrdered: ordered, slotsFilled: filled,
+        workers: workerMatches, tasks: 0, city, fromBot: true, slotId: s.id,
+        turnoCode: s.turno_code, descricao: s.descricao
+      };
+    });
+
+    // Накладываем задачи из actions_log
+    (statsJson.tasks || []).forEach(t => {
+      const city = t.cidade;
+      const day = parseInt(t.day);
+      const cityWorkers = WORKERS[city] || [];
+      const w = cityWorkers.find(wk => String(wk.tg_id) === String(t.tg_id));
+      if(w){
+        const key = `${w.id}_${day}`;
+        if(newSlots[key]) newSlots[key].tasks = parseInt(t.task_count||0);
+        else newSlots[key] = {status:'full',slotsOrdered:1,slotsFilled:1,workers:[w],tasks:parseInt(t.task_count||0),city,fromBot:true};
       }
     });
-    const now=new Date();
-    document.getElementById('statusText').textContent=`${t('status_sync')}: ${now.toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · ${msgs.length} ${t('status_msgs')}`;
-    document.getElementById('statusDot').style.background='var(--accent3)';
-  }catch(e){
-    document.getElementById('statusText').textContent=`${t('status_err')}: ${e.message}`;
-    document.getElementById('statusDot').style.background='var(--accent2)';
+
+    // Merge: реальные данные поверх mock
+    slotsData = {...generateStableSlots(curYear,curMonth), ...newSlots};
+
+    const now = new Date();
+    document.getElementById('statusText').textContent =
+      `${t('status_sync')}: ${now.toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · ${slotsJson.count} слотов · LIVE`;
+    document.getElementById('statusDot').style.background = 'var(--accent3)';
+  }catch(err){
+    console.error('API error:', err);
+    document.getElementById('statusText').textContent = `${t('status_err')}: ${err.message}`;
+    document.getElementById('statusDot').style.background = 'var(--accent2)';
+    // Fallback на mock
+    slotsData = generateStableSlots(curYear, curMonth);
   }finally{
-    const btn=document.getElementById('syncBtn');btn.classList.remove('loading');btn.textContent='⟳ Sync';
+    btn.classList.remove('loading');btn.textContent='⟳ Sync';
   }
   renderWorkers();renderSummary();renderTasks();renderTaskSummary();
+}
+
+function mergeRealWorkers(apiWorkers){
+  // Добавляем реальных MEI из БД в WORKERS если их ещё нет
+  apiWorkers.forEach(w => {
+    const city = w.cidade;
+    if(!city || !WORKERS[city]) return;
+    const tag = w.tg_username ? '@'+w.tg_username : null;
+    if(!tag) return;
+    const exists = WORKERS[city].find(x => x.tag && x.tag.toLowerCase()===tag.toLowerCase());
+    if(!exists){
+      WORKERS[city].push({
+        id: `db_${w.id}`,
+        name: w.nome || tag,
+        tag: tag,
+        role: 'MEI',
+        tg_id: w.tg_id
+      });
+    } else {
+      // Обновляем tg_id если не было
+      exists.tg_id = w.tg_id;
+    }
+  });
 }
 async function syncData(){
   // При ручном sync — сбрасываем кеш текущего месяца и перегенерируем
