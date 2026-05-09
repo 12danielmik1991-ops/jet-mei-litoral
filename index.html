@@ -269,8 +269,6 @@ const WORKERS={
 };
 const ROLE_COLOR={SUP:'#00e5ff',LID:'#ffa502',AUX:'#a78bfa',MEI:'#6b7a99'};
 const API_BASE='https://jet-mei-bot-production.up.railway.app';
-const API_KEY='jet2026panel';
-// FORUM_CHAT removed — using REST API now
 
 let slotsData={};
 let orderedSlots=JSON.parse(localStorage.getItem('jet_ordered_slots')||'[]');
@@ -344,81 +342,126 @@ async function fetchBotData(){
   btn.classList.add('loading');btn.textContent='⟳ ...';
   document.getElementById('statusDot').style.background='var(--accent4)';
   try{
-    const headers={'X-API-Key':API_KEY};
-    // Параллельно грузим слоты и задачи
-    const [slotsResp, statsResp, workersResp] = await Promise.all([
-      fetch(`${API_BASE}/api/slots?year=${curYear}&month=${curMonth+1}&cluster=BRSPL`,{headers}),
-      fetch(`${API_BASE}/api/stats?year=${curYear}&month=${curMonth+1}&cluster=BRSPL`,{headers}),
-      fetch(`${API_BASE}/api/workers?cluster=BRSPL`,{headers}),
+    const SID="1rNDJDRO-a2Q9sbWoW8DUcoZyZ7JddteoDwf843f4hVI";
+    const sheetUrl=t=>`https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:csv&sheet=${t}`;
+
+    const [slotsResp,workersResp,tasksResp]=await Promise.all([
+      fetch(sheetUrl("slots"),{cache:"no-store"}),
+      fetch(sheetUrl("workers"),{cache:"no-store"}),
+      fetch(sheetUrl("tasks"),{cache:"no-store"})
     ]);
 
-    if(!slotsResp.ok) throw new Error(`Slots API ${slotsResp.status}`);
-    const slotsJson   = await slotsResp.json();
-    const statsJson   = statsResp.ok ? await statsResp.json() : {tasks:[]};
-    const workersJson = workersResp.ok ? await workersResp.json() : {workers:[]};
+    if(!slotsResp.ok) throw new Error("Sheet "+slotsResp.status);
 
-    // Обновляем реальных работников если пришли из API
-    if(workersJson.workers && workersJson.workers.length > 0){
-      mergeRealWorkers(workersJson.workers);
+    const parseCsv=text=>{
+      const lines=text.trim().split("\n");
+      const headers=lines[0].split(",").map(h=>h.replace(/^"|"$/g,""));
+      return lines.slice(1).map(line=>{
+        const values=[];let cur="",inQ=false;
+        for(let i=0;i<line.length;i++){
+          const c=line[i];
+          if(c==='"'){inQ=!inQ;continue;}
+          if(c===","&&!inQ){values.push(cur);cur="";continue;}
+          cur+=c;
+        }
+        values.push(cur);
+        const obj={};
+        headers.forEach((h,i)=>{obj[h]=(values[i]||"").trim();});
+        return obj;
+      });
+    };
+
+    const slotsRows=parseCsv(await slotsResp.text());
+    const workersRows=parseCsv(await workersResp.text());
+    const tasksRows=parseCsv(await tasksResp.text());
+
+    // Обновляем WORKERS из Sheet
+    if(workersRows.length>0){
+      mergeRealWorkers(workersRows);
     }
 
-    // Строим slotsData из реальных слотов
-    const newSlots = {};
-    (slotsJson.slots || []).forEach(s => {
-      const d = new Date(s.data);
-      const day = d.getDate();
-      // Ищем worker по городу
-      const city = s.cidade;
-      const cityWorkers = WORKERS[city] || [];
-      // Если есть acceptances — берём первого
-      const acc = s.acceptances || [];
-      const workerMatches = acc.map(a => {
-        return cityWorkers.find(w => w.tag && w.tag.replace('@','').toLowerCase() === (a.tg_username||'').toLowerCase())
-          || {id: `mei_${a.mei_id}`, name: a.name||'MEI', tag: `@${a.tg_username||a.mei_id}`, role:'MEI'};
-      });
-      const filled = parseInt(s.filled_count||0);
-      const ordered = Math.max(filled, 1);
-      const status = filled >= ordered ? 'full' : filled > 0 ? 'partial' : 'empty';
-      // Ключ: используем первого matched worker или создаём по city+day
-      const wid = workerMatches.length > 0 ? workerMatches[0].id : `slot_${s.id}`;
-      const key = `${wid}_${day}`;
-      newSlots[key] = {
-        status, slotsOrdered: ordered, slotsFilled: filled,
-        workers: workerMatches, tasks: 0, city, fromBot: true, slotId: s.id,
-        turnoCode: s.turno_code, descricao: s.descricao
+    // Строим slotsData
+    const newSlots={};
+    slotsRows.forEach(s=>{
+      if(!s.date)return;
+      const dateParts=s.date.split("-");
+      if(dateParts.length<3)return;
+      const yr=parseInt(dateParts[0]),mo=parseInt(dateParts[1])-1,day=parseInt(dateParts[2]);
+      if(yr!==curYear||mo!==curMonth)return;
+
+      const city=s.city;
+      if(!CITIES.includes(city))return;
+
+      const filled=parseInt(s.filled_count||0);
+      const ordered=parseInt(s.vagas_total||1);
+      const status=filled>=ordered?'full':filled>0?'partial':'empty';
+
+      const cityWorkers=WORKERS[city]||[];
+      const wid=cityWorkers.length>0?cityWorkers[0].id:`slot_${s.slot_id}`;
+      const key=`${wid}_${day}`;
+      newSlots[key]={
+        status,slotsOrdered:ordered,slotsFilled:filled,
+        workers:filled>0&&cityWorkers.length>0?[cityWorkers[0]]:[],
+        tasks:0,city,fromBot:true,slotId:s.slot_id,
+        descricao:s.descricao,turnoCode:s.turno_code
       };
     });
 
-    // Накладываем задачи из actions_log
-    (statsJson.tasks || []).forEach(t => {
-      const city = t.cidade;
-      const day = parseInt(t.day);
-      const cityWorkers = WORKERS[city] || [];
-      const w = cityWorkers.find(wk => String(wk.tg_id) === String(t.tg_id));
-      if(w){
-        const key = `${w.id}_${day}`;
-        if(newSlots[key]) newSlots[key].tasks = parseInt(t.task_count||0);
-        else newSlots[key] = {status:'full',slotsOrdered:1,slotsFilled:1,workers:[w],tasks:parseInt(t.task_count||0),city,fromBot:true};
-      }
+    // Накладываем задачи
+    tasksRows.forEach(t=>{
+      if(!t.date)return;
+      const dateParts=t.date.split("-");
+      if(dateParts.length<3)return;
+      const yr=parseInt(dateParts[0]),mo=parseInt(dateParts[1])-1,day=parseInt(dateParts[2]);
+      if(yr!==curYear||mo!==curMonth)return;
+
+      const city=t.city;
+      if(!CITIES.includes(city))return;
+      const cityWorkers=WORKERS[city]||[];
+      const w=cityWorkers[0];
+      if(!w)return;
+      const key=`${w.id}_${day}`;
+      const cnt=parseInt(t.task_count||0);
+      if(newSlots[key]) newSlots[key].tasks+=cnt;
+      else newSlots[key]={status:'full',slotsOrdered:1,slotsFilled:1,workers:[w],tasks:cnt,city,fromBot:true};
     });
 
-    // Merge: реальные данные поверх mock
-    slotsData = {...generateStableSlots(curYear,curMonth), ...newSlots};
+    // Merge с базой
+    slotsData={...generateStableSlots(curYear,curMonth),...newSlots};
 
-    const now = new Date();
-    document.getElementById('statusText').textContent =
-      `${t('status_sync')}: ${now.toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · ${slotsJson.count} слотов · LIVE`;
-    document.getElementById('statusDot').style.background = 'var(--accent3)';
+    const now=new Date();
+    document.getElementById('statusText').textContent=`✅ LIVE Sheets · ${now.toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · ${slotsRows.length} слотов · ${workersRows.length} раб.`;
+    document.getElementById('statusDot').style.background='var(--accent3)';
   }catch(err){
-    console.error('API error:', err);
-    document.getElementById('statusText').textContent = `${t('status_err')}: ${err.message}`;
-    document.getElementById('statusDot').style.background = 'var(--accent2)';
-    // Fallback на mock
-    slotsData = generateStableSlots(curYear, curMonth);
+    console.error('Sheet error:',err);
+    document.getElementById('statusText').textContent=`${t('status_err')}: ${err.message}`;
+    document.getElementById('statusDot').style.background='var(--accent2)';
+    slotsData=generateStableSlots(curYear,curMonth);
   }finally{
     btn.classList.remove('loading');btn.textContent='⟳ Sync';
   }
   renderWorkers();renderSummary();renderTasks();renderTaskSummary();
+}
+
+function mergeRealWorkers(apiWorkers){
+  apiWorkers.forEach(w=>{
+    const city=w.city;
+    if(!city||city==="ALL"||!WORKERS[city])return;
+    const tag=w.tg_username?'@'+w.tg_username:null;
+    if(!tag)return;
+    const exists=WORKERS[city].find(x=>x.tag&&x.tag.toLowerCase()===tag.toLowerCase());
+    if(!exists){
+      WORKERS[city].push({
+        id:`db_${w.worker_id||w.tg_id||tag}`,
+        name:w.name||tag,
+        tag:tag,
+        role:w.role||'MEI',
+        tg_id:w.tg_id
+      });
+    } else if(w.tg_id) {
+      exists.tg_id=w.tg_id;
+    }
+  });
 }
 
 function mergeRealWorkers(apiWorkers){
