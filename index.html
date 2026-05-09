@@ -395,12 +395,7 @@ async function fetchBotData(){
       });
     });
 
-    // Если в каком-то городе нет работников — добавим placeholder
-    CITIES.forEach(c=>{
-      if(WORKERS[c].length===0){
-        WORKERS[c].push({id:`stub_${c}`,name:`(нет данных)`,tag:`@${c.toLowerCase()}_team`,role:'—'});
-      }
-    });
+    // Города без работников остаются пустыми (без placeholders)
 
     // === ПОЛНАЯ ЗАМЕНА slotsData из Sheet ===
     slotsData={};
@@ -650,12 +645,32 @@ function createSlot(){
   const wid=document.getElementById('nsWorker').value;
   const shift=document.getElementById('nsShift').value;
   const qty=parseInt(document.getElementById('nsQty').value)||1;
-  const note=document.getElementById('nsNote').value;
-  if(!city||!date||!wid){alert(lang==='ru'?'Заполните обязательные поля':'Preencha os campos obrigatórios');return;}
+  const note=document.getElementById('nsNote').value||'';
+  console.log('[createSlot] city=',city,'date=',date,'wid=',wid,'shift=',shift,'qty=',qty);
+  if(!city){alert(lang==='ru'?'Выберите город':'Selecione cidade');return;}
+  if(!date){alert(lang==='ru'?'Выберите дату':'Selecione data');return;}
+  if(!wid){alert(lang==='ru'?'Выберите работника':'Selecione trabalhador');return;}
   const worker=(WORKERS[city]||[]).find(w=>w.id===wid);
-  orderedSlots.push({id:Date.now(),city,date,workerId:wid,workerName:worker?worker.name:'',workerTag:worker?worker.tag:'',shift,qty,note,status:'ordered',createdAt:new Date().toISOString()});
-  localStorage.setItem('jet_ordered_slots',JSON.stringify(orderedSlots));
-  toggleNewSlotForm();renderSlotsGrid();
+  if(!worker){alert('Worker '+wid+' not found in '+city);return;}
+  const day=new Date(date).getDate();
+  const key=`${worker.id}_${day}`;
+  const existing=slotsData[key]||{slotsOrdered:0,slotsFilled:0,workers:[],tasks:0,city};
+  existing.slotsOrdered=(existing.slotsOrdered||0)+qty;
+  existing.city=city;
+  existing.workers=existing.workers&&existing.workers.length>0?existing.workers:[worker];
+  existing.descricao=existing.descricao||(shift?`Turno ${shift}`:'')+(note?' · '+note:'');
+  existing.status=existing.slotsFilled>=existing.slotsOrdered?'full':existing.slotsFilled>0?'partial':'empty';
+  existing.fromUser=true;
+  slotsData[key]=existing;
+  // Сохраняем в localStorage чтобы не потерять при F5
+  try{
+    const userSlots=JSON.parse(localStorage.getItem('jet_user_slots_'+curYear+'_'+curMonth)||'{}');
+    userSlots[key]=existing;
+    localStorage.setItem('jet_user_slots_'+curYear+'_'+curMonth,JSON.stringify(userSlots));
+  }catch(e){console.error('save failed',e);}
+  document.getElementById('newSlotForm').style.display='none';
+  renderWorkers();renderSummary();renderTasks();renderTaskSummary();
+  alert(lang==='ru'?`✅ Слот создан для ${worker.name}`:`✅ Vaga criada para ${worker.name}`);
 }
 function cancelSlot(id){
   orderedSlots=orderedSlots.filter(s=>s.id!==id);
