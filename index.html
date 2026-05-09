@@ -395,6 +395,9 @@ async function fetchBotData(){
       });
     });
 
+    // Добавляем локальных MEI из localStorage
+    loadLocalMeis();
+
     // Города без работников остаются пустыми (без placeholders)
 
     // === ПОЛНАЯ ЗАМЕНА slotsData из Sheet ===
@@ -733,5 +736,152 @@ async function init(){
 applyTheme();
 if(sessionStorage.getItem(SESSION_KEY)==='1'){document.getElementById('authOverlay').style.display='none';init();}
 </script>
+
+<!-- Форма добавления MEI -->
+<div id="addMeiModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:9999;align-items:center;justify-content:center;padding:16px">
+  <div style="background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:20px;max-width:420px;width:100%;max-height:90vh;overflow:auto">
+    <h3 style="margin:0 0 16px;color:var(--accent1)" id="addMeiTitle">+ Новый MEI работник</h3>
+
+    <label class="form-label" id="lbl_mei_city">Город</label>
+    <select id="meiCity" class="form-input" style="margin-bottom:12px">
+    </select>
+
+    <label class="form-label" id="lbl_mei_name">Имя</label>
+    <input id="meiName" class="form-input" placeholder="João Silva" style="margin-bottom:12px"/>
+
+    <label class="form-label" id="lbl_mei_tag">@telegram username (без @)</label>
+    <input id="meiTag" class="form-input" placeholder="joao_silva" style="margin-bottom:12px"/>
+
+    <label class="form-label" id="lbl_mei_cnpj">CNPJ (опционально)</label>
+    <input id="meiCnpj" class="form-input" placeholder="12.345.678/0001-90" style="margin-bottom:12px"/>
+
+    <label class="form-label" id="lbl_mei_role">Роль</label>
+    <select id="meiRole" class="form-input" style="margin-bottom:16px">
+      <option value="MEI">MEI (рядовой)</option>
+      <option value="CHARGER">CHARGER (зарядчик)</option>
+      <option value="LOG">LOG (логистика)</option>
+      <option value="SUP">SUP (супервизор)</option>
+      <option value="LID">LID (лидер)</option>
+      <option value="GE">GE (генерал)</option>
+    </select>
+
+    <div style="display:flex;gap:8px">
+      <button onclick="saveMei()" class="ctrl-btn" style="flex:1;background:var(--accent3);color:#000;font-weight:600" id="btn_save_mei">Сохранить</button>
+      <button onclick="closeAddMeiForm()" class="ctrl-btn" style="flex:1" id="btn_cancel_mei">Отмена</button>
+    </div>
+
+    <hr style="margin:20px 0;border-color:var(--border)"/>
+
+    <h4 style="margin:0 0 8px;color:var(--accent1);font-size:14px" id="lbl_local_meis">Локальные MEI (этот браузер)</h4>
+    <div id="localMeisList" style="max-height:200px;overflow:auto;font-size:13px"></div>
+  </div>
+</div>
+
+<script>
+function openAddMeiForm(){
+  // Заполняем выпадашку городов
+  const cityList=document.getElementById('meiCity');
+  cityList.innerHTML=CITIES.map(c=>`<option value="${c}">${c} · ${CITY_NAMES[c]||c}</option>`).join('');
+  // Очищаем поля
+  document.getElementById('meiName').value='';
+  document.getElementById('meiTag').value='';
+  document.getElementById('meiCnpj').value='';
+  document.getElementById('meiRole').value='MEI';
+  // Показываем список локальных MEI
+  renderLocalMeis();
+  document.getElementById('addMeiModal').style.display='flex';
+}
+
+function closeAddMeiForm(){
+  document.getElementById('addMeiModal').style.display='none';
+}
+
+function saveMei(){
+  const city=document.getElementById('meiCity').value;
+  const name=document.getElementById('meiName').value.trim();
+  const tag=document.getElementById('meiTag').value.trim().replace(/^@/,'');
+  const cnpj=document.getElementById('meiCnpj').value.trim();
+  const role=document.getElementById('meiRole').value;
+
+  if(!city||!name){alert(lang==='ru'?'Заполните город и имя':'Preencha cidade e nome');return;}
+
+  const meiObj={
+    id:'local_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+    name:name,
+    tag:tag?'@'+tag:'@'+name.toLowerCase().replace(/\s+/g,'_'),
+    cnpj:cnpj,
+    city:city,
+    role:role,
+    status:'active',
+    createdAt:new Date().toISOString(),
+    isLocal:true
+  };
+
+  // Сохраняем в localStorage
+  const stored=JSON.parse(localStorage.getItem('jet_local_meis')||'[]');
+  stored.push(meiObj);
+  localStorage.setItem('jet_local_meis',JSON.stringify(stored));
+
+  // Добавляем в WORKERS немедленно
+  if(!WORKERS[city])WORKERS[city]=[];
+  WORKERS[city].push(meiObj);
+
+  // Очищаем поля для следующего ввода
+  document.getElementById('meiName').value='';
+  document.getElementById('meiTag').value='';
+  document.getElementById('meiCnpj').value='';
+
+  renderLocalMeis();
+  renderWorkers();renderSummary();renderTasks();renderTaskSummary();
+
+  alert(lang==='ru'?`✅ ${name} добавлен в ${city}`:`✅ ${name} adicionado em ${city}`);
+}
+
+function renderLocalMeis(){
+  const stored=JSON.parse(localStorage.getItem('jet_local_meis')||'[]');
+  const list=document.getElementById('localMeisList');
+  if(stored.length===0){
+    list.innerHTML=`<div style="color:var(--muted);padding:8px;text-align:center">${lang==='ru'?'(пусто)':'(vazio)'}</div>`;
+    return;
+  }
+  list.innerHTML=stored.map((m,i)=>`
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-weight:600">${m.name}</div>
+        <div style="color:var(--muted);font-size:11px">${m.city} · ${m.tag} · ${m.role}</div>
+      </div>
+      <button onclick="deleteMei('${m.id}')" style="background:none;border:none;color:var(--accent2);cursor:pointer;padding:4px 8px;font-size:16px">✕</button>
+    </div>
+  `).join('');
+}
+
+function deleteMei(id){
+  if(!confirm(lang==='ru'?'Удалить?':'Excluir?'))return;
+  const stored=JSON.parse(localStorage.getItem('jet_local_meis')||'[]');
+  const filtered=stored.filter(m=>m.id!==id);
+  localStorage.setItem('jet_local_meis',JSON.stringify(filtered));
+  // Убираем из WORKERS
+  CITIES.forEach(c=>{
+    if(WORKERS[c]) WORKERS[c]=WORKERS[c].filter(w=>w.id!==id);
+  });
+  renderLocalMeis();
+  renderWorkers();renderSummary();renderTasks();renderTaskSummary();
+}
+
+function loadLocalMeis(){
+  // Вызывается из fetchBotData — добавляет локальных MEI к загруженным из Sheet
+  const stored=JSON.parse(localStorage.getItem('jet_local_meis')||'[]');
+  stored.forEach(m=>{
+    const city=m.city;
+    if(!CITIES.includes(city))return;
+    if(!WORKERS[city])WORKERS[city]=[];
+    // Не дублируем
+    if(!WORKERS[city].find(w=>w.id===m.id)){
+      WORKERS[city].push(m);
+    }
+  });
+}
+</script>
+
 </body>
 </html>
