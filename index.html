@@ -269,6 +269,8 @@ const WORKERS={
 };
 const ROLE_COLOR={SUP:'#00e5ff',LID:'#ffa502',AUX:'#a78bfa',MEI:'#6b7a99'};
 const API_BASE='https://jet-mei-bot-production.up.railway.app';
+const API_KEY='jet2026panel';
+// FORUM_CHAT removed — using REST API now
 
 let slotsData={};
 let orderedSlots=JSON.parse(localStorage.getItem('jet_ordered_slots')||'[]');
@@ -343,7 +345,7 @@ async function fetchBotData(){
   document.getElementById('statusDot').style.background='var(--accent4)';
   try{
     const SID="1rNDJDRO-a2Q9sbWoW8DUcoZyZ7JddteoDwf843f4hVI";
-    const sheetUrl=t=>`https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:csv&sheet=${t}`;
+    const sheetUrl=tab=>`https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:csv&sheet=${tab}&_=${Date.now()}`;
 
     const [slotsResp,workersResp,tasksResp]=await Promise.all([
       fetch(sheetUrl("slots"),{cache:"no-store"}),
@@ -355,7 +357,8 @@ async function fetchBotData(){
 
     const parseCsv=text=>{
       const lines=text.trim().split("\n");
-      const headers=lines[0].split(",").map(h=>h.replace(/^"|"$/g,""));
+      if(lines.length<2)return [];
+      const headers=lines[0].split(",").map(h=>h.replace(/^"|"$/g,"").trim());
       return lines.slice(1).map(line=>{
         const values=[];let cur="",inQ=false;
         for(let i=0;i<line.length;i++){
@@ -375,121 +378,115 @@ async function fetchBotData(){
     const workersRows=parseCsv(await workersResp.text());
     const tasksRows=parseCsv(await tasksResp.text());
 
-    // Обновляем WORKERS из Sheet
-    if(workersRows.length>0){
-      mergeRealWorkers(workersRows);
-    }
+    // === ПОЛНАЯ ЗАМЕНА WORKERS из Sheet ===
+    // Очищаем все города, оставляем только то что в Sheet
+    CITIES.forEach(c=>{ WORKERS[c]=[]; });
 
-    // Строим slotsData
-    const newSlots={};
+    workersRows.forEach(w=>{
+      const city=w.city;
+      if(!city||city==="ALL"||!CITIES.includes(city))return;
+      const tag=w.tg_username?'@'+w.tg_username:`@worker_${w.worker_id}`;
+      WORKERS[city].push({
+        id:`db_${w.worker_id||w.tg_id||w.tg_username}`,
+        name:w.name||tag,
+        tag:tag,
+        role:w.role||'MEI',
+        tg_id:w.tg_id
+      });
+    });
+
+    // Если в каком-то городе нет работников — добавим placeholder
+    CITIES.forEach(c=>{
+      if(WORKERS[c].length===0){
+        WORKERS[c].push({id:`stub_${c}`,name:`(нет данных)`,tag:`@${c.toLowerCase()}_team`,role:'—'});
+      }
+    });
+
+    // === ПОЛНАЯ ЗАМЕНА slotsData из Sheet ===
+    slotsData={};
+
+    // Группируем слоты по городу+дню для распределения по работникам
+    const slotsByCityDay={};
     slotsRows.forEach(s=>{
       if(!s.date)return;
-      const dateParts=s.date.split("-");
-      if(dateParts.length<3)return;
-      const yr=parseInt(dateParts[0]),mo=parseInt(dateParts[1])-1,day=parseInt(dateParts[2]);
+      const dp=s.date.split("-");
+      if(dp.length<3)return;
+      const yr=parseInt(dp[0]),mo=parseInt(dp[1])-1,day=parseInt(dp[2]);
       if(yr!==curYear||mo!==curMonth)return;
-
       const city=s.city;
       if(!CITIES.includes(city))return;
+      const key=`${city}_${day}`;
+      if(!slotsByCityDay[key])slotsByCityDay[key]=[];
+      slotsByCityDay[key].push(s);
+    });
 
-      const filled=parseInt(s.filled_count||0);
-      const ordered=parseInt(s.vagas_total||1);
-      const status=filled>=ordered?'full':filled>0?'partial':'empty';
-
+    // Распределяем слоты по работникам города
+    Object.entries(slotsByCityDay).forEach(([cityDayKey,citySlots])=>{
+      const [city,dayStr]=cityDayKey.split("_");
+      const day=parseInt(dayStr);
       const cityWorkers=WORKERS[city]||[];
-      const wid=cityWorkers.length>0?cityWorkers[0].id:`slot_${s.slot_id}`;
-      const key=`${wid}_${day}`;
-      newSlots[key]={
-        status,slotsOrdered:ordered,slotsFilled:filled,
-        workers:filled>0&&cityWorkers.length>0?[cityWorkers[0]]:[],
-        tasks:0,city,fromBot:true,slotId:s.slot_id,
-        descricao:s.descricao,turnoCode:s.turno_code
-      };
+
+      citySlots.forEach((s,idx)=>{
+        // Привязываем к работнику по индексу (1-й слот → 1-й работник, итд)
+        const worker=cityWorkers[idx % cityWorkers.length];
+        if(!worker)return;
+        const filled=parseInt(s.filled_count||0);
+        const ordered=parseInt(s.vagas_total||1);
+        const status=filled>=ordered?'full':filled>0?'partial':'empty';
+        const key=`${worker.id}_${day}`;
+
+        // Если ячейка уже занята — суммируем
+        if(slotsData[key]){
+          slotsData[key].slotsOrdered+=ordered;
+          slotsData[key].slotsFilled+=filled;
+        } else {
+          slotsData[key]={
+            status,slotsOrdered:ordered,slotsFilled:filled,
+            workers:filled>0?[worker]:[],
+            tasks:0,city,fromBot:true,
+            slotId:s.slot_id,descricao:s.descricao,turnoCode:s.turno_code
+          };
+        }
+      });
     });
 
     // Накладываем задачи
     tasksRows.forEach(t=>{
       if(!t.date)return;
-      const dateParts=t.date.split("-");
-      if(dateParts.length<3)return;
-      const yr=parseInt(dateParts[0]),mo=parseInt(dateParts[1])-1,day=parseInt(dateParts[2]);
+      const dp=t.date.split("-");
+      if(dp.length<3)return;
+      const yr=parseInt(dp[0]),mo=parseInt(dp[1])-1,day=parseInt(dp[2]);
       if(yr!==curYear||mo!==curMonth)return;
-
       const city=t.city;
       if(!CITIES.includes(city))return;
       const cityWorkers=WORKERS[city]||[];
-      const w=cityWorkers[0];
+      // Ищем worker по имени, если не нашли — берём первого
+      let w=cityWorkers.find(cw=>cw.name===t.worker_name);
+      if(!w)w=cityWorkers[0];
       if(!w)return;
       const key=`${w.id}_${day}`;
       const cnt=parseInt(t.task_count||0);
-      if(newSlots[key]) newSlots[key].tasks+=cnt;
-      else newSlots[key]={status:'full',slotsOrdered:1,slotsFilled:1,workers:[w],tasks:cnt,city,fromBot:true};
+      if(slotsData[key]) slotsData[key].tasks+=cnt;
+      else slotsData[key]={status:'full',slotsOrdered:1,slotsFilled:1,workers:[w],tasks:cnt,city,fromBot:true};
     });
 
-    // Merge с базой
-    slotsData={...generateStableSlots(curYear,curMonth),...newSlots};
-
     const now=new Date();
-    document.getElementById('statusText').textContent=`✅ LIVE Sheets · ${now.toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · ${slotsRows.length} слотов · ${workersRows.length} раб.`;
+    document.getElementById('statusText').textContent=`✅ LIVE Google Sheet · ${now.toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · ${slotsRows.length} слотов · ${workersRows.length} раб.`;
     document.getElementById('statusDot').style.background='var(--accent3)';
   }catch(err){
     console.error('Sheet error:',err);
     document.getElementById('statusText').textContent=`${t('status_err')}: ${err.message}`;
     document.getElementById('statusDot').style.background='var(--accent2)';
-    slotsData=generateStableSlots(curYear,curMonth);
+    // НЕ откатываемся к моку — оставляем последнее загруженное состояние
   }finally{
     btn.classList.remove('loading');btn.textContent='⟳ Sync';
   }
   renderWorkers();renderSummary();renderTasks();renderTaskSummary();
 }
 
-function mergeRealWorkers(apiWorkers){
-  apiWorkers.forEach(w=>{
-    const city=w.city;
-    if(!city||city==="ALL"||!WORKERS[city])return;
-    const tag=w.tg_username?'@'+w.tg_username:null;
-    if(!tag)return;
-    const exists=WORKERS[city].find(x=>x.tag&&x.tag.toLowerCase()===tag.toLowerCase());
-    if(!exists){
-      WORKERS[city].push({
-        id:`db_${w.worker_id||w.tg_id||tag}`,
-        name:w.name||tag,
-        tag:tag,
-        role:w.role||'MEI',
-        tg_id:w.tg_id
-      });
-    } else if(w.tg_id) {
-      exists.tg_id=w.tg_id;
-    }
-  });
-}
 
-function mergeRealWorkers(apiWorkers){
-  // Добавляем реальных MEI из БД в WORKERS если их ещё нет
-  apiWorkers.forEach(w => {
-    const city = w.cidade;
-    if(!city || !WORKERS[city]) return;
-    const tag = w.tg_username ? '@'+w.tg_username : null;
-    if(!tag) return;
-    const exists = WORKERS[city].find(x => x.tag && x.tag.toLowerCase()===tag.toLowerCase());
-    if(!exists){
-      WORKERS[city].push({
-        id: `db_${w.id}`,
-        name: w.nome || tag,
-        tag: tag,
-        role: 'MEI',
-        tg_id: w.tg_id
-      });
-    } else {
-      // Обновляем tg_id если не было
-      exists.tg_id = w.tg_id;
-    }
-  });
-}
 async function syncData(){
   // При ручном sync — сбрасываем кеш текущего месяца и перегенерируем
-  localStorage.removeItem(`jet_slots_${curYear}_${curMonth}`);
-  slotsData=generateStableSlots(curYear,curMonth);
   await fetchBotData();
 }
 
@@ -504,11 +501,11 @@ function switchTab(tab){
 // ── MONTH NAV ────────────────────────────────────────
 document.getElementById('prevMonth').addEventListener('click',()=>{
   curMonth--;if(curMonth<0){curMonth=11;curYear--;}
-  slotsData=generateStableSlots(curYear,curMonth);render();
+  slotsData={};render();fetchBotData();
 });
 document.getElementById('nextMonth').addEventListener('click',()=>{
   curMonth++;if(curMonth>11){curMonth=0;curYear++;}
-  slotsData=generateStableSlots(curYear,curMonth);render();
+  slotsData={};render();fetchBotData();
 });
 
 function render(){
@@ -712,7 +709,8 @@ function hideTT(){document.getElementById('tooltip').classList.remove('visible')
 async function init(){
   applyTheme();applyLang();
   // Загружаем стабильные данные (из кеша или генерируем один раз)
-  slotsData=generateStableSlots(curYear,curMonth);
+  // Показываем пустой каркас, потом заполняем из Sheet
+  slotsData={};
   render();
   await fetchBotData();
   setInterval(fetchBotData,5*60*1000);
