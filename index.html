@@ -117,6 +117,13 @@
   ::-webkit-scrollbar-track{background:var(--bg)}
   ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
   @media(max-width:700px){.summary{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}.tab{padding:10px 12px;font-size:11px}}
+
+.act-badge{display:inline-block;padding:1px 5px;margin-left:6px;border-radius:8px;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;vertical-align:middle}
+.act-BAT{background:#ffd54f;color:#3e2723}
+.act-MOV{background:#81d4fa;color:#01579b}
+.act-NA{background:#cccccc;color:#333}
+[data-theme="dark"] .act-BAT{background:#ff8f00;color:#fffde7}
+[data-theme="dark"] .act-MOV{background:#0277bd;color:#e1f5fe}
 </style>
 </head>
 <body>
@@ -625,7 +632,9 @@ function renderWorkers(){
     html+=`<tr class="city-row"><td class="city-label">${city} · ${CITY_NAMES[city]}</td>${Array(dim).fill('<td class="city-spacer"></td>').join('')}</tr>`;
     workers.forEach(w=>{
       const rc=ROLE_COLOR[w.role]||'#6b7a99';
-      html+=`<tr><td class="worker-name-cell col-name"><span style="color:${rc};font-size:8px;font-family:'Space Mono',monospace;margin-right:3px">${w.role}</span>${w.name}</td>`;
+      const act7=(typeof actionsLastDays==='function')?actionsLastDays(w.name,7):{total:0,type:null};
+      const actBadge=act7.total>0?`<span class="act-badge act-${act7.type||'NA'}" title="Действий за 7 дней: ${act7.total}, всего за месяц: ${act7.totalMonth||0}">${act7.type||''} ${act7.total}</span>`:'';
+      html+=`<tr><td class="worker-name-cell col-name"><span style="color:${rc};font-size:8px;font-family:\'Space Mono\',monospace;margin-right:3px">${w.role}</span>${w.name} ${actBadge}</td>`;
       for(let d=1;d<=dim;d++){
         const key=`${w.id}_${d}`;
         const slot=slotsData[key];
@@ -670,7 +679,9 @@ function renderTasks(){
     html+=`<tr class="city-row"><td class="city-label">${city} · ${CITY_NAMES[city]}</td>${Array(dim).fill('<td class="city-spacer"></td>').join('')}</tr>`;
     workers.forEach(w=>{
       const rc=ROLE_COLOR[w.role]||'#6b7a99';
-      html+=`<tr><td class="worker-name-cell col-name"><span style="color:${rc};font-size:8px;font-family:'Space Mono',monospace;margin-right:3px">${w.role}</span>${w.name}</td>`;
+      const act7=(typeof actionsLastDays==='function')?actionsLastDays(w.name,7):{total:0,type:null};
+      const actBadge=act7.total>0?`<span class="act-badge act-${act7.type||'NA'}" title="Действий за 7 дней: ${act7.total}, всего за месяц: ${act7.totalMonth||0}">${act7.type||''} ${act7.total}</span>`:'';
+      html+=`<tr><td class="worker-name-cell col-name"><span style="color:${rc};font-size:8px;font-family:\'Space Mono\',monospace;margin-right:3px">${w.role}</span>${w.name} ${actBadge}</td>`;
       for(let d=1;d<=dim;d++){
         const slot=slotsData[`${w.id}_${d}`];
         const tasks=slot?slot.tasks:0;
