@@ -679,19 +679,49 @@ function renderTasks(){
     html+=`<tr class="city-row"><td class="city-label">${city} · ${CITY_NAMES[city]}</td>${Array(dim).fill('<td class="city-spacer"></td>').join('')}</tr>`;
     workers.forEach(w=>{
       const rc=ROLE_COLOR[w.role]||'#6b7a99';
-      const act7=(typeof actionsLastDays==='function')?actionsLastDays(w.name,7):{total:0,type:null};
-      const actBadge=act7.total>0?`<span class="act-badge act-${act7.type||'NA'}" title="Действий за 7 дней: ${act7.total}, всего за месяц: ${act7.totalMonth||0}">${act7.type||''} ${act7.total}</span>`:'';
-      html+=`<tr><td class="worker-name-cell col-name"><span style="color:${rc};font-size:8px;font-family:\'Space Mono\',monospace;margin-right:3px">${w.role}</span>${w.name} ${actBadge}</td>`;
+
+      // Тянем действия MEI из daily_actions (BAT/MOV по дням)
+      const meiRec=(typeof findActionsForMei==='function')?findActionsForMei(w.name):null;
+      const actType=meiRec?meiRec.action_type:null;  // 'BAT' | 'MOV' | null
+      const act7=(typeof actionsLastDays==='function')?actionsLastDays(w.name,7):{total:0,type:actType,totalMonth:0};
+      const badgeHTML=meiRec?
+        `<span class="act-badge act-${actType}" title="За 7 дней: ${act7.total} · за месяц: ${act7.totalMonth||0}">${actType} ${act7.total}</span>`:
+        '';
+
+      html+=`<tr><td class="worker-name-cell col-name"><span style="color:${rc};font-size:8px;font-family:\'Space Mono\',monospace;margin-right:3px">${w.role}</span>${w.name} ${badgeHTML}</td>`;
       for(let d=1;d<=dim;d++){
-        const slot=slotsData[`${w.id}_${d}`];
-        const tasks=slot?slot.tasks:0;
-        if(!slot||tasks===0){html+=`<td class="task-cell task-none-cell"></td>`;}
-        else{
-          const intensity=Math.min(tasks,20);
-          const h2=Math.round(120-(intensity/20)*120);
-          const bg=`hsl(${h2},60%,${isLight?'85%':'20%'})`;
-          const brd=`hsl(${h2},70%,45%)`;
-          html+=`<td class="task-cell" style="background:${bg};border:1px solid ${brd};color:${brd}" data-key="${w.id}_${d}" data-day="${d}" data-wname="${w.name}" data-city="${city}" onmouseenter="showTT(event,this,'t')" onmouseleave="hideTT()">${tasks}</td>`;
+        // Берём действия из daily_actions по дате
+        const dateStr=`${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        let dayActions=0,nightActions=0,totalActions=0;
+        if(meiRec&&meiRec.daily&&meiRec.daily[dateStr]){
+          dayActions=meiRec.daily[dateStr].day||0;
+          nightActions=meiRec.daily[dateStr].night||0;
+          totalActions=meiRec.daily[dateStr].total||0;
+        }
+
+        if(totalActions===0){
+          // Если не из таблицы, fallback на slot.tasks из бота
+          const slot=slotsData[`${w.id}_${d}`];
+          const botTasks=slot?slot.tasks:0;
+          if(!slot||botTasks===0){html+=`<td class="task-cell task-none-cell"></td>`;}
+          else{
+            const intensity=Math.min(botTasks,20);
+            const h2=Math.round(120-(intensity/20)*120);
+            const bg=`hsl(${h2},60%,${isLight?'85%':'20%'})`;
+            const brd=`hsl(${h2},70%,45%)`;
+            html+=`<td class="task-cell" style="background:${bg};border:1px solid ${brd};color:${brd}" data-day="${d}" data-wname="${w.name}" data-city="${city}" data-tasks="${botTasks}" data-type="bot" onmouseenter="showTT(event,this,'t')" onmouseleave="hideTT()">${botTasks}</td>`;
+          }
+        } else {
+          // Из таблицы — цвет зависит от типа (жёлтый BAT, голубой MOV)
+          const isBat=actType==='BAT';
+          const baseHue=isBat?45:200;  // 45=жёлтый, 200=голубой
+          const intensity=Math.min(totalActions/80,1);  // нормализация по 80 действий
+          const lightness=isLight?(90-intensity*40):(15+intensity*30);
+          const saturation=50+intensity*40;
+          const bg=`hsl(${baseHue},${saturation}%,${lightness}%)`;
+          const brd=`hsl(${baseHue},80%,${isLight?'40%':'55%'})`;
+          const fg=isLight?(intensity>0.5?'#fff':'#222'):(intensity>0.4?'#fff':'#aaa');
+          html+=`<td class="task-cell" style="background:${bg};border:1px solid ${brd};color:${fg};font-weight:600" data-day="${d}" data-wname="${w.name}" data-city="${city}" data-tasks="${totalActions}" data-day-cnt="${dayActions}" data-night-cnt="${nightActions}" data-type="${actType}" onmouseenter="showTaskTT(event,this)" onmouseleave="hideTT()">${totalActions}</td>`;
         }
       }
       html+='</tr>';
@@ -700,6 +730,22 @@ function renderTasks(){
   });
   document.getElementById('calTasks').innerHTML=html+'</tbody>';
 }
+
+// Tooltip для ячейки задач с разбивкой день/ночь
+function showTaskTT(e,cell){
+  const d=cell.dataset.day,nm=cell.dataset.wname,ct=cell.dataset.city;
+  const day=cell.dataset.dayCnt||0,night=cell.dataset.nightCnt||0,total=cell.dataset.tasks||0;
+  const type=cell.dataset.type;
+  const typeLabel=type==='BAT'?(lang==='ru'?'🔋 Замены батарей':'🔋 Trocas de bateria'):(lang==='ru'?'🚛 Перемещения':'🚛 Movimentações');
+  const tt=document.getElementById('tooltip');
+  if(!tt)return;
+  tt.innerHTML=`<b>${nm}</b> · ${ct}<br>${typeLabel}<br>${(lang==='ru'?'День':'Dia')}: ${day}<br>${(lang==='ru'?'Ночь':'Noite')}: ${night}<br><b>${(lang==='ru'?'Всего':'Total')}: ${total}</b><br><span style="opacity:.6;font-size:10px">${d} ${(lang==='ru'?'число':'do mês')}</span>`;
+  tt.style.display='block';
+  const rect=cell.getBoundingClientRect();
+  tt.style.left=(rect.left+window.scrollX)+'px';
+  tt.style.top=(rect.bottom+window.scrollY+4)+'px';
+}
+
 
 function renderTaskSummary(){
   const dim=new Date(curYear,curMonth+1,0).getDate();
