@@ -344,144 +344,180 @@ async function fetchBotData(){
   btn.classList.add('loading');btn.textContent='⟳ ...';
   document.getElementById('statusDot').style.background='var(--accent4)';
   try{
-    const SID="1rNDJDRO-a2Q9sbWoW8DUcoZyZ7JddteoDwf843f4hVI";
-    const sheetUrl=tab=>`https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:csv&sheet=${tab}&_=${Date.now()}`;
+    // Источник 1: GitHub Gist (бот пишет туда каждые 5 мин из БД)
+    const GIST_USER="12danielmik1991-ops";
+    const GIST_ID="54c012a98e6d8f34986afca9d76f3539";
+    const ts=Date.now();
+    const gistUrl=f=>`https://gist.githubusercontent.com/${GIST_USER}/${GIST_ID}/raw/${f}?_=${ts}`;
 
-    const [slotsResp,workersResp,tasksResp]=await Promise.all([
-      fetch(sheetUrl("slots"),{cache:"no-store"}),
-      fetch(sheetUrl("workers"),{cache:"no-store"}),
-      fetch(sheetUrl("tasks"),{cache:"no-store"})
-    ]);
+    let workersRaw=[],slotsRaw=[],tasksRaw=[];
+    let source="gist",updatedAt=null;
 
-    if(!slotsResp.ok) throw new Error("Sheet "+slotsResp.status);
+    try {
+      const [wResp,sResp,tResp]=await Promise.all([
+        fetch(gistUrl("workers.json"),{cache:"no-store"}),
+        fetch(gistUrl("slots.json"),{cache:"no-store"}),
+        fetch(gistUrl("tasks.json"),{cache:"no-store"})
+      ]);
+      if(wResp.ok){
+        const wJson=await wResp.json();
+        workersRaw=wJson.workers||[];
+        if(wJson.updated_at)updatedAt=wJson.updated_at;
+      }
+      if(sResp.ok){
+        const sJson=await sResp.json();
+        slotsRaw=sJson.slots||[];
+      }
+      if(tResp.ok){
+        const tJson=await tResp.json();
+        tasksRaw=tJson.tasks||[];
+      }
+    } catch(e){
+      console.warn("Gist failed, falling back to Sheet:",e);
+      source="sheet";
+    }
 
-    const parseCsv=text=>{
-      const lines=text.trim().split("\n");
-      if(lines.length<2)return [];
-      const headers=lines[0].split(",").map(h=>h.replace(/^"|"$/g,"").trim());
-      return lines.slice(1).map(line=>{
-        const values=[];let cur="",inQ=false;
-        for(let i=0;i<line.length;i++){
-          const c=line[i];
-          if(c==='"'){inQ=!inQ;continue;}
-          if(c===","&&!inQ){values.push(cur);cur="";continue;}
-          cur+=c;
-        }
-        values.push(cur);
-        const obj={};
-        headers.forEach((h,i)=>{obj[h]=(values[i]||"").trim();});
-        return obj;
-      });
-    };
+    // Если Gist пустой — fallback на Google Sheet
+    if(workersRaw.length===0&&slotsRaw.length===0){
+      source="sheet";
+      const SID="1rNDJDRO-a2Q9sbWoW8DUcoZyZ7JddteoDwf843f4hVI";
+      const sheetUrl=tab=>`https://docs.google.com/spreadsheets/d/${SID}/gviz/tq?tqx=out:csv&sheet=${tab}&_=${ts}`;
+      const parseCsv=text=>{
+        const lines=text.trim().split("\n");
+        if(lines.length<2)return [];
+        const headers=lines[0].split(",").map(h=>h.replace(/^"|"$/g,"").trim());
+        return lines.slice(1).map(line=>{
+          const values=[];let cur="",inQ=false;
+          for(let i=0;i<line.length;i++){
+            const c=line[i];
+            if(c==='"'){inQ=!inQ;continue;}
+            if(c===","&&!inQ){values.push(cur);cur="";continue;}
+            cur+=c;
+          }
+          values.push(cur);
+          const obj={};headers.forEach((h,i)=>{obj[h]=(values[i]||"").trim();});
+          return obj;
+        });
+      };
+      const [sR,wR,tR]=await Promise.all([
+        fetch(sheetUrl("slots"),{cache:"no-store"}),
+        fetch(sheetUrl("workers"),{cache:"no-store"}),
+        fetch(sheetUrl("tasks"),{cache:"no-store"})
+      ]);
+      if(sR.ok)slotsRaw=parseCsv(await sR.text());
+      if(wR.ok)workersRaw=parseCsv(await wR.text());
+      if(tR.ok)tasksRaw=parseCsv(await tR.text());
+    }
 
-    const slotsRows=parseCsv(await slotsResp.text());
-    const workersRows=parseCsv(await workersResp.text());
-    const tasksRows=parseCsv(await tasksResp.text());
+    // === Очищаем WORKERS и заполняем из источника ===
+    CITIES.forEach(c=>{WORKERS[c]=[];});
 
-    // === ПОЛНАЯ ЗАМЕНА WORKERS из Sheet ===
-    // Очищаем все города, оставляем только то что в Sheet
-    CITIES.forEach(c=>{ WORKERS[c]=[]; });
+    workersRaw.forEach(w=>{
+      // gist формат: {nome, cidade, tg_username, ...}
+      // sheet формат: {name, city, tg_username, ...}
+      const name=w.nome||w.name;
+      const city=w.cidade||w.city;
+      const tg_username=w.tg_username;
+      const role=w.role||(w.cnpj?'MEI':'MEI');
 
-    workersRows.forEach(w=>{
-      const city=w.city;
       if(!city||city==="ALL"||!CITIES.includes(city))return;
-      const tag=w.tg_username?'@'+w.tg_username:`@worker_${w.worker_id}`;
+      const tag=tg_username?'@'+tg_username:`@${name||'worker'}`.toLowerCase().replace(/\s+/g,'_');
       WORKERS[city].push({
-        id:`db_${w.worker_id||w.tg_id||w.tg_username}`,
-        name:w.name||tag,
+        id:`db_${w.id||w.worker_id||tg_username||name}`,
+        name:name||tag,
         tag:tag,
-        role:w.role||'MEI',
+        role:role,
+        cnpj:w.cnpj||'',
         tg_id:w.tg_id
       });
     });
 
-    // Добавляем локальных MEI из localStorage
-    loadLocalMeis();
+    // Локальные MEI из браузера
+    if(typeof loadLocalMeis==='function')loadLocalMeis();
 
-    // Города без работников остаются пустыми (без placeholders)
-
-    // === ПОЛНАЯ ЗАМЕНА slotsData из Sheet ===
+    // === Очищаем slotsData и распределяем слоты ===
     slotsData={};
-
-    // Группируем слоты по городу+дню для распределения по работникам
     const slotsByCityDay={};
-    slotsRows.forEach(s=>{
-      if(!s.date)return;
-      const dp=s.date.split("-");
+    slotsRaw.forEach(s=>{
+      const dateStr=s.data||s.date;
+      if(!dateStr)return;
+      const dp=String(dateStr).slice(0,10).split("-");
       if(dp.length<3)return;
       const yr=parseInt(dp[0]),mo=parseInt(dp[1])-1,day=parseInt(dp[2]);
       if(yr!==curYear||mo!==curMonth)return;
-      const city=s.city;
+      const city=s.cidade||s.city;
       if(!CITIES.includes(city))return;
       const key=`${city}_${day}`;
       if(!slotsByCityDay[key])slotsByCityDay[key]=[];
       slotsByCityDay[key].push(s);
     });
 
-    // Распределяем слоты по работникам города
     Object.entries(slotsByCityDay).forEach(([cityDayKey,citySlots])=>{
       const [city,dayStr]=cityDayKey.split("_");
       const day=parseInt(dayStr);
       const cityWorkers=WORKERS[city]||[];
-
       citySlots.forEach((s,idx)=>{
-        // Привязываем к работнику по индексу (1-й слот → 1-й работник, итд)
-        const worker=cityWorkers[idx % cityWorkers.length];
+        const worker=cityWorkers[idx % Math.max(cityWorkers.length,1)];
         if(!worker)return;
         const filled=parseInt(s.filled_count||0);
         const ordered=parseInt(s.vagas_total||1);
         const status=filled>=ordered?'full':filled>0?'partial':'empty';
         const key=`${worker.id}_${day}`;
-
-        // Если ячейка уже занята — суммируем
         if(slotsData[key]){
           slotsData[key].slotsOrdered+=ordered;
           slotsData[key].slotsFilled+=filled;
-        } else {
+        }else{
           slotsData[key]={
             status,slotsOrdered:ordered,slotsFilled:filled,
             workers:filled>0?[worker]:[],
             tasks:0,city,fromBot:true,
-            slotId:s.slot_id,descricao:s.descricao,turnoCode:s.turno_code
+            slotId:s.id||s.slot_id,descricao:s.descricao,turnoCode:s.turno_code
           };
         }
       });
     });
 
     // Накладываем задачи
-    tasksRows.forEach(t=>{
-      if(!t.date)return;
-      const dp=t.date.split("-");
+    tasksRaw.forEach(t=>{
+      const dateStr=t.date;
+      if(!dateStr)return;
+      const dp=String(dateStr).slice(0,10).split("-");
       if(dp.length<3)return;
       const yr=parseInt(dp[0]),mo=parseInt(dp[1])-1,day=parseInt(dp[2]);
       if(yr!==curYear||mo!==curMonth)return;
-      const city=t.city;
+      const city=t.cidade||t.city;
       if(!CITIES.includes(city))return;
       const cityWorkers=WORKERS[city]||[];
-      // Ищем worker по имени, если не нашли — берём первого
-      let w=cityWorkers.find(cw=>cw.name===t.worker_name);
+      const tg=t.tg_username;
+      let w=cityWorkers.find(cw=>cw.tag&&cw.tag.toLowerCase()===('@'+(tg||'').toLowerCase()));
       if(!w)w=cityWorkers[0];
       if(!w)return;
       const key=`${w.id}_${day}`;
       const cnt=parseInt(t.task_count||0);
-      if(slotsData[key]) slotsData[key].tasks+=cnt;
+      if(slotsData[key])slotsData[key].tasks+=cnt;
       else slotsData[key]={status:'full',slotsOrdered:1,slotsFilled:1,workers:[w],tasks:cnt,city,fromBot:true};
     });
 
+    // Пользовательские слоты из localStorage
+    try{
+      const userSlots=JSON.parse(localStorage.getItem('jet_user_slots_'+curYear+'_'+curMonth)||'{}');
+      Object.entries(userSlots).forEach(([k,v])=>{slotsData[k]=v;});
+    }catch(e){}
+
     const now=new Date();
-    document.getElementById('statusText').textContent=`✅ LIVE Google Sheet · ${now.toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · ${slotsRows.length} слотов · ${workersRows.length} раб.`;
+    const srcLabel=source==="gist"?"🔥 Bot LIVE":"📊 Sheet";
+    const ageMin=updatedAt?Math.round((Date.now()-new Date(updatedAt).getTime())/60000):"?";
+    document.getElementById('statusText').textContent=`${srcLabel} · ${now.toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · ${slotsRaw.length}сл/${workersRaw.length}р · upd ${ageMin}мин`;
     document.getElementById('statusDot').style.background='var(--accent3)';
   }catch(err){
-    console.error('Sheet error:',err);
+    console.error('Fetch error:',err);
     document.getElementById('statusText').textContent=`${t('status_err')}: ${err.message}`;
     document.getElementById('statusDot').style.background='var(--accent2)';
-    // НЕ откатываемся к моку — оставляем последнее загруженное состояние
   }finally{
     btn.classList.remove('loading');btn.textContent='⟳ Sync';
   }
   renderWorkers();renderSummary();renderTasks();renderTaskSummary();
 }
-
 
 async function syncData(){
   // При ручном sync — сбрасываем кеш текущего месяца и перегенерируем
@@ -731,7 +767,7 @@ async function init(){
   slotsData={};
   render();
   await fetchBotData();
-  setInterval(fetchBotData,5*60*1000);
+  setInterval(fetchBotData,60*1000);  // poll Gist every 1 min
 }
 applyTheme();
 if(sessionStorage.getItem(SESSION_KEY)==='1'){document.getElementById('authOverlay').style.display='none';init();}
