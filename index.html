@@ -715,7 +715,7 @@ function renderTasks(){
           const bg=`hsl(${baseHue},${saturation}%,${lightness}%)`;
           const brd=`hsl(${baseHue},80%,${isLight?'40%':'55%'})`;
           const fg=isLight?(intensity>0.5?'#fff':'#222'):(intensity>0.4?'#fff':'#aaa');
-          html+=`<td class="task-cell" style="background:${bg};border:1px solid ${brd};color:${fg};font-weight:600" data-day="${d}" data-wname="${w.name}" data-wtag="${w.tag||''}" data-city="${city}" data-tasks="${totalA}" data-day-cnt="${dayA}" data-night-cnt="${nightA}" data-type="${actType}" onmouseenter="showTaskTT(event,this)" onmouseleave="hideTT()">${totalA}</td>`;
+          html+=`<td class="task-cell" style="background:${bg};border:1px solid ${brd};color:${fg};font-weight:600" data-day="${d}" data-wname="${w.name}" data-city="${city}" data-tasks="${totalA}" data-day-cnt="${dayA}" data-night-cnt="${nightA}" data-type="${actType}" onmouseenter="showTaskTT(event,this)" onmouseleave="hideTT()">${totalA}</td>`;
         }
       }
       html+='</tr>';
@@ -915,41 +915,6 @@ window.updatedAtGlobal=null;
 
 <script>
 // === DAILY ACTIONS из таблицы ЦД ===
-
-// Маппинг турносов из БД
-const TURNO_LABELS={
-  'T0':{label:'🌃 23:00–07:00',short:'T0'},
-  'T1':{label:'☀️ 07:00–15:00',short:'T1'},
-  'T2':{label:'🌆 15:00–23:00',short:'T2'},
-  'Livre':{label:'🆓 Livre',short:'Livre'}
-};
-
-// Находим турно слота для MEI в конкретный день
-function getTurnoForMei(tgUsername,meiName,dateIso){
-  if(typeof liveOffers==='undefined'||!liveOffers||liveOffers.length===0)return null;
-  // По tg_username (точнее всего)
-  const tgClean=(tgUsername||'').replace(/^@/,'').toLowerCase();
-  const nameUpper=(meiName||'').toUpperCase();
-  for(const o of liveOffers){
-    const ou=(o.tg_username||'').toLowerCase();
-    const on=(o.nome||'').toUpperCase();
-    const matchTg=tgClean&&ou&&ou===tgClean;
-    // Имя через >=2 общих слов (фамилия+имя)
-    let matchName=false;
-    if(nameUpper&&on){
-      const target=new Set(nameUpper.split(/\s+/).filter(w=>w.length>=3));
-      const cand=new Set(on.split(/\s+/).filter(w=>w.length>=3));
-      let common=0;
-      target.forEach(w=>{if(cand.has(w))common++;});
-      matchName=common>=2;
-    }
-    if((matchTg||matchName)&&o.slot_date===dateIso&&o.turno_code){
-      return o.turno_code;
-    }
-  }
-  return null;
-}
-
 let dailyActions=[];
 
 function normalizeName(s){
@@ -1068,22 +1033,43 @@ function showTaskTT(e,cell){
   if(!tt){
     tt=document.createElement('div');
     tt.id='taskTooltip';
-    tt.style.cssText='position:fixed;z-index:99999;background:var(--surface,#181e2e);border:1px solid var(--border,#1f2a40);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text,#e8edf5);box-shadow:0 4px 16px rgba(0,0,0,.5);pointer-events:none;max-width:240px;display:none';
+    tt.style.cssText='position:fixed;z-index:99999;background:var(--surface,#181e2e);border:1px solid var(--border,#1f2a40);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text,#e8edf5);box-shadow:0 4px 16px rgba(0,0,0,.5);pointer-events:none;max-width:260px;display:none';
     document.body.appendChild(tt);
   }
   const d=cell.dataset.day,nm=cell.dataset.wname,ct=cell.dataset.city;
   const day=cell.dataset.dayCnt||0,night=cell.dataset.nightCnt||0,total=cell.dataset.tasks||0;
   const type=cell.dataset.type;
+  const wTag=cell.dataset.wtag||'';
   const typeLabel=type==='BAT'?(lang==='ru'?'🔋 Замены батарей':'🔋 Trocas de bateria'):(lang==='ru'?'🚛 Перемещения':'🚛 Movimentações');
-  tt.innerHTML=`<b>${nm}</b> · ${ct}<br><span style="color:var(--accent)">${typeLabel}</span><br>${(lang==='ru'?'День':'Dia')}: ${day}<br>${(lang==='ru'?'Ночь':'Noite')}: ${night}<br><b>${(lang==='ru'?'Всего':'Total')}: ${total}</b><br><span style="opacity:.6;font-size:10px">${d} ${(lang==='ru'?'число':'do mês')}</span>`;
+
+  // Ищем какой турно был у MEI в этот день
+  const dateIso=`${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+  let turnoCode=null;
+  if(typeof getTurnoForMei==='function'){
+    turnoCode=getTurnoForMei(wTag,nm,dateIso);
+  }
+
+  let shiftBlock='';
+  if(turnoCode&&typeof TURNO_LABELS!=='undefined'&&TURNO_LABELS[turnoCode]){
+    const tl=TURNO_LABELS[turnoCode];
+    shiftBlock=`<div style="display:flex;justify-content:space-between;gap:12px;padding:4px 0"><span>${tl.label}</span><b style="color:var(--accent)">${total}</b></div>`;
+  } else {
+    // Fallback: разбивка день/ночь из ЦД
+    const lines=[];
+    if(parseInt(day)>0)lines.push(`<div style="display:flex;justify-content:space-between;gap:12px;padding:3px 0"><span>${lang==='ru'?'☀️ День (07-19)':'☀️ Dia (07-19)'}</span><b>${day}</b></div>`);
+    if(parseInt(night)>0)lines.push(`<div style="display:flex;justify-content:space-between;gap:12px;padding:3px 0"><span>${lang==='ru'?'🌙 Ночь (19-07)':'🌙 Noite (19-07)'}</span><b>${night}</b></div>`);
+    shiftBlock=lines.join('');
+  }
+
+  tt.innerHTML=`<b>${nm}</b> · ${ct}<br><span style="color:var(--accent)">${typeLabel}</span><div style="margin:6px 0 0;border-top:1px solid var(--border,#1f2a40);padding-top:6px">${shiftBlock}</div><div style="display:flex;justify-content:space-between;gap:12px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border,#1f2a40)"><b>${(lang==='ru'?'Всего':'Total')}</b><b style="color:var(--accent)">${total}</b></div><span style="opacity:.6;font-size:10px;display:block;margin-top:6px">${d} ${(lang==='ru'?'число':'do mês')}${turnoCode?' · '+turnoCode:''}</span>`;
+
   tt.style.display='block';
   const rect=cell.getBoundingClientRect();
-  // Размещаем умно — если близко к низу экрана, показываем выше
-  const ttH=120;
+  const ttH=180;
   let top=rect.bottom+6;
   if(top+ttH>window.innerHeight)top=rect.top-ttH-6;
   let left=rect.left;
-  if(left+260>window.innerWidth)left=window.innerWidth-260;
+  if(left+270>window.innerWidth)left=window.innerWidth-270;
   tt.style.top=top+'px';
   tt.style.left=left+'px';
 }
