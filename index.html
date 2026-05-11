@@ -1040,11 +1040,18 @@ function showTaskTT(e,cell){
   const day=cell.dataset.dayCnt||0,night=cell.dataset.nightCnt||0,total=cell.dataset.tasks||0;
   const type=cell.dataset.type;
   const typeLabel=type==='BAT'?(lang==='ru'?'🔋 Замены батарей':'🔋 Trocas de bateria'):(lang==='ru'?'🚛 Перемещения':'🚛 Movimentações');
-  tt.innerHTML=`<b>${nm}</b> · ${ct}<br><span style="color:var(--accent)">${typeLabel}</span><br>${(lang==='ru'?'День':'Dia')}: ${day}<br>${(lang==='ru'?'Ночь':'Noite')}: ${night}<br><b>${(lang==='ru'?'Всего':'Total')}: ${total}</b><br><span style="opacity:.6;font-size:10px">${d} ${(lang==='ru'?'число':'do mês')}</span>`;
+  const shiftLines=[];
+  if(parseInt(day)>0){
+    shiftLines.push(`<div style="display:flex;justify-content:space-between;gap:12px"><span>${lang==='ru'?'☀️ 07:00–19:00':'☀️ 07:00–19:00'}</span><b>${day}</b></div>`);
+  }
+  if(parseInt(night)>0){
+    shiftLines.push(`<div style="display:flex;justify-content:space-between;gap:12px"><span>${lang==='ru'?'🌙 19:00–07:00':'🌙 19:00–07:00'}</span><b>${night}</b></div>`);
+  }
+  tt.innerHTML=`<b>${nm}</b> · ${ct}<br><span style="color:var(--accent)">${typeLabel}</span><div style="margin:6px 0 4px;border-top:1px solid var(--border,#1f2a40);padding-top:6px">${shiftLines.join('')}</div><div style="display:flex;justify-content:space-between;gap:12px;margin-top:4px;padding-top:4px;border-top:1px solid var(--border,#1f2a40)"><b>${(lang==='ru'?'Всего':'Total')}</b><b style="color:var(--accent)">${total}</b></div><span style="opacity:.6;font-size:10px;display:block;margin-top:4px">${d} ${(lang==='ru'?'число':'do mês')}</span>`;
   tt.style.display='block';
   const rect=cell.getBoundingClientRect();
   // Размещаем умно — если близко к низу экрана, показываем выше
-  const ttH=120;
+  const ttH=180;
   let top=rect.bottom+6;
   if(top+ttH>window.innerHeight)top=rect.top-ttH-6;
   let left=rect.left;
