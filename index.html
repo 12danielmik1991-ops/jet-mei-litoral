@@ -1033,54 +1033,43 @@ function showTaskTT(e,cell){
   if(!tt){
     tt=document.createElement('div');
     tt.id='taskTooltip';
-    tt.style.cssText='position:fixed;z-index:99999;background:var(--surface,#181e2e);border:1px solid var(--border,#1f2a40);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text,#e8edf5);box-shadow:0 4px 16px rgba(0,0,0,.5);pointer-events:none;max-width:280px;display:none';
+    tt.style.cssText='position:fixed;z-index:99999;background:var(--surface,#181e2e);border:1px solid var(--border,#1f2a40);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text,#e8edf5);box-shadow:0 4px 16px rgba(0,0,0,.5);pointer-events:none;max-width:260px;display:none';
     document.body.appendChild(tt);
   }
   const d=cell.dataset.day,nm=cell.dataset.wname,ct=cell.dataset.city;
-  const total=cell.dataset.tasks||0;
+  const day=cell.dataset.dayCnt||0,night=cell.dataset.nightCnt||0,total=cell.dataset.tasks||0;
   const type=cell.dataset.type;
   const wTag=cell.dataset.wtag||'';
   const typeLabel=type==='BAT'?(lang==='ru'?'🔋 Замены батарей':'🔋 Trocas de bateria'):(lang==='ru'?'🚛 Перемещения':'🚛 Movimentações');
 
+  // Ищем какой турно был у MEI в этот день
   const dateIso=`${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-  let info={turno:null,hasSlot:false,slotCreatedAt:null,shiftStartedAt:null};
-  if(typeof getTurnoForMei==='function')info=getTurnoForMei(wTag,nm,dateIso)||info;
+  let turnoCode=null;
+  if(typeof getTurnoForMei==='function'){
+    turnoCode=getTurnoForMei(wTag,nm,dateIso);
+  }
 
-  // Блок: какая смена
   let shiftBlock='';
-  if(info.turno&&typeof TURNO_LABELS!=='undefined'&&TURNO_LABELS[info.turno]){
-    const tl=TURNO_LABELS[info.turno];
-    shiftBlock+=`<div style="display:flex;justify-content:space-between;gap:12px;padding:4px 0"><span>${tl.label}</span><b style="color:var(--accent3)">${info.turno}</b></div>`;
+  if(turnoCode&&typeof TURNO_LABELS!=='undefined'&&TURNO_LABELS[turnoCode]){
+    const tl=TURNO_LABELS[turnoCode];
+    shiftBlock=`<div style="display:flex;justify-content:space-between;gap:12px;padding:4px 0"><span>${tl.label}</span><b style="color:var(--accent)">${total}</b></div>`;
   } else {
-    // Нет турно — показываем 3 возможных
-    shiftBlock+=`<div style="opacity:.5;padding:4px 0;font-size:11px">${lang==='ru'?'⚠ Смена не определена':'⚠ Turno desconhecido'}<br>T1 07–15 / T2 15–23 / T0 23–07</div>`;
+    // Fallback: разбивка день/ночь из ЦД
+    const lines=[];
+    if(parseInt(day)>0)lines.push(`<div style="display:flex;justify-content:space-between;gap:12px;padding:3px 0"><span>${lang==='ru'?'☀️ День (07-19)':'☀️ Dia (07-19)'}</span><b>${day}</b></div>`);
+    if(parseInt(night)>0)lines.push(`<div style="display:flex;justify-content:space-between;gap:12px;padding:3px 0"><span>${lang==='ru'?'🌙 Ночь (19-07)':'🌙 Noite (19-07)'}</span><b>${night}</b></div>`);
+    shiftBlock=lines.join('');
   }
 
-  // Блок: статус слота
-  let slotBlock='';
-  if(info.hasSlot){
-    const fmt=iso=>{const x=new Date(iso);return new Date(x.getTime()-3*3600*1000).toUTCString().slice(17,22);};
-    slotBlock=`<div style="background:rgba(46,213,115,.1);padding:4px 6px;border-radius:4px;margin-top:4px;font-size:11px">${lang==='ru'?'✅ Слот принят':'✅ Slot aceito'} ${fmt(info.slotCreatedAt)} BRT</div>`;
-  } else {
-    slotBlock=`<div style="background:rgba(255,71,87,.12);padding:4px 6px;border-radius:4px;margin-top:4px;font-size:11px;color:var(--accent2)">${lang==='ru'?'⚠️ БЕЗ СЛОТА':'⚠️ SEM SLOT'}</div>`;
-  }
-
-  // Блок: shift_start
-  let startBlock='';
-  if(info.shiftStartedAt){
-    const fmt=iso=>{const x=new Date(iso);return new Date(x.getTime()-3*3600*1000).toUTCString().slice(17,22);};
-    startBlock=`<div style="opacity:.7;font-size:11px;margin-top:3px">▶ ${lang==='ru'?'Начал смену':'Iniciou'} ${fmt(info.shiftStartedAt)} BRT</div>`;
-  }
-
-  tt.innerHTML=`<b>${nm}</b> · ${ct}<br><span style="color:var(--accent)">${typeLabel}</span><div style="margin:6px 0 0;border-top:1px solid var(--border,#1f2a40);padding-top:6px">${shiftBlock}</div>${slotBlock}${startBlock}<div style="display:flex;justify-content:space-between;gap:12px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border,#1f2a40)"><b>${(lang==='ru'?'Всего действий':'Total ações')}</b><b style="color:var(--accent)">${total}</b></div><span style="opacity:.5;font-size:10px;display:block;margin-top:4px">${d} ${(lang==='ru'?'число':'do mês')}</span>`;
+  tt.innerHTML=`<b>${nm}</b> · ${ct}<br><span style="color:var(--accent)">${typeLabel}</span><div style="margin:6px 0 0;border-top:1px solid var(--border,#1f2a40);padding-top:6px">${shiftBlock}</div><div style="display:flex;justify-content:space-between;gap:12px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border,#1f2a40)"><b>${(lang==='ru'?'Всего':'Total')}</b><b style="color:var(--accent)">${total}</b></div><span style="opacity:.6;font-size:10px;display:block;margin-top:6px">${d} ${(lang==='ru'?'число':'do mês')}${turnoCode?' · '+turnoCode:''}</span>`;
 
   tt.style.display='block';
   const rect=cell.getBoundingClientRect();
-  const ttH=200;
+  const ttH=180;
   let top=rect.bottom+6;
   if(top+ttH>window.innerHeight)top=rect.top-ttH-6;
   let left=rect.left;
-  if(left+290>window.innerWidth)left=window.innerWidth-290;
+  if(left+270>window.innerWidth)left=window.innerWidth-270;
   tt.style.top=top+'px';
   tt.style.left=left+'px';
 }
@@ -1112,6 +1101,64 @@ document.addEventListener('mousemove',(e)=>{
     clearTimeout(_tttHideTimer);
   }
 });
+</script>
+
+
+<script>
+// === TURNO LOOKUP ===
+const TURNO_LABELS={
+  'T0':{label:'🌃 23:00–07:00',short:'T0'},
+  'T1':{label:'☀️ 07:00–15:00',short:'T1'},
+  'T2':{label:'🌆 15:00–23:00',short:'T2'},
+  'Livre':{label:'🆓 Livre',short:'Livre'}
+};
+
+function getTurnoForMei(tgUsername,meiName,dateIso){
+  const result={turno:null,hasSlot:false,slotCreatedAt:null,shiftStartedAt:null,slotDescricao:null};
+  const tgClean=(tgUsername||'').replace(/^@/,'').toLowerCase();
+  const nameUpper=(meiName||'').toUpperCase();
+  const matchByNameTg=(recTg,recName)=>{
+    const ou=(recTg||'').toLowerCase();
+    if(tgClean&&ou&&ou===tgClean)return true;
+    const on=(recName||'').toUpperCase();
+    if(!nameUpper||!on)return false;
+    const tgt=new Set(nameUpper.split(/\s+/).filter(w=>w.length>=3));
+    const cnd=new Set(on.split(/\s+/).filter(w=>w.length>=3));
+    let common=0;
+    tgt.forEach(w=>{if(cnd.has(w))common++;});
+    return common>=2;
+  };
+  if(typeof liveOffers!=='undefined'&&Array.isArray(liveOffers)){
+    for(const o of liveOffers){
+      if(o.slot_date===dateIso&&matchByNameTg(o.tg_username,o.nome)){
+        result.hasSlot=true;
+        result.slotCreatedAt=o.accepted_at;
+        result.slotDescricao=o.slot_descricao;
+        if(o.turno_code&&o.turno_code!=='Livre'){
+          result.turno=o.turno_code;
+        }
+        break;
+      }
+    }
+  }
+  if(!result.turno&&typeof liveShifts!=='undefined'&&Array.isArray(liveShifts)){
+    for(const s of liveShifts){
+      if(!s.started_at)continue;
+      const startUtc=new Date(s.started_at);
+      const startBrt=new Date(startUtc.getTime()-3*3600*1000);
+      const shiftDate=startBrt.toISOString().slice(0,10);
+      if(shiftDate!==dateIso)continue;
+      if(!matchByNameTg(s.tg_username,s.nome))continue;
+      result.shiftStartedAt=s.started_at;
+      const h=startBrt.getUTCHours();
+      if(h>=7&&h<15)result.turno='T1';
+      else if(h>=15&&h<23)result.turno='T2';
+      else result.turno='T0';
+      break;
+    }
+  }
+  return result;
+}
 </script>
 
 </body>
