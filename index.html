@@ -118,12 +118,6 @@
   ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
   @media(max-width:700px){.summary{grid-template-columns:repeat(2,1fr)}.form-grid{grid-template-columns:1fr}.tab{padding:10px 12px;font-size:11px}}
 
-.act-badge{display:inline-block;padding:1px 5px;margin-left:6px;border-radius:8px;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;vertical-align:middle}
-.act-BAT{background:#ffd54f;color:#3e2723}
-.act-MOV{background:#81d4fa;color:#01579b}
-.act-NA{background:#cccccc;color:#333}
-[data-theme="dark"] .act-BAT{background:#ff8f00;color:#fffde7}
-[data-theme="dark"] .act-MOV{background:#0277bd;color:#e1f5fe}
 </style>
 </head>
 <body>
@@ -931,5 +925,93 @@ window.updatedAtGlobal=null;
 .live-wait{border-left-color:var(--accent4);background:rgba(245,166,35,0.06)}
 .live-noshow{border-left-color:var(--accent2);background:rgba(255,80,80,0.08)}
 </style>
+
+<script>
+// === DAILY ACTIONS из таблицы ЦД ===
+let dailyActions=[];
+
+function normalizeName(s){
+  if(!s)return new Set();
+  return new Set(String(s).toUpperCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .replace(/[^A-Z\s]/g,' ')
+    .split(/\s+/)
+    .filter(w=>w.length>=3));
+}
+
+function findActionsForMei(meiName){
+  if(!meiName||!dailyActions||dailyActions.length===0)return null;
+  const target=normalizeName(meiName);
+  if(target.size===0)return null;
+  let best=null,bestScore=0;
+  for(const rec of dailyActions){
+    const cand=normalizeName(rec.name);
+    let common=0;
+    target.forEach(w=>{if(cand.has(w))common++;});
+    const minLen=Math.min(target.size,cand.size);
+    const required=minLen<=2?2:(minLen===3?2:3);
+    if(common>=required){
+      const score=common/Math.max(target.size,cand.size);
+      if(score>bestScore&&score>=0.4){bestScore=score;best=rec;}
+    }
+  }
+  return best;
+}
+
+function actionsLastDays(meiName,n){
+  const rec=findActionsForMei(meiName);
+  if(!rec||!rec.daily)return {total:0,type:null,days:[],totalMonth:0};
+  const today=new Date();
+  const days=[];
+  for(let i=1;i<=n;i++){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    const iso=d.toISOString().slice(0,10);
+    if(rec.daily[iso])days.push({date:iso,...rec.daily[iso]});
+  }
+  return {
+    total:days.reduce((s,d)=>s+(d.total||0),0),
+    type:rec.action_type,
+    days,
+    totalMonth:rec.total_actions||0
+  };
+}
+
+async function loadDailyActions(){
+  try{
+    const url=`https://gist.githubusercontent.com/12danielmik1991-ops/54c012a98e6d8f34986afca9d76f3539/raw/daily_actions.json?_=${Date.now()}`;
+    const resp=await fetch(url,{cache:"no-store"});
+    if(!resp.ok)throw new Error("status "+resp.status);
+    const json=await resp.json();
+    dailyActions=json.mei_actions||[];
+    let matched=0,total=0;
+    for(const c of (typeof CITIES!=='undefined'?CITIES:[])){
+      for(const w of (WORKERS[c]||[])){
+        total++;
+        if(findActionsForMei(w.name))matched++;
+      }
+    }
+    console.log(`[daily_actions] loaded ${dailyActions.length} ЦД records · matched ${matched}/${total} workers`);
+    // Перерисовываем задачи
+    if(typeof renderTasks==='function')renderTasks();
+  }catch(e){
+    console.error('loadDailyActions failed:',e);
+  }
+}
+
+// Загружаем при старте + каждые 5 мин
+window.addEventListener('load',()=>{
+  setTimeout(loadDailyActions,2500);
+  setInterval(loadDailyActions,5*60*1000);
+});
+</script>
+
+<style>
+.act-badge{display:inline-block;padding:2px 6px;margin-left:6px;border-radius:9px;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;vertical-align:middle;line-height:1}
+.act-BAT{background:#ffd54f;color:#3e2723}
+.act-MOV{background:#81d4fa;color:#01579b}
+[data-theme="dark"] .act-BAT,html:not(.light) .act-BAT{background:#ff8f00;color:#fffde7}
+[data-theme="dark"] .act-MOV,html:not(.light) .act-MOV{background:#0277bd;color:#e1f5fe}
+</style>
+
 </body>
 </html>
