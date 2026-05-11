@@ -154,8 +154,7 @@
 </header>
 
 <div class="tabs-bar">
-  <div class="tab active" data-tab="live" onclick="switchTab('live')"><span>🟢</span><span>LIVE</span></div>
-  <div class="tab" data-tab="workers" onclick="switchTab('workers')"><span>☭</span><span data-i18n="tab_workers">Сотрудники</span></div>
+  <div class="tab active" data-tab="workers" onclick="switchTab('workers')"><span>☭</span><span data-i18n="tab_workers">Сотрудники</span></div>
   <div class="tab" data-tab="slots" onclick="switchTab('slots')"><span>📋</span><span data-i18n="tab_slots">Slots</span></div>
   <div class="tab" data-tab="tasks" onclick="switchTab('tasks')"><span>✅</span><span data-i18n="tab_tasks">Задачи</span></div>
 </div>
@@ -730,31 +729,36 @@ function createSlot(){
   const shift=document.getElementById('nsShift').value;
   const qty=parseInt(document.getElementById('nsQty').value)||1;
   const note=document.getElementById('nsNote').value||'';
-  console.log('[createSlot] city=',city,'date=',date,'wid=',wid,'shift=',shift,'qty=',qty);
   if(!city){alert(lang==='ru'?'Выберите город':'Selecione cidade');return;}
   if(!date){alert(lang==='ru'?'Выберите дату':'Selecione data');return;}
-  if(!wid){alert(lang==='ru'?'Выберите работника':'Selecione trabalhador');return;}
-  const worker=(WORKERS[city]||[]).find(w=>w.id===wid);
-  if(!worker){alert('Worker '+wid+' not found in '+city);return;}
+
+  // Формируем текст для бота — пользователь нажмёт кнопку и сообщение уйдёт в Telegram
+  const turnoTxt=shift?`Turno ${shift}`:'Turno livre';
+  const cmdText=`/web_order\ncidade=${city}\ndata=${date}\nturno=${shift||'Livre'}\nvagas=${qty}\ntipo=LOGISTICA${note?'\nobs='+note:''}`;
+
+  // Локально показываем сразу (pending)
   const day=new Date(date).getDate();
-  const key=`${worker.id}_${day}`;
-  const existing=slotsData[key]||{slotsOrdered:0,slotsFilled:0,workers:[],tasks:0,city};
-  existing.slotsOrdered=(existing.slotsOrdered||0)+qty;
-  existing.city=city;
-  existing.workers=existing.workers&&existing.workers.length>0?existing.workers:[worker];
-  existing.descricao=existing.descricao||(shift?`Turno ${shift}`:'')+(note?' · '+note:'');
-  existing.status=existing.slotsFilled>=existing.slotsOrdered?'full':existing.slotsFilled>0?'partial':'empty';
-  existing.fromUser=true;
-  slotsData[key]=existing;
-  // Сохраняем в localStorage чтобы не потерять при F5
-  try{
-    const userSlots=JSON.parse(localStorage.getItem('jet_user_slots_'+curYear+'_'+curMonth)||'{}');
-    userSlots[key]=existing;
-    localStorage.setItem('jet_user_slots_'+curYear+'_'+curMonth,JSON.stringify(userSlots));
-  }catch(e){console.error('save failed',e);}
+  const cityWorkers=WORKERS[city]||[];
+  const worker=wid?cityWorkers.find(w=>w.id===wid):cityWorkers[0];
+  if(worker){
+    const key=`${worker.id}_${day}`;
+    slotsData[key]={
+      status:'pending',slotsOrdered:qty,slotsFilled:0,
+      workers:[],tasks:0,city,fromUser:true,
+      descricao:turnoTxt+(note?' · '+note:''),
+      pending:true
+    };
+  }
   document.getElementById('newSlotForm').style.display='none';
-  renderWorkers();renderSummary();renderTasks();renderTaskSummary();if(typeof renderLive==='function')renderLive();
-  alert(lang==='ru'?`✅ Слот создан для ${worker.name}`:`✅ Vaga criada para ${worker.name}`);
+  renderWorkers();renderSummary();renderTasks();renderTaskSummary();
+
+  // Открываем Telegram с готовой командой к боту
+  const tgUrl=`https://t.me/MEI_JET_bot?text=${encodeURIComponent(cmdText)}`;
+  if(confirm(lang==='ru'?
+    `✅ Слот готов к отправке боту:\n\n${cmdText}\n\nОтправить?`:
+    `✅ Slot pronto:\n\n${cmdText}\n\nEnviar?`)){
+    window.location.href=tgUrl;
+  }
 }
 function cancelSlot(id){
   orderedSlots=orderedSlots.filter(s=>s.id!==id);
