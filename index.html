@@ -160,7 +160,35 @@
 </div>
 
 <!-- TAB WORKERS -->
-<div class="tab-content active" id="tab-workers">
+<div class="tab-content active" id="tab-live">
+  <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px;font-size:13px;color:var(--muted)">
+    <span id="liveLastUpdate"></span>
+    <span style="flex:1"></span>
+    <button class="ctrl-btn" onclick="fetchBotData()" style="padding:6px 12px;font-size:12px">⟳</button>
+  </div>
+
+  <div class="live-section">
+    <h3 style="color:var(--accent3);margin:0 0 8px;font-size:15px">🟢 СЕЙЧАС НА СМЕНЕ <span id="liveOnShiftCount" style="opacity:0.6">(0)</span></h3>
+    <div id="liveOnShift"></div>
+  </div>
+
+  <div class="live-section" style="margin-top:16px">
+    <h3 style="color:var(--accent4);margin:0 0 8px;font-size:15px">⌛ ДОЛЖНЫ ВЫЙТИ СЕГОДНЯ <span id="liveExpectedCount" style="opacity:0.6">(0)</span></h3>
+    <div id="liveExpected"></div>
+  </div>
+
+  <div class="live-section" style="margin-top:16px">
+    <h3 style="color:var(--accent2);margin:0 0 8px;font-size:15px">❌ НЕ ВЫШЛИ (за вчера) <span id="liveNoShowCount" style="opacity:0.6">(0)</span></h3>
+    <div id="liveNoShow"></div>
+  </div>
+
+  <div class="live-section" style="margin-top:16px">
+    <h3 style="color:var(--accent1);margin:0 0 8px;font-size:15px">✅ ЗАВЕРШИЛИ СЕГОДНЯ <span id="liveCompletedCount" style="opacity:0.6">(0)</span></h3>
+    <div id="liveCompleted"></div>
+  </div>
+</div>
+
+<div class="tab-content" id="tab-workers">
   <div class="status-bar"><div class="status-dot pulse" id="statusDot"></div><span id="statusText">—</span></div>
   <div class="summary">
     <div class="card"><div class="card-label" data-i18n="slots_ordered">Слотов заказано</div><div class="card-val cyan" id="sumTotal">—</div><div class="card-sub" id="sumMonth"></div></div>
@@ -272,6 +300,7 @@ const API_BASE='https://jet-mei-bot-production.up.railway.app';
 const API_KEY='jet2026panel';
 // FORUM_CHAT removed — using REST API now
 
+let liveShifts=[];let liveOffers=[];let liveTurnos=[];
 let slotsData={};
 let orderedSlots=JSON.parse(localStorage.getItem('jet_ordered_slots')||'[]');
 const today=new Date();
@@ -354,15 +383,18 @@ async function fetchBotData(){
     let source="gist",updatedAt=null;
 
     try {
-      const [wResp,sResp,tResp]=await Promise.all([
+      const [wResp,sResp,tResp,shResp,ofResp,tuResp]=await Promise.all([
         fetch(gistUrl("workers.json"),{cache:"no-store"}),
         fetch(gistUrl("slots.json"),{cache:"no-store"}),
-        fetch(gistUrl("tasks.json"),{cache:"no-store"})
+        fetch(gistUrl("tasks.json"),{cache:"no-store"}),
+        fetch(gistUrl("shifts.json"),{cache:"no-store"}),
+        fetch(gistUrl("offers.json"),{cache:"no-store"}),
+        fetch(gistUrl("turnos.json"),{cache:"no-store"})
       ]);
       if(wResp.ok){
         const wJson=await wResp.json();
         workersRaw=wJson.workers||[];
-        if(wJson.updated_at)updatedAt=wJson.updated_at;
+        if(wJson.updated_at){updatedAt=wJson.updated_at;window.updatedAtGlobal=updatedAt;}
       }
       if(sResp.ok){
         const sJson=await sResp.json();
@@ -371,6 +403,18 @@ async function fetchBotData(){
       if(tResp.ok){
         const tJson=await tResp.json();
         tasksRaw=tJson.tasks||[];
+      }
+      if(shResp.ok){
+        const shJson=await shResp.json();
+        liveShifts=shJson.shifts||[];
+      }
+      if(ofResp.ok){
+        const ofJson=await ofResp.json();
+        liveOffers=ofJson.offers||[];
+      }
+      if(tuResp.ok){
+        const tuJson=await tuResp.json();
+        liveTurnos=tuJson.turnos||[];
       }
     } catch(e){
       console.warn("Gist failed, falling back to Sheet:",e);
@@ -516,7 +560,7 @@ async function fetchBotData(){
   }finally{
     btn.classList.remove('loading');btn.textContent='⟳ Sync';
   }
-  renderWorkers();renderSummary();renderTasks();renderTaskSummary();
+  renderWorkers();renderSummary();renderTasks();renderTaskSummary();if(typeof renderLive==='function')renderLive();
 }
 
 async function syncData(){
@@ -544,7 +588,7 @@ document.getElementById('nextMonth').addEventListener('click',()=>{
 
 function render(){
   document.getElementById('monthLabel').textContent=`${t('months')[curMonth]} ${curYear}`;
-  renderCityFilters();renderWorkers();renderSummary();renderTasks();renderTaskSummary();renderSlotsGrid();
+  renderCityFilters();renderWorkers();renderSummary();renderTasks();renderTaskSummary();if(typeof renderLive==='function')renderLive();renderSlotsGrid();
 }
 
 // ── CITY FILTERS ─────────────────────────────────────
@@ -708,7 +752,7 @@ function createSlot(){
     localStorage.setItem('jet_user_slots_'+curYear+'_'+curMonth,JSON.stringify(userSlots));
   }catch(e){console.error('save failed',e);}
   document.getElementById('newSlotForm').style.display='none';
-  renderWorkers();renderSummary();renderTasks();renderTaskSummary();
+  renderWorkers();renderSummary();renderTasks();renderTaskSummary();if(typeof renderLive==='function')renderLive();
   alert(lang==='ru'?`✅ Слот создан для ${worker.name}`:`✅ Vaga criada para ${worker.name}`);
 }
 function cancelSlot(id){
@@ -868,7 +912,7 @@ function saveMei(){
   document.getElementById('meiCnpj').value='';
 
   renderLocalMeis();
-  renderWorkers();renderSummary();renderTasks();renderTaskSummary();
+  renderWorkers();renderSummary();renderTasks();renderTaskSummary();if(typeof renderLive==='function')renderLive();
 
   alert(lang==='ru'?`✅ ${name} добавлен в ${city}`:`✅ ${name} adicionado em ${city}`);
 }
@@ -901,7 +945,7 @@ function deleteMei(id){
     if(WORKERS[c]) WORKERS[c]=WORKERS[c].filter(w=>w.id!==id);
   });
   renderLocalMeis();
-  renderWorkers();renderSummary();renderTasks();renderTaskSummary();
+  renderWorkers();renderSummary();renderTasks();renderTaskSummary();if(typeof renderLive==='function')renderLive();
 }
 
 function loadLocalMeis(){
@@ -919,5 +963,130 @@ function loadLocalMeis(){
 }
 </script>
 
+
+<script>
+function renderLive(){
+  if(typeof liveShifts==='undefined'||!Array.isArray(liveShifts)){liveShifts=[];}
+  if(typeof liveOffers==='undefined'||!Array.isArray(liveOffers)){liveOffers=[];}
+
+  const nowBRT=new Date(Date.now()-3*3600*1000); // BRT = UTC-3
+  const todayStr=nowBRT.toISOString().slice(0,10);
+  const yesterdayStr=new Date(nowBRT.getTime()-24*3600*1000).toISOString().slice(0,10);
+  const todayBR=todayStr; // YYYY-MM-DD
+
+  const cityFiltered=s=>(!currentCityFilter||currentCityFilter.length===0||currentCityFilter.includes(s.cidade));
+
+  // 1. СЕЙЧАС НА СМЕНЕ — shift_start есть, shift_end null, и началась < 12 часов назад
+  const onShift=liveShifts.filter(s=>{
+    if(!s.started_at||s.ended_at)return false;
+    const start=new Date(s.started_at);
+    const hoursAgo=(Date.now()-start.getTime())/3600000;
+    return hoursAgo<14&&cityFiltered(s);
+  }).sort((a,b)=>new Date(b.started_at)-new Date(a.started_at));
+
+  // 2. ЗАВЕРШИЛИ СЕГОДНЯ — shift_end сегодня
+  const completed=liveShifts.filter(s=>{
+    if(!s.ended_at)return false;
+    return s.ended_at.slice(0,10)===todayStr&&cityFiltered(s);
+  }).sort((a,b)=>new Date(b.ended_at)-new Date(a.ended_at));
+
+  // 3. ДОЛЖНЫ ВЫЙТИ СЕГОДНЯ — offer на сегодня + ещё не shift_start
+  const startedTgIds=new Set(onShift.concat(completed).map(s=>s.tg_id));
+  const expected=liveOffers.filter(o=>{
+    return o.slot_date===todayStr&&!startedTgIds.has(o.tg_id)&&cityFiltered(o);
+  }).sort((a,b)=>new Date(a.accepted_at)-new Date(b.accepted_at));
+
+  // 4. НЕ ВЫШЛИ ВЧЕРА — offer на вчера + не было shift_start вчера
+  const yesterdayOffers=liveOffers.filter(o=>o.slot_date===yesterdayStr&&cityFiltered(o));
+  const yesterdayStarts=new Set(liveShifts.filter(s=>s.started_at&&s.started_at.slice(0,10)===yesterdayStr).map(s=>s.tg_id));
+  const noShow=yesterdayOffers.filter(o=>!yesterdayStarts.has(o.tg_id));
+
+  // === Render ===
+  const fmtTime=isoStr=>{
+    if(!isoStr)return '—';
+    const d=new Date(isoStr);
+    return d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit',timeZone:'America/Sao_Paulo'});
+  };
+  const hoursOnShift=startIso=>{
+    const h=(Date.now()-new Date(startIso).getTime())/3600000;
+    const hh=Math.floor(h);const mm=Math.floor((h-hh)*60);
+    return `${hh}ч${String(mm).padStart(2,'0')}м`;
+  };
+  const cityBadge=c=>`<span style="background:var(--bg3);padding:2px 6px;border-radius:4px;font-size:11px;color:var(--accent1)">${c}</span>`;
+  const tg=u=>u?`<a href="https://t.me/${u}" target="_blank" style="color:var(--accent1);text-decoration:none;font-size:11px">@${u}</a>`:'';
+
+  const renderItem=(item,type)=>{
+    const name=item.nome||'?';
+    const city=item.cidade||'?';
+    const tgu=item.tg_username||'';
+    const descr=(item.slot_descricao||'').slice(0,60)+(item.slot_descricao&&item.slot_descricao.length>60?'…':'');
+
+    if(type==='onShift'){
+      return `<div class="live-item live-on">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap">
+          <div><strong>${name}</strong> ${cityBadge(city)} ${tg(tgu)}</div>
+          <div style="color:var(--accent3);font-weight:700;font-size:13px">${hoursOnShift(item.started_at)}</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">▶ ${fmtTime(item.started_at)} BRT · ${item.slot_tipo||''} · ${descr}</div>
+      </div>`;
+    }
+    if(type==='completed'){
+      const dur=item.started_at&&item.ended_at?((new Date(item.ended_at)-new Date(item.started_at))/3600000).toFixed(1)+'ч':'?';
+      return `<div class="live-item live-done">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap">
+          <div><strong>${name}</strong> ${cityBadge(city)} ${tg(tgu)}</div>
+          <div style="color:var(--accent1);font-size:12px">${dur}</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">▶${fmtTime(item.started_at)} ⏹${fmtTime(item.ended_at)} BRT · ${descr}</div>
+      </div>`;
+    }
+    if(type==='expected'){
+      return `<div class="live-item live-wait">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap">
+          <div><strong>${name}</strong> ${cityBadge(city)} ${tg(tgu)}</div>
+          <div style="color:var(--accent4);font-size:12px">принял ${fmtTime(item.accepted_at)}</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${item.slot_tipo||''} · ${descr}</div>
+      </div>`;
+    }
+    if(type==='noShow'){
+      return `<div class="live-item live-noshow">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;flex-wrap:wrap">
+          <div><strong>${name}</strong> ${cityBadge(city)} ${tg(tgu)}</div>
+          <div style="color:var(--accent2);font-size:11px">❌ no-show</div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">принял ${fmtTime(item.accepted_at)} · ${descr}</div>
+      </div>`;
+    }
+  };
+
+  document.getElementById('liveOnShift').innerHTML=onShift.length?onShift.map(i=>renderItem(i,'onShift')).join(''):`<div style="color:var(--muted);padding:8px">никого на смене</div>`;
+  document.getElementById('liveOnShiftCount').textContent=`(${onShift.length})`;
+
+  document.getElementById('liveExpected').innerHTML=expected.length?expected.map(i=>renderItem(i,'expected')).join(''):`<div style="color:var(--muted);padding:8px">никто не должен</div>`;
+  document.getElementById('liveExpectedCount').textContent=`(${expected.length})`;
+
+  document.getElementById('liveNoShow').innerHTML=noShow.length?noShow.map(i=>renderItem(i,'noShow')).join(''):`<div style="color:var(--muted);padding:8px">все вышли вчера ✓</div>`;
+  document.getElementById('liveNoShowCount').textContent=`(${noShow.length})`;
+
+  document.getElementById('liveCompleted').innerHTML=completed.length?completed.map(i=>renderItem(i,'completed')).join(''):`<div style="color:var(--muted);padding:8px">пока никто</div>`;
+  document.getElementById('liveCompletedCount').textContent=`(${completed.length})`;
+
+  const updMin=Math.round((Date.now()-new Date(updatedAtGlobal||Date.now()).getTime())/60000);
+  document.getElementById('liveLastUpdate').textContent=`Обновлено ${updMin} мин назад`;
+}
+
+// Глобальная переменная для последнего обновления
+window.updatedAtGlobal=null;
+</script>
+
+<style>
+.live-section{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:12px}
+.live-item{padding:8px 10px;border-radius:6px;margin-bottom:6px;background:var(--bg3);border-left:3px solid var(--border)}
+.live-on{border-left-color:var(--accent3);background:rgba(40,180,99,0.08)}
+.live-done{border-left-color:var(--accent1);background:rgba(43,170,255,0.05)}
+.live-wait{border-left-color:var(--accent4);background:rgba(245,166,35,0.06)}
+.live-noshow{border-left-color:var(--accent2);background:rgba(255,80,80,0.08)}
+</style>
 </body>
 </html>
