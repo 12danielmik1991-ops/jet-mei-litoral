@@ -589,7 +589,7 @@ async function fetchBotData(){
   }finally{
     btn.classList.remove('loading');btn.textContent='⟳ Sync';
   }
-  try{renderWorkers();}catch(e){console.warn('renderWorkers skipped:',e.message);}try{renderSummary();}catch(e){console.warn('renderSummary skipped:',e.message);}try{renderTasks();}catch(e){console.warn('renderTasks skipped:',e.message);}try{renderTaskSummary();}catch(e){console.warn('renderTaskSummary skipped:',e.message);}if(typeof renderMonitor==='function'){try{renderMonitor();}catch(e){console.error('renderMonitor failed',e);}}if(typeof renderLive==='function')renderLive();
+  [renderWorkers,renderSummary,renderTasks,renderTaskSummary,()=>{if(typeof renderMonitor==='function')renderMonitor();},()=>{if(typeof renderSlotsGrid==='function')renderSlotsGrid();}].forEach(fn=>{try{fn();}catch(e){console.warn('render skipped:',fn.name||'anon',e.message);}});if(typeof renderMonitor==='function'){try{renderMonitor();}catch(e){console.error('renderMonitor failed',e);}}if(typeof renderLive==='function')renderLive();
 }
 
 async function syncData(){
@@ -625,7 +625,7 @@ document.getElementById('nextMonth').addEventListener('click',()=>{
 
 function render(){
   document.getElementById('monthLabel').textContent=`${t('months')[curMonth]} ${curYear}`;
-  renderCityFilters();try{renderWorkers();}catch(e){console.warn('renderWorkers skipped:',e.message);}try{renderSummary();}catch(e){console.warn('renderSummary skipped:',e.message);}try{renderTasks();}catch(e){console.warn('renderTasks skipped:',e.message);}try{renderTaskSummary();}catch(e){console.warn('renderTaskSummary skipped:',e.message);}if(typeof renderMonitor==='function'){try{renderMonitor();}catch(e){console.error('renderMonitor failed',e);}}if(typeof renderLive==='function')renderLive();try{renderSlotsGrid();}catch(e){console.warn('renderSlotsGrid skipped:',e.message);}
+  renderCityFilters();[renderWorkers,renderSummary,renderTasks,renderTaskSummary,()=>{if(typeof renderMonitor==='function')renderMonitor();},()=>{if(typeof renderSlotsGrid==='function')renderSlotsGrid();}].forEach(fn=>{try{fn();}catch(e){console.warn('render skipped:',fn.name||'anon',e.message);}});if(typeof renderMonitor==='function'){try{renderMonitor();}catch(e){console.error('renderMonitor failed',e);}}if(typeof renderLive==='function')renderLive();try{renderSlotsGrid();}catch(e){console.warn('renderSlotsGrid skipped:',e.message);}
 }
 
 // ── CITY FILTERS ─────────────────────────────────────
@@ -653,8 +653,6 @@ function buildCalHeader(dim){
 }
 
 function renderWorkers(){
-  const _el=document.getElementById('calWorkers');
-  if(!_el)return;  // вкладка удалена
   const dim=new Date(curYear,curMonth+1,0).getDate();
   const td=new Date();
   let html=buildCalHeader(dim)+'<tbody>';
@@ -1466,6 +1464,26 @@ window.renderLive=renderMonitor;
 .mon-completed{border-left-color:var(--accent1);background:rgba(43,170,255,.04)}
 @media(max-width:640px){.mon-card-grid{grid-template-columns:1fr}}
 </style>
+
+
+<script>
+// Страховка: через 6 сек после загрузки гарантированно сбросить loading-state syncBtn
+setTimeout(function(){
+  const btn=document.getElementById('syncBtn');
+  if(btn&&btn.classList.contains('loading')){
+    btn.classList.remove('loading');
+    btn.textContent='⟳ Sync';
+    console.warn('[safety] syncBtn was stuck in loading state, force-reset');
+  }
+},6000);
+setTimeout(function(){
+  const btn=document.getElementById('syncBtn');
+  if(btn&&btn.classList.contains('loading')){
+    btn.classList.remove('loading');
+    btn.textContent='⟳ Sync';
+  }
+},15000);
+</script>
 
 </body>
 </html>
