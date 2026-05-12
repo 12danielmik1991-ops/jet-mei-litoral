@@ -158,10 +158,11 @@
   <div class="tab active" data-tab="workers" onclick="switchTab('workers')"><span>☭</span><span data-i18n="tab_workers">Сотрудники</span></div>
   <div class="tab" data-tab="slots" onclick="switchTab('slots')"><span>📋</span><span data-i18n="tab_slots">Slots</span></div>
   <div class="tab" data-tab="tasks" onclick="switchTab('tasks')"><span>✅</span><span data-i18n="tab_tasks">Задачи</span></div>
-</div>
+  <div class="tab" data-tab="active" onclick="switchTab('active')"><span>🟢</span><span>Активные слоты</span></div>
+  </div>
 
 <!-- TAB WORKERS -->
-<div class="tab-content" id="tab-active">
+<div class="tab-content active" id="tab-live">
   <!-- Шапка: выбор даты + статус -->
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:10px;background:var(--bg2);border:1px solid var(--border);border-radius:10px">
     <div style="display:flex;align-items:center;gap:6px">
@@ -233,7 +234,7 @@
   </div>
 </div>
 
-<div class="tab-content active" id="tab-workers">
+<div class="tab-content" id="tab-workers">
   <div class="status-bar"><div class="status-dot pulse" id="statusDot"></div><span id="statusText">—</span></div>
   <div class="summary">
     <div class="card"><div class="card-label" data-i18n="slots_ordered">Слотов заказано</div><div class="card-val cyan" id="sumTotal">—</div><div class="card-sub" id="sumMonth"></div></div>
