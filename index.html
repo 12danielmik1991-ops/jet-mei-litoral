@@ -416,8 +416,9 @@ function generateStableSlots(year,month){
 // ── BOT SYNC ────────────────────────────────────────
 async function fetchBotData(){
   const btn=document.getElementById('syncBtn');
-  btn.classList.add('loading');btn.textContent='⟳ ...';
-  document.getElementById('statusDot').style.background='var(--accent4)';
+  if(btn){btn.classList.add('loading');btn.textContent='⟳ ...';}
+  const sd=document.getElementById('statusDot');
+  if(sd)sd.style.background='var(--accent4)';
   try{
     // Источник 1: GitHub Gist (бот пишет туда каждые 5 мин из БД)
     const GIST_USER="12danielmik1991-ops";
@@ -604,7 +605,7 @@ async function fetchBotData(){
     document.getElementById('statusText').textContent=`${t('status_err')}: ${err.message}`;
     document.getElementById('statusDot').style.background='var(--accent2)';
   }finally{
-    btn.classList.remove('loading');btn.textContent='⟳ Sync';
+    if(btn){btn.classList.remove('loading');btn.textContent='⟳ Sync';}
   }
   renderWorkers();renderSummary();renderTasks();renderTaskSummary();if(typeof renderMonitor==='function'){try{renderMonitor();}catch(e){console.error('renderMonitor failed',e);}}if(typeof renderLive==='function')renderLive();
 }
@@ -1390,31 +1391,6 @@ document.addEventListener('DOMContentLoaded',_initMonitor);
 window.renderLive=renderMonitor;
 </script>
 
-
-
-<script>
-// === BOOT: первичная отрисовка при загрузке ===
-(function bootPanel(){
-  function doBoot(){
-    try{
-      // Гарантируем что curMonth и curYear = текущие
-      const _today=new Date();
-      if(typeof curMonth!=='undefined'){curMonth=_today.getMonth();}
-      if(typeof curYear!=='undefined'){curYear=_today.getFullYear();}
-      // Рисуем шапку и таблицы
-      if(typeof render==='function')render();
-      // Тянем данные из Gist
-      if(typeof fetchBotData==='function')fetchBotData();
-    }catch(e){console.error('boot failed:',e);}
-  }
-  // На случай что DOM ещё не готов
-  if(document.readyState==='complete'||document.readyState==='interactive'){
-    setTimeout(doBoot,0);
-  } else {
-    document.addEventListener('DOMContentLoaded',doBoot);
-  }
-})();
-</script>
 
 </body>
 </html>
