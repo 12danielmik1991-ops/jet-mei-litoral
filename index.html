@@ -1391,5 +1391,41 @@ window.renderLive=renderMonitor;
 </script>
 
 
+
+<script>
+// === BOOT: первичная отрисовка и загрузка данных ===
+(function bootPanel(){
+  var _booted=false;
+  function doBoot(){
+    if(_booted)return;
+    _booted=true;
+    try{
+      var _today=new Date();
+      if(typeof curMonth!=='undefined'){curMonth=_today.getMonth();}
+      if(typeof curYear!=='undefined'){curYear=_today.getFullYear();}
+      if(typeof render==='function'){
+        try{render();}catch(e){console.error('render failed:',e);}
+      }
+      setTimeout(function(){
+        if(typeof fetchBotData==='function'){
+          try{
+            var _p=fetchBotData();
+            if(_p&&typeof _p.catch==='function'){_p.catch(function(e){console.error('fetchBotData rejected:',e);});}
+          }catch(e){console.error('fetchBotData call crashed:',e);}
+        } else {
+          console.warn('fetchBotData is not a function');
+        }
+      },350);
+    }catch(e){console.error('boot crashed:',e);}
+  }
+  if(document.readyState==='complete'){
+    setTimeout(doBoot,80);
+  } else {
+    document.addEventListener('DOMContentLoaded',doBoot);
+    window.addEventListener('load',doBoot);
+  }
+})();
+</script>
+
 </body>
 </html>
