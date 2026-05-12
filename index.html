@@ -606,7 +606,7 @@ async function fetchBotData(){
   }finally{
     btn.classList.remove('loading');btn.textContent='⟳ Sync';
   }
-  renderWorkers();renderSummary();renderTasks();renderTaskSummary();if(typeof renderLive==='function')renderLive();
+  renderWorkers();renderSummary();renderTasks();renderTaskSummary();if(typeof renderMonitor==='function'){try{renderMonitor();}catch(e){console.error('renderMonitor failed',e);}}if(typeof renderLive==='function')renderLive();
 }
 
 async function syncData(){
@@ -620,6 +620,14 @@ function switchTab(tab){
   document.querySelectorAll('.tab').forEach(el=>el.classList.remove('active'));
   document.getElementById('tab-'+tab).classList.add('active');
   document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
+  if(tab==='active'&&typeof renderMonitor==='function'){
+    try{
+      if(!window.monSelectedDate){window.monSelectedDate=new Date().toISOString().slice(0,10);}
+      const inp=document.getElementById('monDate');
+      if(inp&&!inp.value)inp.value=window.monSelectedDate;
+      renderMonitor();
+    }catch(e){console.error('switchTab→active renderMonitor failed',e);}
+  }
 }
 
 // ── MONTH NAV ────────────────────────────────────────
@@ -634,7 +642,7 @@ document.getElementById('nextMonth').addEventListener('click',()=>{
 
 function render(){
   document.getElementById('monthLabel').textContent=`${t('months')[curMonth]} ${curYear}`;
-  renderCityFilters();renderWorkers();renderSummary();renderTasks();renderTaskSummary();if(typeof renderLive==='function')renderLive();renderSlotsGrid();
+  renderCityFilters();renderWorkers();renderSummary();renderTasks();renderTaskSummary();if(typeof renderMonitor==='function'){try{renderMonitor();}catch(e){console.error('renderMonitor failed',e);}}if(typeof renderLive==='function')renderLive();renderSlotsGrid();
 }
 
 // ── CITY FILTERS ─────────────────────────────────────
@@ -1358,19 +1366,25 @@ function renderMonitor(){
   }
 }
 
-// Инициализация при загрузке
-window.addEventListener('load',()=>{
-  setTimeout(()=>{
-    setMonDateToday();
-    const inp=document.getElementById('monDate');
-    if(inp){
+// Инициализация Монитора при загрузке (синхронно, без задержек)
+function _initMonitor(){
+  const today=new Date();
+  window.monSelectedDate=today.toISOString().slice(0,10);
+  const inp=document.getElementById('monDate');
+  if(inp){
+    inp.value=window.monSelectedDate;
+    if(!inp._hasHandler){
       inp.addEventListener('change',(e)=>{
         window.monSelectedDate=e.target.value;
         renderMonitor();
       });
+      inp._hasHandler=true;
     }
-  },800);
-});
+  }
+  try{renderMonitor();}catch(e){console.error('renderMonitor init failed',e);}
+}
+window.addEventListener('load',_initMonitor);
+document.addEventListener('DOMContentLoaded',_initMonitor);
 
 // renderLive теперь = renderMonitor (для совместимости с fetchBotData)
 window.renderLive=renderMonitor;
