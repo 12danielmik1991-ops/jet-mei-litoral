@@ -155,8 +155,8 @@
 </header>
 
 <div class="tabs-bar">
-  <div class="tab active" data-tab="slots" onclick="switchTab('slots')"><span>📝</span><span data-i18n="tab_create_slot">Создать новый слот</span></div>
-  <div class="tab" data-tab="tasks" onclick="switchTab('tasks')"><span>✅</span><span data-i18n="tab_tasks">Задачи</span></div>
+  <div class="tab active" data-tab="slots" onclick="switchTab('slots')"><span>📝</span><span>Создать новый слот</span></div>
+  <div class="tab" data-tab="tasks" onclick="switchTab('tasks')"><span>✅</span><span>Задачи</span></div>
   <div class="tab" data-tab="active" onclick="switchTab('active')"><span>🟢</span><span>История создания слотов</span></div>
   </div>
 
@@ -294,7 +294,7 @@ function t(k){return I18N[lang][k]||k;}
 function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
   document.getElementById('langBtn').textContent=lang==='ru'?'🌐 PT':'🌐 RU';
-  renderSummary();renderTaskSummary();renderSlotsGrid();renderCityFilters();
+  renderSummary();renderTaskSummary();try{renderSlotsGrid();}catch(e){console.warn('renderSlotsGrid skipped:',e.message);}renderCityFilters();
   if(document.getElementById('calWorkers').innerHTML)renderWorkers();
   if(document.getElementById('calTasks').innerHTML)renderTasks();
 }
@@ -589,7 +589,7 @@ async function fetchBotData(){
   }finally{
     btn.classList.remove('loading');btn.textContent='⟳ Sync';
   }
-  renderWorkers();renderSummary();renderTasks();renderTaskSummary();if(typeof renderMonitor==='function'){try{renderMonitor();}catch(e){console.error('renderMonitor failed',e);}}if(typeof renderLive==='function')renderLive();
+  try{renderWorkers();}catch(e){console.warn('renderWorkers skipped:',e.message);}try{renderSummary();}catch(e){console.warn('renderSummary skipped:',e.message);}try{renderTasks();}catch(e){console.warn('renderTasks skipped:',e.message);}try{renderTaskSummary();}catch(e){console.warn('renderTaskSummary skipped:',e.message);}if(typeof renderMonitor==='function'){try{renderMonitor();}catch(e){console.error('renderMonitor failed',e);}}if(typeof renderLive==='function')renderLive();
 }
 
 async function syncData(){
@@ -625,7 +625,7 @@ document.getElementById('nextMonth').addEventListener('click',()=>{
 
 function render(){
   document.getElementById('monthLabel').textContent=`${t('months')[curMonth]} ${curYear}`;
-  renderCityFilters();renderWorkers();renderSummary();renderTasks();renderTaskSummary();if(typeof renderMonitor==='function'){try{renderMonitor();}catch(e){console.error('renderMonitor failed',e);}}if(typeof renderLive==='function')renderLive();renderSlotsGrid();
+  renderCityFilters();try{renderWorkers();}catch(e){console.warn('renderWorkers skipped:',e.message);}try{renderSummary();}catch(e){console.warn('renderSummary skipped:',e.message);}try{renderTasks();}catch(e){console.warn('renderTasks skipped:',e.message);}try{renderTaskSummary();}catch(e){console.warn('renderTaskSummary skipped:',e.message);}if(typeof renderMonitor==='function'){try{renderMonitor();}catch(e){console.error('renderMonitor failed',e);}}if(typeof renderLive==='function')renderLive();try{renderSlotsGrid();}catch(e){console.warn('renderSlotsGrid skipped:',e.message);}
 }
 
 // ── CITY FILTERS ─────────────────────────────────────
@@ -653,6 +653,8 @@ function buildCalHeader(dim){
 }
 
 function renderWorkers(){
+  const _el=document.getElementById('calWorkers');
+  if(!_el)return;  // вкладка удалена
   const dim=new Date(curYear,curMonth+1,0).getDate();
   const td=new Date();
   let html=buildCalHeader(dim)+'<tbody>';
