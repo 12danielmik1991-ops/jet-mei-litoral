@@ -444,7 +444,7 @@ async function fetchBotData(){
       }
       if(sResp.ok){
         const sJson=await sResp.json();
-        slotsRaw=sJson.slots||[];
+        slotsRaw=sJson.slots||[];window.allSlots=slotsRaw;
       }
       if(tResp.ok){
         const tJson=await tResp.json();
@@ -1226,42 +1226,134 @@ function _detectTurnoByHour(iso){
 function renderMonitor(){
   if(typeof liveShifts==='undefined')window.liveShifts=[];
   if(typeof liveOffers==='undefined')window.liveOffers=[];
+  if(typeof liveTurnos==='undefined')window.liveTurnos=[];
 
-  const dateIso=window.monSelectedDate;
+  const dateIso=window.monSelectedDate||new Date().toISOString().slice(0,10);
   const dateLabel=new Date(dateIso+'T12:00:00').toLocaleDateString(lang==='ru'?'ru-RU':'pt-BR',{weekday:'long',day:'numeric',month:'long'});
-  document.getElementById('monDateLabel').textContent=dateLabel;
+  const lblEl=document.getElementById('monDateLabel');
+  if(lblEl)lblEl.textContent=dateLabel;
 
   const todayIso=new Date().toISOString().slice(0,10);
   const isToday=dateIso===todayIso;
+  const isPast=dateIso<todayIso;
 
-  // === 1. ЗАКАЗАННЫЕ СЛОТЫ (offers за эту дату) ===
-  const slotsForDay=liveOffers.filter(o=>o.slot_date===dateIso);
-  document.getElementById('monSlotsCount').textContent=`(${slotsForDay.length})`;
-  document.getElementById('monSlotsMeta').innerHTML=_cityChips(slotsForDay,o=>o.cidade);
-  document.getElementById('monSlotsBody').innerHTML=slotsForDay.length===0?
-    '<div class="mon-empty">Слотов на эту дату нет</div>':
-    slotsForDay.sort((a,b)=>(a.cidade||'').localeCompare(b.cidade||'')||new Date(b.accepted_at)-new Date(a.accepted_at))
-    .map(o=>{
-      const tg=o.tg_username?`<a href="https://t.me/${o.tg_username}" target="_blank" style="color:var(--accent1);text-decoration:none">@${o.tg_username}</a>`:'';
-      const desc=(o.slot_descricao||'').slice(0,80)+(o.slot_descricao&&o.slot_descricao.length>80?'…':'');
-      return `<div class="mon-item">
+  // ВСЕ слоты на дату (из slots — там полная инфо)
+  // typeof slotsRaw bypass: используем напрямую загруженные данные из Gist
+  // Берём слоты из window.allSlots если есть, иначе фильтруем offers
+  let daySlotsAll=[];
+  if(window.allSlots&&Array.isArray(window.allSlots)){
+    daySlotsAll=window.allSlots.filter(s=>s.data===dateIso);
+  }
+  const offersForDay=liveOffers.filter(o=>o.slot_date===dateIso);
+
+  // === Карточка слота (заказ) ===
+  function renderOfferCard(o,kind){
+    const tg=o.tg_username?`<a href="https://t.me/${o.tg_username}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent1);text-decoration:none">@${o.tg_username}</a>`:'';
+    const typeIcon=o.slot_tipo==='CHARGER'?'🔋':(o.slot_tipo==='LOGISTICA'?'🚛':'📋');
+    const cidade=o.cidade||'?';
+    const desc=o.slot_descricao||'';
+    const turnoBadge=o.turno_code&&TURNO_LABELS[o.turno_code]?`<span class="mon-turno-chip">${o.turno_code}</span>`:'';
+    const cardId='card_'+(o.slot_id||Math.random().toString(36).slice(2));
+    // Подтянуть полный slot из slots.json
+    let slotFull=null;
+    if(window.allSlots){
+      slotFull=window.allSlots.find(s=>s.id===o.slot_id);
+    }
+    const vagas=slotFull?`${slotFull.filled_count||0}/${slotFull.vagas_total||1}`:'';
+    const created=slotFull?slotFull.created_at:null;
+    let acceptances=[];
+    if(slotFull&&slotFull.acceptances){
+      try{
+        acceptances=typeof slotFull.acceptances==='string'?JSON.parse(slotFull.acceptances):slotFull.acceptances;
+      }catch(e){acceptances=[];}
+    }
+
+    const headerHtml=`<div class="mon-card-head" onclick="toggleMonCard('${cardId}')">
+      <div style="flex:1;min-width:200px">
+        <div class="mon-item-name">${typeIcon} ${o.nome||'?'} <span class="mon-city-chip">${cidade}</span> ${turnoBadge}${vagas?' <span style="opacity:.7;font-size:11px">'+vagas+'</span>':''}</div>
+        <div class="mon-item-meta">${tg}${desc?' · '+desc.slice(0,60).replace(/\n/g,' ')+(desc.length>60?'…':''):''}</div>
+      </div>
+      <div class="mon-item-time">${_fmtBRT(o.accepted_at)}</div>
+      <span class="mon-card-toggle">▾</span>
+    </div>`;
+
+    // Подробности (раскрытие)
+    const bodyHtml=`<div class="mon-card-body" id="${cardId}_body" style="display:none">
+      <div class="mon-card-grid">
+        <div><b>${lang==='ru'?'Тип:':'Tipo:'}</b> ${typeIcon} ${o.slot_tipo||'—'}</div>
+        <div><b>${lang==='ru'?'Город:':'Cidade:'}</b> ${cidade}</div>
+        <div><b>${lang==='ru'?'Дата:':'Data:'}</b> ${o.slot_date}</div>
+        <div><b>${lang==='ru'?'Турно:':'Turno:'}</b> ${o.turno_code||'—'}</div>
+        <div><b>${lang==='ru'?'Принял:':'Aceitou:'}</b> ${_fmtBRT(o.accepted_at)} BRT</div>
+        ${vagas?`<div><b>${lang==='ru'?'Вакансии:':'Vagas:'}</b> ${vagas}</div>`:''}
+        ${created?`<div><b>${lang==='ru'?'Создан:':'Criado:'}</b> ${new Date(new Date(created).getTime()-3*3600*1000).toLocaleString('ru-RU')}</div>`:''}
+        <div style="grid-column:1/-1"><b>MEI:</b> ${o.nome||'?'} ${tg}</div>
+        ${desc?`<div style="grid-column:1/-1;background:var(--bg);padding:8px;border-radius:4px;font-size:11px;white-space:pre-wrap;color:var(--muted);margin-top:4px">${desc}</div>`:''}
+        ${acceptances.length>1?`<div style="grid-column:1/-1"><b>${lang==='ru'?'Принявшие':'Aceitos'} (${acceptances.length}):</b> ${acceptances.map(a=>a.name||a.tg_username).join(', ')}</div>`:''}
+      </div>
+    </div>`;
+
+    return `<div class="mon-card mon-${kind}">${headerHtml}${bodyHtml}</div>`;
+  }
+
+  function renderShiftCard(s,kind){
+    const tg=s.tg_username?`<a href="https://t.me/${s.tg_username}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent1);text-decoration:none">@${s.tg_username}</a>`:'';
+    const cidade=s.cidade||'?';
+    const typeIcon=s.slot_tipo==='CHARGER'?'🔋':(s.slot_tipo==='LOGISTICA'?'🚛':'📋');
+    const turnoCode=_detectTurnoByHour(s.started_at);
+    const turnoBadge=turnoCode&&TURNO_LABELS[turnoCode]?`<span class="mon-turno-chip">${turnoCode}</span>`:'';
+    const cardId='shift_'+(s.event_id||Math.random().toString(36).slice(2));
+    const desc=s.slot_descricao||'';
+
+    let timeBlock='';
+    if(kind==='onshift'){
+      const h=(Date.now()-new Date(s.started_at).getTime())/3600000;
+      const hh=Math.floor(h),mm=Math.floor((h-hh)*60);
+      timeBlock=`<div class="mon-item-time" style="color:var(--accent3)">${hh}ч${String(mm).padStart(2,'0')}м</div>`;
+    } else if(kind==='completed'){
+      const dur=s.started_at&&s.ended_at?((new Date(s.ended_at)-new Date(s.started_at))/3600000).toFixed(1):'?';
+      timeBlock=`<div class="mon-item-time">${dur}ч</div>`;
+    }
+
+    return `<div class="mon-card mon-${kind}">
+      <div class="mon-card-head" onclick="toggleMonCard('${cardId}')">
         <div style="flex:1;min-width:200px">
-          <div class="mon-item-name">${o.nome||'?'} <span class="mon-city-chip">${o.cidade||'?'}</span> ${_turnoBadge(o.turno_code)}</div>
-          <div class="mon-item-meta">${tg} · ${o.slot_tipo||''} · ${desc}</div>
+          <div class="mon-item-name">${typeIcon} ${s.nome||'?'} <span class="mon-city-chip">${cidade}</span> ${turnoBadge}</div>
+          <div class="mon-item-meta">${tg} · ${kind==='completed'?_fmtBRT(s.started_at)+'–'+_fmtBRT(s.ended_at):'с '+_fmtBRT(s.started_at)} BRT</div>
         </div>
-        <div class="mon-item-time">принял ${_fmtBRT(o.accepted_at)}</div>
-      </div>`;
-    }).join('');
+        ${timeBlock}
+        <span class="mon-card-toggle">▾</span>
+      </div>
+      <div class="mon-card-body" id="${cardId}_body" style="display:none">
+        <div class="mon-card-grid">
+          <div><b>${lang==='ru'?'Тип:':'Tipo:'}</b> ${typeIcon} ${s.slot_tipo||'—'}</div>
+          <div><b>${lang==='ru'?'Город:':'Cidade:'}</b> ${cidade}</div>
+          <div><b>${lang==='ru'?'Турно:':'Turno:'}</b> ${turnoCode||'—'}</div>
+          <div><b>${lang==='ru'?'Начало:':'Início:'}</b> ${_fmtBRT(s.started_at)} BRT</div>
+          ${s.ended_at?`<div><b>${lang==='ru'?'Конец:':'Fim:'}</b> ${_fmtBRT(s.ended_at)} BRT</div>`:`<div style="color:var(--accent3)"><b>${lang==='ru'?'Статус:':'Status:'}</b> 🟢 на смене</div>`}
+          <div style="grid-column:1/-1"><b>MEI:</b> ${s.nome||'?'} ${tg}</div>
+          ${desc?`<div style="grid-column:1/-1;background:var(--bg);padding:8px;border-radius:4px;font-size:11px;white-space:pre-wrap;color:var(--muted);margin-top:4px">${desc}</div>`:''}
+        </div>
+      </div>
+    </div>`;
+  }
 
-  // === 2. СЕЙЧАС НА СМЕНЕ — только если выбранная дата = сегодня ===
+  // === 1. Заказанные слоты ===
+  document.getElementById('monSlotsCount').textContent=`(${offersForDay.length})`;
+  document.getElementById('monSlotsMeta').innerHTML=_cityChips(offersForDay,o=>o.cidade);
+  document.getElementById('monSlotsBody').innerHTML=offersForDay.length===0?
+    '<div class="mon-empty">Слотов на эту дату нет</div>':
+    offersForDay.sort((a,b)=>(a.cidade||'').localeCompare(b.cidade||'')||new Date(b.accepted_at)-new Date(a.accepted_at))
+      .map(o=>renderOfferCard(o,'slot')).join('');
+
+  // === 2. Сейчас на смене (только для today) ===
   const nowUtc=new Date();
   let onShift=[];
   if(isToday){
     onShift=liveShifts.filter(s=>{
       if(!s.started_at||s.ended_at)return false;
-      const start=new Date(s.started_at);
-      const hours=(nowUtc-start)/3600000;
-      return hours<14;
+      const h=(nowUtc-new Date(s.started_at))/3600000;
+      return h<14;
     });
   }
   document.getElementById('monOnShiftCount').textContent=`(${onShift.length})`;
@@ -1269,22 +1361,9 @@ function renderMonitor(){
   document.getElementById('monOnShiftBody').innerHTML=!isToday?
     '<div class="mon-empty">Доступно только для сегодняшней даты</div>':
     (onShift.length===0?'<div class="mon-empty">Никого на смене</div>':
-    onShift.sort((a,b)=>new Date(b.started_at)-new Date(a.started_at))
-    .map(s=>{
-      const h=(nowUtc-new Date(s.started_at))/3600000;
-      const hh=Math.floor(h),mm=Math.floor((h-hh)*60);
-      const tg=s.tg_username?`<a href="https://t.me/${s.tg_username}" target="_blank" style="color:var(--accent1);text-decoration:none">@${s.tg_username}</a>`:'';
-      const turnoCode=_detectTurnoByHour(s.started_at);
-      return `<div class="mon-item mon-onshift">
-        <div style="flex:1;min-width:200px">
-          <div class="mon-item-name">${s.nome||'?'} <span class="mon-city-chip">${s.cidade||'?'}</span> ${_turnoBadge(turnoCode)}</div>
-          <div class="mon-item-meta">${tg} · ${s.slot_tipo||''} · с ${_fmtBRT(s.started_at)} BRT</div>
-        </div>
-        <div class="mon-item-time" style="color:var(--accent3)">${hh}ч${String(mm).padStart(2,'0')}м</div>
-      </div>`;
-    }).join(''));
+    onShift.sort((a,b)=>new Date(b.started_at)-new Date(a.started_at)).map(s=>renderShiftCard(s,'onshift')).join(''));
 
-  // === 3. ДОЛЖНЫ ВЫЙТИ — offer есть, shift_start нет ===
+  // === 3. Должны выйти ===
   const startedTgIds=new Set();
   liveShifts.forEach(s=>{
     if(s.started_at){
@@ -1292,50 +1371,26 @@ function renderMonitor(){
       if(sBrt.toISOString().slice(0,10)===dateIso)startedTgIds.add(s.tg_id);
     }
   });
-  const expected=slotsForDay.filter(o=>!startedTgIds.has(o.tg_id));
+  const expected=offersForDay.filter(o=>!startedTgIds.has(o.tg_id));
   document.getElementById('monExpectedCount').textContent=`(${expected.length})`;
   document.getElementById('monExpectedMeta').innerHTML=_cityChips(expected,o=>o.cidade);
   document.getElementById('monExpectedBody').innerHTML=expected.length===0?
     '<div class="mon-empty">Все вышедшие отметились ✓</div>':
-    expected.sort((a,b)=>new Date(a.accepted_at)-new Date(b.accepted_at))
-    .map(o=>{
-      const tg=o.tg_username?`<a href="https://t.me/${o.tg_username}" target="_blank" style="color:var(--accent1);text-decoration:none">@${o.tg_username}</a>`:'';
-      return `<div class="mon-item mon-expected">
-        <div style="flex:1;min-width:200px">
-          <div class="mon-item-name">${o.nome||'?'} <span class="mon-city-chip">${o.cidade||'?'}</span> ${_turnoBadge(o.turno_code)}</div>
-          <div class="mon-item-meta">${tg} · ${o.slot_tipo||''}</div>
-        </div>
-        <div class="mon-item-time" style="color:var(--accent4)">принял ${_fmtBRT(o.accepted_at)}</div>
-      </div>`;
-    }).join('');
+    expected.sort((a,b)=>new Date(a.accepted_at)-new Date(b.accepted_at)).map(o=>renderOfferCard(o,'expected')).join('');
 
-  // === 4. НЕ ВЫШЛИ — offer был, shift_start не было ВЕСЬ день
-  //   (для прошлых дат - окончательно; для сегодня - те у кого offer + сейчас не на смене + не завершил смену)
-  const isPast=dateIso<todayIso;
+  // === 4. Не вышли (только прошлое) ===
   let noShow=[];
   if(isPast){
-    noShow=slotsForDay.filter(o=>!startedTgIds.has(o.tg_id));
-  } else if(isToday){
-    // Для сегодня "не вышли" = expected (дублирование), скрываем
-    noShow=[];
+    noShow=offersForDay.filter(o=>!startedTgIds.has(o.tg_id));
   }
   document.getElementById('monNoShowCount').textContent=`(${noShow.length})`;
   document.getElementById('monNoShowMeta').innerHTML=isPast?_cityChips(noShow,o=>o.cidade):'<span style="opacity:.5">только для прошедших дат</span>';
   document.getElementById('monNoShowBody').innerHTML=!isPast?
     '<div class="mon-empty">Для прошедших дат</div>':
     (noShow.length===0?'<div class="mon-empty">Все вышли ✓</div>':
-    noShow.map(o=>{
-      const tg=o.tg_username?`<a href="https://t.me/${o.tg_username}" target="_blank" style="color:var(--accent1);text-decoration:none">@${o.tg_username}</a>`:'';
-      return `<div class="mon-item mon-noshow">
-        <div style="flex:1;min-width:200px">
-          <div class="mon-item-name">${o.nome||'?'} <span class="mon-city-chip">${o.cidade||'?'}</span> ${_turnoBadge(o.turno_code)}</div>
-          <div class="mon-item-meta">${tg} · принял ${_fmtBRT(o.accepted_at)}</div>
-        </div>
-        <div class="mon-item-time" style="color:var(--accent2)">❌</div>
-      </div>`;
-    }).join(''));
+    noShow.map(o=>renderOfferCard(o,'noshow')).join(''));
 
-  // === 5. ЗАВЕРШИЛИ СМЕНУ — shift_end на эту дату ===
+  // === 5. Завершили смену ===
   const completed=liveShifts.filter(s=>{
     if(!s.ended_at)return false;
     const endBrt=new Date(new Date(s.ended_at).getTime()-3*3600*1000);
@@ -1345,49 +1400,28 @@ function renderMonitor(){
   document.getElementById('monCompletedMeta').innerHTML=_cityChips(completed,s=>s.cidade);
   document.getElementById('monCompletedBody').innerHTML=completed.length===0?
     '<div class="mon-empty">Пока никто</div>':
-    completed.sort((a,b)=>new Date(b.ended_at)-new Date(a.ended_at))
-    .map(s=>{
-      const dur=s.started_at?(((new Date(s.ended_at)-new Date(s.started_at))/3600000).toFixed(1)):'?';
-      const tg=s.tg_username?`<a href="https://t.me/${s.tg_username}" target="_blank" style="color:var(--accent1);text-decoration:none">@${s.tg_username}</a>`:'';
-      const turnoCode=_detectTurnoByHour(s.started_at);
-      return `<div class="mon-item mon-completed">
-        <div style="flex:1;min-width:200px">
-          <div class="mon-item-name">${s.nome||'?'} <span class="mon-city-chip">${s.cidade||'?'}</span> ${_turnoBadge(turnoCode)}</div>
-          <div class="mon-item-meta">${tg} · ${_fmtBRT(s.started_at)}–${_fmtBRT(s.ended_at)} BRT</div>
-        </div>
-        <div class="mon-item-time">${dur}ч</div>
-      </div>`;
-    }).join('');
+    completed.sort((a,b)=>new Date(b.ended_at)-new Date(a.ended_at)).map(s=>renderShiftCard(s,'completed')).join('');
 
   // last update
   if(typeof updatedAtGlobal!=='undefined'&&updatedAtGlobal){
     const min=Math.round((Date.now()-new Date(updatedAtGlobal).getTime())/60000);
-    document.getElementById('monLastUpdate').textContent=`обновлено ${min}мин назад`;
+    const upd=document.getElementById('monLastUpdate');
+    if(upd)upd.textContent=`обновлено ${min}мин назад`;
   }
 }
 
-// Инициализация Монитора при загрузке (синхронно, без задержек)
-function _initMonitor(){
-  const today=new Date();
-  window.monSelectedDate=today.toISOString().slice(0,10);
-  const inp=document.getElementById('monDate');
-  if(inp){
-    inp.value=window.monSelectedDate;
-    if(!inp._hasHandler){
-      inp.addEventListener('change',(e)=>{
-        window.monSelectedDate=e.target.value;
-        renderMonitor();
-      });
-      inp._hasHandler=true;
-    }
-  }
-  try{renderMonitor();}catch(e){console.error('renderMonitor init failed',e);}
+// Toggle карточки слота
+function toggleMonCard(cardId){
+  const body=document.getElementById(cardId+'_body');
+  if(!body)return;
+  const isOpen=body.style.display!=='none';
+  body.style.display=isOpen?'none':'block';
+  const toggle=body.previousElementSibling.querySelector('.mon-card-toggle');
+  if(toggle)toggle.style.transform=isOpen?'rotate(0deg)':'rotate(180deg)';
 }
-window.addEventListener('load',_initMonitor);
-document.addEventListener('DOMContentLoaded',_initMonitor);
 
-// renderLive теперь = renderMonitor (для совместимости с fetchBotData)
 window.renderLive=renderMonitor;
+
 </script>
 
 
@@ -1426,6 +1460,24 @@ window.renderLive=renderMonitor;
   }
 })();
 </script>
+
+
+<style>
+.mon-card{background:var(--bg3);border-left:3px solid var(--border);border-radius:6px;margin-top:6px;overflow:hidden;transition:all .15s}
+.mon-card:hover{border-left-width:5px}
+.mon-card-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:8px 12px;cursor:pointer;flex-wrap:wrap}
+.mon-card-head:hover{background:rgba(255,255,255,.03)}
+.mon-card-toggle{color:var(--muted);font-size:12px;transition:transform .2s;margin-left:4px}
+.mon-card-body{padding:10px 12px;background:var(--bg);border-top:1px solid var(--border)}
+.mon-card-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 14px;font-size:12px;line-height:1.5}
+.mon-card-grid b{color:var(--muted);font-weight:600;margin-right:4px}
+.mon-slot{border-left-color:var(--accent1)}
+.mon-expected{border-left-color:var(--accent4);background:rgba(245,166,35,.05)}
+.mon-onshift{border-left-color:var(--accent3);background:rgba(40,180,99,.06)}
+.mon-noshow{border-left-color:var(--accent2);background:rgba(255,80,80,.06)}
+.mon-completed{border-left-color:var(--accent1);background:rgba(43,170,255,.04)}
+@media(max-width:640px){.mon-card-grid{grid-template-columns:1fr}}
+</style>
 
 </body>
 </html>
