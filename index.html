@@ -1391,5 +1391,30 @@ window.renderLive=renderMonitor;
 </script>
 
 
+
+<script>
+// === BOOT: первичная отрисовка при загрузке ===
+(function bootPanel(){
+  function doBoot(){
+    try{
+      // Гарантируем что curMonth и curYear = текущие
+      const _today=new Date();
+      if(typeof curMonth!=='undefined'){curMonth=_today.getMonth();}
+      if(typeof curYear!=='undefined'){curYear=_today.getFullYear();}
+      // Рисуем шапку и таблицы
+      if(typeof render==='function')render();
+      // Тянем данные из Gist
+      if(typeof fetchBotData==='function')fetchBotData();
+    }catch(e){console.error('boot failed:',e);}
+  }
+  // На случай что DOM ещё не готов
+  if(document.readyState==='complete'||document.readyState==='interactive'){
+    setTimeout(doBoot,0);
+  } else {
+    document.addEventListener('DOMContentLoaded',doBoot);
+  }
+})();
+</script>
+
 </body>
 </html>
