@@ -178,8 +178,8 @@
   </div>
 
   <!-- 5 секций -->
-  <div id="monSlots" class="mon-section mon-clickable" onclick="toggleMonSection('Slots')">
-    <div class="mon-header">
+  <div id="monSlots" class="mon-section">
+    <div class="mon-header" onclick="toggleMonSection('Slots')" style="cursor:pointer">
       <span class="mon-icon" style="color:var(--accent1)">📋</span>
       <span class="mon-title">ЗАКАЗАННЫЕ СЛОТЫ</span>
       <span class="mon-count" id="monSlotsCount">(0)</span>
@@ -189,8 +189,8 @@
     <div class="mon-body" id="monSlotsBody" style="display:none"></div>
   </div>
 
-  <div id="monOnShift" class="mon-section mon-clickable" onclick="toggleMonSection('OnShift')">
-    <div class="mon-header">
+  <div id="monOnShift" class="mon-section">
+    <div class="mon-header" onclick="toggleMonSection('OnShift')" style="cursor:pointer">
       <span class="mon-icon" style="color:var(--accent3)">🟢</span>
       <span class="mon-title">СЕЙЧАС НА СМЕНЕ</span>
       <span class="mon-count" id="monOnShiftCount">(0)</span>
@@ -200,8 +200,8 @@
     <div class="mon-body" id="monOnShiftBody" style="display:none"></div>
   </div>
 
-  <div id="monExpected" class="mon-section mon-clickable" onclick="toggleMonSection('Expected')">
-    <div class="mon-header">
+  <div id="monExpected" class="mon-section">
+    <div class="mon-header" onclick="toggleMonSection('Expected')" style="cursor:pointer">
       <span class="mon-icon" style="color:var(--accent4)">⌛</span>
       <span class="mon-title">ДОЛЖНЫ ВЫЙТИ</span>
       <span class="mon-count" id="monExpectedCount">(0)</span>
@@ -211,8 +211,8 @@
     <div class="mon-body" id="monExpectedBody" style="display:none"></div>
   </div>
 
-  <div id="monNoShow" class="mon-section mon-clickable" onclick="toggleMonSection('NoShow')">
-    <div class="mon-header">
+  <div id="monNoShow" class="mon-section">
+    <div class="mon-header" onclick="toggleMonSection('NoShow')" style="cursor:pointer">
       <span class="mon-icon" style="color:var(--accent2)">❌</span>
       <span class="mon-title">НЕ ВЫШЛИ</span>
       <span class="mon-count" id="monNoShowCount">(0)</span>
@@ -222,8 +222,8 @@
     <div class="mon-body" id="monNoShowBody" style="display:none"></div>
   </div>
 
-  <div id="monCompleted" class="mon-section mon-clickable" onclick="toggleMonSection('Completed')">
-    <div class="mon-header">
+  <div id="monCompleted" class="mon-section">
+    <div class="mon-header" onclick="toggleMonSection('Completed')" style="cursor:pointer">
       <span class="mon-icon" style="color:var(--accent1)">✅</span>
       <span class="mon-title">ЗАВЕРШИЛИ СМЕНУ</span>
       <span class="mon-count" id="monCompletedCount">(0)</span>
@@ -1268,7 +1268,7 @@ function renderMonitor(){
       }catch(e){acceptances=[];}
     }
 
-    const headerHtml=`<div class="mon-card-head" onclick="toggleMonCard('${cardId}')">
+    const headerHtml=`<div class="mon-card-head" onclick="toggleMonCard('${cardId}',event)">
       <div style="flex:1;min-width:200px">
         <div class="mon-item-name">${typeIcon} ${o.nome||'?'} <span class="mon-city-chip">${cidade}</span> ${turnoBadge}${vagas?' <span style="opacity:.7;font-size:11px">'+vagas+'</span>':''}</div>
         <div class="mon-item-meta">${tg}${desc?' · '+desc.slice(0,60).replace(/\n/g,' ')+(desc.length>60?'…':''):''}</div>
@@ -1316,7 +1316,7 @@ function renderMonitor(){
     }
 
     return `<div class="mon-card mon-${kind}">
-      <div class="mon-card-head" onclick="toggleMonCard('${cardId}')">
+      <div class="mon-card-head" onclick="toggleMonCard('${cardId}',event)">
         <div style="flex:1;min-width:200px">
           <div class="mon-item-name">${typeIcon} ${s.nome||'?'} <span class="mon-city-chip">${cidade}</span> ${turnoBadge}</div>
           <div class="mon-item-meta">${tg} · ${kind==='completed'?_fmtBRT(s.started_at)+'–'+_fmtBRT(s.ended_at):'с '+_fmtBRT(s.started_at)} BRT</div>
@@ -1411,7 +1411,10 @@ function renderMonitor(){
 }
 
 // Toggle карточки слота
-function toggleMonCard(cardId){
+function toggleMonCard(cardId,ev){
+  // Не давать всплыть наверх — иначе закроется родительская секция
+  if(ev){ev.stopPropagation();}
+  else if(window.event){window.event.stopPropagation();}
   const body=document.getElementById(cardId+'_body');
   if(!body)return;
   const isOpen=body.style.display!=='none';
