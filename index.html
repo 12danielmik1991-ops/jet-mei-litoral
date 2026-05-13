@@ -1210,6 +1210,12 @@ function _detectTurnoByHour(iso){
 function renderMonitor(){
   if(typeof liveShifts==='undefined')window.liveShifts=[];
   if(typeof liveOffers==='undefined')window.liveOffers=[];
+  // Авто-переключение на вчера если на сегодня данных нет (один раз)
+  if(typeof _autoSwitchToYesterdayIfEmpty==='function'){
+    if(_autoSwitchToYesterdayIfEmpty()){
+      // дата сменилась — продолжаем рендер с новой датой
+    }
+  }
   if(typeof liveTurnos==='undefined')window.liveTurnos=[];
 
   const dateIso=window.monSelectedDate||new Date().toISOString().slice(0,10);
