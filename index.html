@@ -1492,5 +1492,45 @@ setTimeout(function(){
 },15000);
 </script>
 
+
+<script>
+// Auto-switch на вчера если на сегодня в мониторе ничего нет
+window._monAutoYesterdayApplied=window._monAutoYesterdayApplied||false;
+
+function _autoSwitchToYesterdayIfEmpty(){
+  if(window._monAutoYesterdayApplied)return false;
+  if(typeof liveOffers==='undefined'||typeof liveShifts==='undefined')return false;
+  if(!Array.isArray(liveOffers)||!Array.isArray(liveShifts))return false;
+  const todayIso=new Date().toISOString().slice(0,10);
+  if(window.monSelectedDate!==todayIso)return false;
+  const offersToday=liveOffers.filter(o=>o.slot_date===todayIso).length;
+  let shiftsToday=0;
+  liveShifts.forEach(s=>{
+    if(s.started_at){
+      const sBrt=new Date(new Date(s.started_at).getTime()-3*3600*1000);
+      if(sBrt.toISOString().slice(0,10)===todayIso)shiftsToday++;
+    }
+  });
+  if(offersToday===0&&shiftsToday===0){
+    const y=new Date();y.setDate(y.getDate()-1);
+    const ydayIso=y.toISOString().slice(0,10);
+    window.monSelectedDate=ydayIso;
+    window._monAutoYesterdayApplied=true;
+    const inp=document.getElementById('monDate');
+    if(inp)inp.value=ydayIso;
+    console.log('[monitor] auto-switched to yesterday',ydayIso,'(no data for today)');
+    return true;
+  }
+  return false;
+}
+
+// Если пользователь сам поменял дату — больше не авто-переключаемся
+document.addEventListener('change',function(e){
+  if(e.target&&e.target.id==='monDate'){
+    window._monAutoYesterdayApplied=true;
+  }
+},true);
+</script>
+
 </body>
 </html>
