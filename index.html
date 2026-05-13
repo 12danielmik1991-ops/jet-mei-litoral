@@ -1238,6 +1238,7 @@ function renderMonitor(){
 
   // === Карточка слота (заказ) ===
   function renderOfferCard(o,kind){
+    if(typeof _enrichOfferWithCreator==='function')o=_enrichOfferWithCreator(o);
     const tg=o.tg_username?`<a href="https://t.me/${o.tg_username}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent1);text-decoration:none">@${o.tg_username}</a>`:'';
     const typeIcon=o.slot_tipo==='CHARGER'?'🔋':(o.slot_tipo==='LOGISTICA'?'🚛':'📋');
     const cidade=o.cidade||'?';
@@ -1277,6 +1278,7 @@ function renderMonitor(){
         <div><b>${lang==='ru'?'Принял:':'Aceitou:'}</b> ${_fmtBRT(o.accepted_at)} BRT</div>
         ${vagas?`<div><b>${lang==='ru'?'Вакансии:':'Vagas:'}</b> ${vagas}</div>`:''}
         ${created?`<div><b>${lang==='ru'?'Создан:':'Criado:'}</b> ${new Date(new Date(created).getTime()-3*3600*1000).toLocaleString('ru-RU')}</div>`:''}
+        ${(o.slot_created_by_name||o.slot_created_by_username)?`<div style="grid-column:1/-1"><b>${lang==='ru'?'Создал:':'Criou:'}</b> ${o.slot_created_by_name||'?'} ${o.slot_created_by_username?'<a href="https://t.me/'+o.slot_created_by_username+'" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent1);text-decoration:none">@'+o.slot_created_by_username+'</a>':''}</div>`:''}
         <div style="grid-column:1/-1"><b>MEI:</b> ${o.nome||'?'} ${tg}</div>
         ${desc?`<div style="grid-column:1/-1;background:var(--bg);padding:8px;border-radius:4px;font-size:11px;white-space:pre-wrap;color:var(--muted);margin-top:4px">${desc}</div>`:''}
         ${acceptances.length>1?`<div style="grid-column:1/-1"><b>${lang==='ru'?'Принявшие':'Aceitos'} (${acceptances.length}):</b> ${acceptances.map(a=>a.name||a.tg_username).join(', ')}</div>`:''}
@@ -1287,6 +1289,14 @@ function renderMonitor(){
   }
 
   function renderShiftCard(s,kind){
+    // Подтягиваем создателя из allSlots
+    if(s.slot_id&&window.allSlots){
+      const slot=window.allSlots.find(x=>x.id===s.slot_id);
+      if(slot){
+        s.slot_created_by_name=slot.created_by_name;
+        s.slot_created_by_username=slot.created_by_username;
+      }
+    }
     const tg=s.tg_username?`<a href="https://t.me/${s.tg_username}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent1);text-decoration:none">@${s.tg_username}</a>`:'';
     const cidade=s.cidade||'?';
     const typeIcon=s.slot_tipo==='CHARGER'?'🔋':(s.slot_tipo==='LOGISTICA'?'🚛':'📋');
@@ -1321,6 +1331,7 @@ function renderMonitor(){
           <div><b>${lang==='ru'?'Турно:':'Turno:'}</b> ${turnoCode||'—'}</div>
           <div><b>${lang==='ru'?'Начало:':'Início:'}</b> ${_fmtBRT(s.started_at)} BRT</div>
           ${s.ended_at?`<div><b>${lang==='ru'?'Конец:':'Fim:'}</b> ${_fmtBRT(s.ended_at)} BRT</div>`:`<div style="color:var(--accent3)"><b>${lang==='ru'?'Статус:':'Status:'}</b> 🟢 на смене</div>`}
+          ${(s.slot_created_by_name||s.slot_created_by_username)?`<div style="grid-column:1/-1"><b>${lang==='ru'?'Слот создал:':'Slot criado por:'}</b> ${s.slot_created_by_name||'?'} ${s.slot_created_by_username?'<a href="https://t.me/'+s.slot_created_by_username+'" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent1);text-decoration:none">@'+s.slot_created_by_username+'</a>':''}</div>`:''}
           <div style="grid-column:1/-1"><b>MEI:</b> ${s.nome||'?'} ${tg}</div>
           ${desc?`<div style="grid-column:1/-1;background:var(--bg);padding:8px;border-radius:4px;font-size:11px;white-space:pre-wrap;color:var(--muted);margin-top:4px">${desc}</div>`:''}
         </div>
@@ -1343,7 +1354,7 @@ function renderMonitor(){
     onShift=liveShifts.filter(s=>{
       if(!s.started_at||s.ended_at)return false;
       const h=(nowUtc-new Date(s.started_at))/3600000;
-      return h<14;
+      return h<10;  // >10ч = забытая смена, не показываем
     });
   }
   document.getElementById('monOnShiftCount').textContent=`(${onShift.length})`;
@@ -1530,6 +1541,21 @@ document.addEventListener('change',function(e){
     window._monAutoYesterdayApplied=true;
   }
 },true);
+</script>
+
+
+<script>
+// Подтягиваем создателя слота из window.allSlots по slot_id если в offer нет
+function _enrichOfferWithCreator(o){
+  if(o.slot_created_by_name||o.slot_created_by_username)return o;
+  if(!window.allSlots||!Array.isArray(window.allSlots))return o;
+  const slot=window.allSlots.find(s=>s.id===o.slot_id);
+  if(slot){
+    if(slot.created_by_name)o.slot_created_by_name=slot.created_by_name;
+    if(slot.created_by_username)o.slot_created_by_username=slot.created_by_username;
+  }
+  return o;
+}
 </script>
 
 </body>
