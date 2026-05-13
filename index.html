@@ -399,8 +399,9 @@ function generateStableSlots(year,month){
 // ── BOT SYNC ────────────────────────────────────────
 async function fetchBotData(){
   const btn=document.getElementById('syncBtn');
-  btn.classList.add('loading');btn.textContent='⟳ ...';
-  document.getElementById('statusDot').style.background='var(--accent4)';
+  if(btn){btn.classList.add('loading');btn.textContent='⟳ ...';}
+  const _sd=document.getElementById('statusDot');
+  if(_sd)_sd.style.background='var(--accent4)';
   try{
     // Источник 1: GitHub Gist (бот пишет туда каждые 5 мин из БД)
     const GIST_USER="12danielmik1991-ops";
@@ -587,7 +588,7 @@ async function fetchBotData(){
     document.getElementById('statusText').textContent=`${t('status_err')}: ${err.message}`;
     document.getElementById('statusDot').style.background='var(--accent2)';
   }finally{
-    btn.classList.remove('loading');btn.textContent='⟳ Sync';
+    if(btn){btn.classList.remove('loading');btn.textContent='⟳ Sync';}
   }
   [renderWorkers,renderSummary,renderTasks,renderTaskSummary,()=>{if(typeof renderMonitor==='function')renderMonitor();},()=>{if(typeof renderSlotsGrid==='function')renderSlotsGrid();}].forEach(fn=>{try{fn();}catch(e){console.warn('render skipped:',fn.name||'anon',e.message);}});if(typeof renderMonitor==='function'){try{renderMonitor();}catch(e){console.error('renderMonitor failed',e);}}if(typeof renderLive==='function')renderLive();
 }
