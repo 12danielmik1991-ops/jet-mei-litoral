@@ -853,20 +853,40 @@ function normalizeName(s){
     .filter(w=>w.length>=3));
 }
 
+const NAME_STOPWORDS=new Set(['MEI','SILVA','SANTOS','DOS','DAS','OLIVEIRA','SOUZA','SOUSA','LIMA','FERREIRA','ALVES','RODRIGUES','PEREIRA','COSTA','GOMES','RIBEIRO','MARTINS','CARVALHO','JUNIOR','NETO','FILHO']);
+function meaningfulWords(nameSet){
+  // редкие (значимые) слова — без частых фамилий-паразитов
+  const out=new Set();
+  nameSet.forEach(w=>{if(!NAME_STOPWORDS.has(w))out.add(w);});
+  return out;
+}
 function findActionsForMei(meiName){
   if(!meiName||!dailyActions||dailyActions.length===0)return null;
   const target=normalizeName(meiName);
   if(target.size===0)return null;
+  const targetMeaningful=meaningfulWords(target);
   let best=null,bestScore=0;
   for(const rec of dailyActions){
     const cand=normalizeName(rec.name);
-    let common=0;
-    target.forEach(w=>{if(cand.has(w))common++;});
-    const minLen=Math.min(target.size,cand.size);
-    const required=minLen<=2?2:(minLen===3?2:3);
-    if(common>=required){
-      const score=common/Math.max(target.size,cand.size);
-      if(score>bestScore&&score>=0.4){bestScore=score;best=rec;}
+    const candMeaningful=meaningfulWords(cand);
+    // считаем совпадения ЗНАЧИМЫХ слов
+    let commonMeaningful=0;
+    targetMeaningful.forEach(w=>{if(candMeaningful.has(w))commonMeaningful++;});
+    // совпадения всех слов (для score)
+    let commonAll=0;
+    target.forEach(w=>{if(cand.has(w))commonAll++;});
+    // ТРЕБОВАНИЕ: минимум 2 значимых слова должны совпасть.
+    // Если у имени всего 1 значимое слово — требуем чтобы оно совпало + ещё хотя бы 1 любое.
+    const minMeaningful=Math.min(targetMeaningful.size,candMeaningful.size);
+    let required;
+    if(minMeaningful>=2){required=2;}
+    else if(minMeaningful===1){required=1;}
+    else {required=99;} // нет значимых слов с обеих сторон → не матчим
+    if(commonMeaningful>=required){
+      // score на основе значимых слов
+      const denom=Math.max(targetMeaningful.size,candMeaningful.size,1);
+      const score=commonMeaningful/denom;
+      if(score>bestScore&&score>=0.5){bestScore=score;best=rec;}
     }
   }
   return best;
