@@ -905,6 +905,12 @@ async function loadDailyActions(){
       }
     }
     console.log(`[daily_actions] loaded ${dailyActions.length} ЦД records · matched ${matched}/${total} workers`);
+    // PG diagnostic
+    if(typeof CITIES!=='undefined'){
+      const pgw=(WORKERS['PG']||[]);
+      let pgMatch=0; pgw.forEach(w=>{if(findActionsForMei(w.name))pgMatch++;});
+      console.log(`[PG diag] WORKERS.PG=${pgw.length} matched=${pgMatch} dailyActions=${dailyActions.length}`);
+    }
     // Перерисовываем задачи
     if(typeof renderTasks==='function')renderTasks();
   }catch(e){
