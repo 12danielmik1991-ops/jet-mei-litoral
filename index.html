@@ -486,15 +486,29 @@ async function fetchBotData(){
     // === Очищаем WORKERS и заполняем из источника ===
     CITIES.forEach(c=>{WORKERS[c]=[];});
 
+    // Маппинг полного названия города → код (для synthetic-воркеров из Urent листа)
+    const CITY_NAME_TO_CODE={};
+    Object.entries(CITY_NAMES).forEach(([code,nm])=>{
+      const norm=nm.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+      CITY_NAME_TO_CODE[norm]=code;
+    });
+    const resolveCity=v=>{
+      if(!v)return null;
+      if(CITIES.includes(v))return v; // уже код
+      const norm=String(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
+      return CITY_NAME_TO_CODE[norm]||null;
+    };
+
     workersRaw.forEach(w=>{
       // gist формат: {nome, cidade, tg_username, ...}
       // sheet формат: {name, city, tg_username, ...}
       const name=w.nome||w.name;
-      const city=w.cidade||w.city;
+      const cityRaw=w.cidade||w.city;
+      const city=resolveCity(cityRaw);
       const tg_username=w.tg_username;
       const role=w.role||(w.cnpj?'MEI':'MEI');
 
-      if(!city||city==="ALL"||!CITIES.includes(city))return;
+      if(!city||!CITIES.includes(city))return;
       const tag=tg_username?'@'+tg_username:`@${name||'worker'}`.toLowerCase().replace(/\s+/g,'_');
       WORKERS[city].push({
         id:`db_${w.id||w.worker_id||tg_username||name}`,
@@ -502,7 +516,9 @@ async function fetchBotData(){
         tag:tag,
         role:role,
         cnpj:w.cnpj||'',
-        tg_id:w.tg_id
+        tg_id:w.tg_id,
+        notRegistered: !!w.not_registered,
+        source: w.source||(w.not_registered?'urent_sheet':'bot_db')
       });
     });
 
