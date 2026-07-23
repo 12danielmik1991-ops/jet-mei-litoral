@@ -73,12 +73,9 @@
   .sch-chip.sch-taken{background:var(--slot-full);border:1px solid var(--slot-full-border);color:var(--text)}
   .sch-chip.sch-confirmed{background:var(--slot-full-border);border:1px solid var(--slot-full-border);color:#000;font-weight:700}
   .sch-empty-note{padding:30px;text-align:center;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:12px}
-  /* ── Подложка JET MEI ── */
-  #brandWatermark{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;z-index:0;user-select:none}
-  #brandWatermark .wm-main{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(90px,18vw,260px);line-height:.9;letter-spacing:-.02em;color:var(--text);opacity:.035;text-align:center}
-  #brandWatermark .wm-sub{font-family:'Space Mono',monospace;font-size:clamp(12px,2vw,20px);letter-spacing:.4em;color:var(--accent);opacity:.07;margin-top:18px;text-transform:uppercase}
-  header,.tabs-bar,.status-bar,.tab-content,.tooltip{position:relative;z-index:1}
-  .brand-credit{position:fixed;right:14px;bottom:10px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);opacity:.55;z-index:2;pointer-events:none;letter-spacing:.08em}
+  /* ── Подложка JET MEI (как на maps.jetmd.online: диагональный повторяющийся узор) ── */
+  body{background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzNjAiIGhlaWdodD0iMjAwIj48ZyB0cmFuc2Zvcm09InJvdGF0ZSgtMzAgMTgwIDEwMCkiPjx0ZXh0IHg9IjYwIiB5PSI5MCIgZmlsbD0iIzAwZTVmZiIgZmlsbC1vcGFjaXR5PSIwLjEwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjYiIGZvbnQtd2VpZ2h0PSI4MDAiPkpFVDwvdGV4dD48dGV4dCB4PSIxMCIgeT0iMTIwIiBmaWxsPSIjMDBlNWZmIiBmaWxsLW9wYWNpdHk9IjAuMTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCI+TUVJPC90ZXh0Pjx0ZXh0IHg9IjMwIiB5PSIxNDUiIGZpbGw9IiMwMGU1ZmYiIGZpbGwtb3BhY2l0eT0iMC4xMCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNjAwIj5CeSBEYW5pZWwgTTwvdGV4dD48L2c+PC9zdmc+');background-repeat:repeat}
+  html.light body{background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzNjAiIGhlaWdodD0iMjAwIj48ZyB0cmFuc2Zvcm09InJvdGF0ZSgtMzAgMTgwIDEwMCkiPjx0ZXh0IHg9IjYwIiB5PSI5MCIgZmlsbD0iIzAwNzdjYyIgZmlsbC1vcGFjaXR5PSIwLjEwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjYiIGZvbnQtd2VpZ2h0PSI4MDAiPkpFVDwvdGV4dD48dGV4dCB4PSIxMCIgeT0iMTIwIiBmaWxsPSIjMDA3N2NjIiBmaWxsLW9wYWNpdHk9IjAuMTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCI+TUVJPC90ZXh0Pjx0ZXh0IHg9IjMwIiB5PSIxNDUiIGZpbGw9IiMwMDc3Y2MiIGZpbGwtb3BhY2l0eT0iMC4xMCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNjAwIj5CeSBEYW5pZWwgTTwvdGV4dD48L2c+PC9zdmc+');background-repeat:repeat}
   .calendar-table{border-collapse:separate;border-spacing:2px;min-width:100%;table-layout:fixed}
   .calendar-table th,.calendar-table td{padding:0}
   .col-name{width:155px;min-width:130px;position:sticky;left:0;z-index:10}
@@ -329,13 +326,6 @@
     <div id="schGrid" style="min-width:760px"></div>
   </div>
 </div>
-
-<!-- Подложка бренда -->
-<div id="brandWatermark" aria-hidden="true">
-  <div class="wm-main">JET<br>MEI</div>
-  <div class="wm-sub">by Daniel M</div>
-</div>
-<div class="brand-credit">JET MEI · by Daniel M</div>
 
 <div class="tooltip" id="tooltip"></div>
 
