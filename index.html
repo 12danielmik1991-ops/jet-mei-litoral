@@ -1645,16 +1645,23 @@ function renderAntifraud(){
   });
   html+='</tbody></table>';
   document.getElementById('afCities').innerHTML=html;
+  // Если пароль уже сохранён на устройстве — сразу показываем ФИО, без ввода
+  const saved=localStorage.getItem('jet_af_pass');
+  if(saved&&afData.people_enc){
+    const inp=document.getElementById('afPass'); if(inp)inp.value=saved;
+    afReveal(saved);
+  }
 }
 function resolveCityAF(name){return ourCity(name)||name;}
 
-async function afReveal(){
-  const pass=document.getElementById('afPass').value;
+async function afReveal(pass){
+  if(pass===undefined)pass=document.getElementById('afPass').value;
   const box=document.getElementById('afPeopleBox');
   if(!afData||!afData.people_enc){box.innerHTML='<div class="mon-empty">—</div>';return;}
   try{
     const people=await afDecrypt(afData.people_enc,pass);
     afPeople=people;
+    localStorage.setItem('jet_af_pass',pass); // запомнить на этом устройстве
     renderAfPeople(people);
   }catch(e){
     box.innerHTML=`<div class="mon-empty" style="color:var(--accent2)">🔒 ${t('af_wrongpass')}</div>`;
