@@ -73,6 +73,24 @@
   .sch-chip.sch-taken{background:var(--slot-full);border:1px solid var(--slot-full-border);color:var(--text)}
   .sch-chip.sch-confirmed{background:var(--slot-full-border);border:1px solid var(--slot-full-border);color:#000;font-weight:700}
   .sch-empty-note{padding:30px;text-align:center;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:12px}
+  /* ── OVERVIEW (Painel Geral) ── */
+  .ov-hero{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:16px 24px 8px;flex-wrap:wrap}
+  .ov-hero-title{font-size:20px;font-weight:800}
+  .ov-hero-sub{font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;margin-top:2px}
+  .ov-links{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .ov-link{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:7px 13px;font-size:12px;font-weight:700;cursor:pointer;text-decoration:none;font-family:'Syne',sans-serif;transition:all .2s;display:inline-flex;align-items:center;gap:5px}
+  .ov-link:hover{border-color:var(--accent);color:var(--accent)}
+  .ov-link-heat{background:linear-gradient(135deg,#ff6b35,#ff4757);color:#fff;border:none}
+  .ov-link-heat:hover{opacity:.88;color:#fff}
+  .ov-kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;padding:10px 24px 16px}
+  @media(max-width:1000px){.ov-kpis{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:560px){.ov-kpis{grid-template-columns:repeat(2,1fr)}}
+  .ov-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding:0 24px 30px}
+  @media(max-width:820px){.ov-grid{grid-template-columns:1fr}}
+  .ov-city-row{display:flex;align-items:center;gap:10px;padding:7px 4px;border-bottom:1px solid var(--border);font-size:12px}
+  .ov-city-name{width:130px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ov-city-stat{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);white-space:nowrap}
+  .ov-city-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px}
   /* ── ANALYTICS TAB ── */
   .an-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:6px 24px 18px}
   @media(max-width:820px){.an-grid{grid-template-columns:1fr}}
@@ -189,7 +207,8 @@
 </header>
 
 <div class="tabs-bar">
-  <div class="tab active" data-tab="slots" onclick="switchTab('slots')"><span>📝</span><span>Создать новый слот</span></div>
+  <div class="tab active" data-tab="overview" onclick="switchTab('overview')"><span>📊</span><span>Painel Geral</span></div>
+  <div class="tab" data-tab="slots" onclick="switchTab('slots')"><span>📝</span><span>Создать новый слот</span></div>
   <div class="tab" data-tab="tasks" onclick="switchTab('tasks')"><span>✅</span><span>Задачи</span></div>
   <div class="tab" data-tab="analytics" onclick="switchTab('analytics')"><span>📈</span><span>Аналитика</span></div>
   <div class="tab" data-tab="schedule" onclick="switchTab('schedule')"><span>📅</span><span>График</span></div>
@@ -272,7 +291,7 @@
 
 
 <!-- TAB SLOTS -->
-<div class="tab-content active" id="tab-slots">
+<div class="tab-content" id="tab-slots">
   <div class="slots-wrap">
     <div class="slots-header">
       <div class="slots-title" data-i18n="order_shift">Заказать смену</div>
@@ -314,6 +333,42 @@
   </div>
   <div class="city-filter" id="cityFilter2"></div>
   <div class="calendar-wrap"><table class="calendar-table" id="calTasks"></table></div>
+</div>
+
+<!-- TAB OVERVIEW (Painel Geral — сводка дня + ссылки) -->
+<div class="tab-content active" id="tab-overview">
+  <div class="ov-hero">
+    <div class="ov-hero-left">
+      <div class="ov-hero-title">📊 Painel Geral</div>
+      <div class="ov-hero-sub" id="ovDate">—</div>
+    </div>
+    <div class="ov-links">
+      <a class="ov-link ov-link-heat" href="https://maps.jetmd.online" target="_blank" rel="noopener">🔥 Mapa de calor</a>
+      <button class="ov-link" onclick="switchTab('analytics')">📈 Analítica</button>
+      <button class="ov-link" onclick="switchTab('schedule')">📅 Escalas</button>
+      <button class="icon-btn" onclick="fetchBotData();loadDailyActions();loadSchedule(true)">⟳ Sync</button>
+    </div>
+  </div>
+
+  <div class="ov-kpis">
+    <div class="card"><div class="card-label">MEIs ativos</div><div class="card-val cyan" id="ovActive">—</div><div class="card-sub">cadastrados</div></div>
+    <div class="card"><div class="card-label">🟢 Em turno agora</div><div class="card-val green" id="ovOnShift">—</div><div class="card-sub">trabalhando</div></div>
+    <div class="card"><div class="card-label">✅ Concluíram hoje</div><div class="card-val cyan" id="ovDone">—</div><div class="card-sub">turnos encerrados</div></div>
+    <div class="card"><div class="card-label">❌ Faltas hoje</div><div class="card-val red" id="ovNoShow">—</div><div class="card-sub">não apareceram</div></div>
+    <div class="card"><div class="card-label">⚡ Ações hoje</div><div class="card-val orange" id="ovActToday">—</div><div class="card-sub" id="ovActWeek"></div></div>
+    <div class="card"><div class="card-label">📅 Escalas na semana</div><div class="card-val cyan" id="ovSchedTaken">—</div><div class="card-sub" id="ovSchedSub"></div></div>
+  </div>
+
+  <div class="ov-grid">
+    <div class="an-panel">
+      <div class="an-title">🏙 Operação por cidade (hoje)</div>
+      <div id="ovByCity" style="overflow-x:auto"></div>
+    </div>
+    <div class="an-panel">
+      <div class="an-title">📈 Ações nos últimos 14 dias</div>
+      <div class="an-canvas-wrap" style="height:200px"><canvas id="ovChartTrend"></canvas></div>
+    </div>
+  </div>
 </div>
 
 <!-- TAB ANALYTICS (графики трендов + рейтинг Desempenho) -->
@@ -697,6 +752,7 @@ async function fetchBotData(){
     if(btn){btn.classList.remove('loading');btn.textContent='⟳ Sync';}
   }
   [renderWorkers,renderSummary,renderTasks,renderTaskSummary,()=>{if(typeof renderMonitor==='function')renderMonitor();},()=>{if(typeof renderSlotsGrid==='function')renderSlotsGrid();}].forEach(fn=>{try{fn();}catch(e){console.warn('render skipped:',fn.name||'anon',e.message);}});if(typeof renderMonitor==='function'){try{renderMonitor();}catch(e){console.error('renderMonitor failed',e);}}if(typeof renderLive==='function')renderLive();
+  try{if(typeof renderOverview==='function' && document.getElementById('tab-overview')?.classList.contains('active'))renderOverview();}catch(e){console.warn('renderOverview skipped:',e.message);}
 }
 
 async function syncData(){
@@ -724,6 +780,13 @@ function switchTab(tab){
   if(tab==='analytics'&&typeof renderAnalytics==='function'){
     try{ if(!dailyActions.length){loadDailyActions().then(()=>renderAnalytics());} else renderAnalytics(); }
     catch(e){console.error('switchTab→analytics failed',e);}
+  }
+  if(tab==='overview'&&typeof renderOverview==='function'){
+    try{
+      if(!dailyActions.length)loadDailyActions().then(()=>renderOverview());
+      if(typeof schedRaw==='undefined'||!schedRaw.length)loadSchedule();
+      renderOverview();
+    }catch(e){console.error('switchTab→overview failed',e);}
   }
 }
 
@@ -1034,9 +1097,11 @@ async function loadDailyActions(){
     }
     // Перерисовываем задачи
     if(typeof renderTasks==='function')renderTasks();
-    // Аналитика, если вкладка открыта
+    // Аналитика/обзор, если вкладка открыта
     if(typeof renderAnalytics==='function' &&
        document.getElementById('tab-analytics')?.classList.contains('active'))renderAnalytics();
+    if(typeof renderOverview==='function' &&
+       document.getElementById('tab-overview')?.classList.contains('active'))renderOverview();
   }catch(e){
     console.error('loadDailyActions failed:',e);
   }
@@ -1080,6 +1145,8 @@ async function loadSchedule(force){
     console.log(`[schedule] loaded ${schedRaw.length} shifts`);
     if(!schWeekStart)schWeekStart=schMonday(new Date());
     renderSchedule();
+    if(typeof renderOverview==='function' &&
+       document.getElementById('tab-overview')?.classList.contains('active'))renderOverview();
   }catch(e){console.error('loadSchedule failed:',e);
     const g=document.getElementById('schGrid');
     if(g&&!schedRaw.length)g.innerHTML='<div class="sch-empty-note">Не удалось загрузить график: '+e.message+'</div>';
@@ -1280,6 +1347,97 @@ function renderAnalytics(){
   html+='</tbody></table>';
   if(!s.people.length)html='<div class="sch-empty-note">Нет данных за этот месяц.</div>';
   document.getElementById('anRanking').innerHTML=html;
+}
+
+// ── OVERVIEW (Painel Geral) ─────────────────────────────────────────
+function ovBRTdate(d){ // Date -> iso по BRT
+  const b=new Date((d||new Date()).getTime()-3*3600*1000);
+  return b.toISOString().slice(0,10);
+}
+function renderOverview(){
+  const todayIso=ovBRTdate(new Date());
+  const dl=document.getElementById('ovDate');
+  if(dl)dl.textContent=new Date().toLocaleString(lang==='ru'?'ru-RU':'pt-BR');
+
+  // MEI ativos (реальные, не synthetic urent)
+  let active=0;
+  (typeof CITIES!=='undefined'?CITIES:[]).forEach(c=>{
+    (WORKERS[c]||[]).forEach(w=>{if(!w.not_registered)active++;});
+  });
+  document.getElementById('ovActive').textContent=active;
+
+  // Статусы смен сегодня — из liveShifts (started_at/ended_at) — как в мониторе бота
+  const sh=(typeof liveShifts!=='undefined'?liveShifts:[]);
+  const onShift=sh.filter(s=>s.started_at&&!s.ended_at);
+  const doneToday=sh.filter(s=>s.started_at&&s.ended_at&&ovBRTdate(new Date(s.started_at))===todayIso);
+  document.getElementById('ovOnShift').textContent=onShift.length;
+  document.getElementById('ovDone').textContent=doneToday.length;
+
+  // Faltas: слоты на сегодня (принятые), по которым нет shift_start
+  const slots=(window.allSlots||[]);
+  const startedTg=new Set(sh.filter(s=>s.started_at).map(s=>String(s.tg_id)));
+  const todaySlots=slots.filter(s=>s.data===todayIso&&s.status==='full');
+  // сколько принятых сегодня без старта (грубо: full-слоты без стартовавшего исполнителя)
+  const noShow=(typeof liveOffers!=='undefined'?liveOffers:[])
+    .filter(o=>o.slot_date===todayIso && !startedTg.has(String(o.tg_id)));
+  document.getElementById('ovNoShow').textContent=noShow.length;
+
+  // Действия сегодня / за 7 дней (из dailyActions)
+  let actToday=0,act7=0;
+  const wk=[];for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);wk.push(ovBRTdate(d));}
+  (dailyActions||[]).forEach(rec=>{
+    if(!rec.daily)return;
+    for(const iso in rec.daily){
+      const t=rec.daily[iso].total||0;
+      if(iso===todayIso)actToday+=t;
+      if(wk.includes(iso))act7+=t;
+    }
+  });
+  document.getElementById('ovActToday').textContent=actToday;
+  document.getElementById('ovActWeek').textContent=`${act7} nos últimos 7 dias`;
+
+  // Эскалы недели (из schedRaw)
+  const wkStart=schMonday(new Date()),days=[];
+  for(let i=0;i<7;i++){const d=new Date(wkStart);d.setDate(d.getDate()+i);days.push(schIso(d));}
+  const wkSched=(typeof schedRaw!=='undefined'?schedRaw:[]).filter(s=>days.includes(s.data));
+  const taken=wkSched.filter(s=>s.status==='taken'||s.status==='confirmed').length;
+  document.getElementById('ovSchedTaken').textContent=taken;
+  document.getElementById('ovSchedSub').textContent=`${wkSched.filter(s=>s.status==='open').length} livres · ${wkSched.length} no total`;
+
+  // Операция по городам сегодня
+  const grn=anCssVar('--accent3'),red=anCssVar('--accent2'),acc=anCssVar('--accent');
+  let ch='';
+  (typeof CITIES!=='undefined'?CITIES:[]).forEach(c=>{
+    const cOn=onShift.filter(s=>s.cidade===c).length;
+    const cDone=doneToday.filter(s=>s.cidade===c).length;
+    let cAct=0;
+    (dailyActions||[]).forEach(rec=>{
+      const rc=rec.cidade||rec.city_current||rec.city_home;
+      if(rc===c&&rec.daily&&rec.daily[todayIso])cAct+=rec.daily[todayIso].total||0;
+    });
+    if(cOn===0&&cDone===0&&cAct===0)return;
+    ch+=`<div class="ov-city-row"><span class="ov-city-name">${c} · ${CITY_NAMES[c]||''}</span>`+
+      `<span class="ov-city-stat"><span class="ov-city-dot" style="background:${grn}"></span>${cOn} em turno</span>`+
+      `<span class="ov-city-stat"><span class="ov-city-dot" style="background:${acc}"></span>${cDone} ok</span>`+
+      `<span class="ov-city-stat">⚡ ${cAct} ações</span></div>`;
+  });
+  document.getElementById('ovByCity').innerHTML=ch||'<div class="mon-empty">Sem operação registrada hoje ainda.</div>';
+
+  // Тренд 14 дней
+  if(typeof Chart!=='undefined'){
+    const labels=[],data=[];
+    for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const iso=ovBRTdate(d);
+      labels.push(iso.slice(8,10)+'/'+iso.slice(5,7));
+      let t=0;(dailyActions||[]).forEach(rec=>{if(rec.daily&&rec.daily[iso])t+=rec.daily[iso].total||0;});
+      data.push(t);}
+    anDestroy('ovtrend');
+    const acc2=anCssVar('--accent'),grid=anCssVar('--border'),txt=anCssVar('--text-dim');
+    anCharts.ovtrend=new Chart(document.getElementById('ovChartTrend'),{type:'line',
+      data:{labels,datasets:[{data,borderColor:acc2,backgroundColor:'rgba(0,229,255,.12)',
+        fill:true,tension:.3,pointRadius:2}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+        scales:{x:{grid:{color:grid},ticks:{color:txt,maxTicksLimit:7}},y:{grid:{color:grid},ticks:{color:txt},beginAtZero:true}}}});
+  }
 }
 
 function exportRankingCsv(){
