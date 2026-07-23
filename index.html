@@ -91,6 +91,21 @@
   .ov-city-name{width:130px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ov-city-stat{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);white-space:nowrap}
   .ov-city-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px}
+  /* ── ANTIFRAUD ── */
+  .af-detectors{margin:0 24px 16px}
+  .af-det-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px 18px;font-size:12px}
+  @media(max-width:640px){.af-det-grid{grid-template-columns:1fr}}
+  .af-scorehint{margin-top:10px;font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace}
+  .af-table{width:100%;border-collapse:collapse;font-size:12px;min-width:560px}
+  .af-table th{text-align:left;padding:8px 10px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;border-bottom:2px solid var(--border);white-space:nowrap}
+  .af-table td{padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+  .af-table tr:hover td{background:var(--surface2)}
+  .af-bar{height:14px;border-radius:3px;min-width:30px}
+  .af-badhi{color:var(--accent2);font-weight:700}
+  .af-chip-mei{background:rgba(0,229,255,.15);color:var(--accent);padding:1px 7px;border-radius:8px;font-size:10px;font-weight:700}
+  .af-chip-clt{background:rgba(46,213,115,.15);color:var(--accent3);padding:1px 7px;border-radius:8px;font-size:10px;font-weight:700}
+  .af-flag{background:var(--accent2);color:#fff;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;font-family:'Space Mono',monospace;margin-left:4px}
+  .af-low{opacity:.55}
   /* ── TEAM (Executores) ── */
   .tm-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:14px 24px 10px}
   .tm-input{flex:1;min-width:200px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 12px;font-size:13px;font-family:'Space Mono',monospace;outline:none}
@@ -233,6 +248,7 @@
   <div class="tab" data-tab="tasks" onclick="switchTab('tasks')"><span>✅</span><span data-i18n="nav_tasks">Tarefas</span></div>
   <div class="tab" data-tab="analytics" onclick="switchTab('analytics')"><span>📈</span><span data-i18n="nav_analytics">Analítica</span></div>
   <div class="tab" data-tab="team" onclick="switchTab('team')"><span>👥</span><span data-i18n="nav_team">Executores</span></div>
+  <div class="tab" data-tab="antifraud" onclick="switchTab('antifraud')"><span>🛡</span><span data-i18n="nav_antifraud">Antifraude</span></div>
   <div class="tab" data-tab="schedule" onclick="switchTab('schedule')"><span>📅</span><span data-i18n="nav_schedule">Escalas</span></div>
   <div class="tab" data-tab="active" onclick="switchTab('active')"><span>🟢</span><span data-i18n="nav_history">Histórico</span></div>
   </div>
@@ -436,6 +452,46 @@
   </div>
 </div>
 
+<!-- TAB ANTIFRAUD (антифрод перемещений из jet-operation.com через VPS) -->
+<div class="tab-content" id="tab-antifraud">
+  <div class="ov-hero">
+    <div class="ov-hero-left">
+      <div class="ov-hero-title" data-i18n="af_title">🛡 Antifraude de movimentações</div>
+      <div class="ov-hero-sub" id="afMeta">—</div>
+    </div>
+    <button class="icon-btn" onclick="loadAntifraud(true)">⟳ Sync</button>
+  </div>
+  <div class="summary">
+    <div class="card"><div class="card-label" data-i18n="af_score">Score total</div><div class="card-val red" id="afScore">—</div></div>
+    <div class="card"><div class="card-label" data-i18n="af_moves">Movimentações</div><div class="card-val cyan" id="afMoves">—</div></div>
+    <div class="card"><div class="card-label" data-i18n="af_bad">Ruins %</div><div class="card-val orange" id="afBad">—</div></div>
+    <div class="card"><div class="card-label" data-i18n="af_people">Pessoas</div><div class="card-val green" id="afPeopleKpi">—</div></div>
+  </div>
+  <div class="an-panel af-detectors">
+    <div class="an-title" data-i18n="af_detectors">Como ler os scores</div>
+    <div class="af-det-grid">
+      <div><b>D1</b> · <span data-i18n="af_d1">pegou de monitor vazio</span></div>
+      <div><b>D2</b> · <span data-i18n="af_d2">levou para monitor cheio</span></div>
+      <div><b>D3</b> · <span data-i18n="af_d3">deixou fora do monitor do bloco</span></div>
+      <div><b>D4</b> · <span data-i18n="af_d4">movimentação incorreta</span></div>
+    </div>
+    <div class="af-scorehint" data-i18n="af_scorehint">Score = D1 + D2 + D3. Dados confiáveis desde 17/07/2026.</div>
+  </div>
+  <div class="an-panel" style="margin:0 24px 16px">
+    <div class="an-title" data-i18n="af_bycity">Por cidade</div>
+    <div id="afCities" style="overflow-x:auto"></div>
+  </div>
+  <div class="an-panel" style="margin:0 24px 30px">
+    <div class="an-title" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+      <span data-i18n="af_detbtn">👤 Detalhes por pessoa</span>
+      <span style="flex:1"></span>
+      <input type="password" id="afPass" class="tm-input" style="max-width:180px" data-i18n-ph="af_dethint" placeholder="senha">
+      <button class="ov-link" onclick="afReveal()" data-i18n="af_show">Mostrar</button>
+    </div>
+    <div id="afPeopleBox" style="overflow-x:auto;margin-top:10px"></div>
+  </div>
+</div>
+
 <!-- TAB SCHEDULE (недельный график смен из бота) -->
 <div class="tab-content" id="tab-schedule">
   <div class="summary">
@@ -470,7 +526,8 @@
 // ── i18n ─────────────────────────────────────────────
 const I18N={
   ru:{tab_workers:'Сотрудники',tab_slots:'Slots',tab_tasks:'Задачи',slots_ordered:'Слотов заказано',slots_filled:'Принято',slots_empty:'Пустых слотов',tasks_done:'Задач выполнено',current_period:'за текущий период',leg_full:'Заполнен',leg_partial:'Частично',leg_empty:'Пустой',leg_none:'Нет слота',all_cities:'🌐 Все',status_sync:'Обновлено',status_msgs:'сообщ.',status_err:'Ошибка',tt_status:'Статус',tt_ordered:'Заказано',tt_filled:'Принято',tt_empty:'Пустых',tt_tasks:'Задач',tt_workers:'Работники',st_full:'Заполнен',st_partial:'Частично',st_empty:'Пустой',pct_of:'% от заказ.',pct_open:'% незакр.',order_shift:'Заказать смену',new_slot:'Новый слот',new_slot_title:'Новый слот смены',lbl_city:'Город',lbl_date:'Дата',lbl_worker:'Сотрудник',lbl_shift:'Тип смены',lbl_qty:'Кол-во',lbl_note:'Примечание',btn_order:'Заказать',btn_cancel:'Отмена',badge_open:'Открыт',badge_ordered:'Заказан',badge_filled:'Выполнен',total_tasks:'Всего задач',avg_per_day:'Ср. в день',best_worker:'Лучший сотр.',best_city:'Лучший город',working_days:'рабочих дней',tt_tasks_count:'Задач за день',
-    nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_team:'Исполнители',nav_schedule:'График',nav_history:'История слотов',
+    nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_team:'Исполнители',nav_antifraud:'Антифрод',nav_schedule:'График',nav_history:'История слотов',
+    af_title:'🛡 Антифрод перемещений',af_score:'Балл всего',af_moves:'Перемещений',af_bad:'Плохих %',af_people:'Человек',af_bycity:'По городам',af_col_city:'Город',af_col_score:'Балл',af_col_moves:'Перем.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Плохих%',af_col_ppl:'Чел.',af_detbtn:'👤 Детализация по людям',af_dethint:'Введите пароль для просмотра ФИО:',af_show:'Показать',af_wrongpass:'Неверный пароль',af_col_fio:'ФИО',af_col_type:'Тип',af_col_pos:'Должность',af_detectors:'Как читать баллы',af_d1:'D1 — забрал с пустого монитора',af_d2:'D2 — привёз на полный монитор',af_d3:'D3 — поставил не на монитор текущего блока',af_d4:'D4 — неправильное перемещение (хотя бы одно из D1/D2/D3)',af_scorehint:'Балл = D1 + D2 + D3. Данные достоверны с 17.07.2026.',af_updated:'обновлено',af_period:'период',af_loading:'Загрузка…',af_lowdata:'мало данных (не оценивается)',
     tm_title:'Все исполнители',tm_search:'Поиск по имени, CNPJ, телефону…',tm_all:'Все города',tm_reg:'В боте',tm_urent:'Только Urent',tm_col_name:'Полное имя',tm_col_cnpj:'CNPJ',tm_col_phone:'Телефон',tm_col_tg:'Telegram',tm_col_city:'Город',tm_col_type:'Тип',tm_col_status:'Статус',tm_col_actions:'Действий/мес',tm_count:'исполнителей',tm_export:'⬇ CSV',tm_notreg:'не в боте',tm_active:'активен',
     ov_title:'Обзор',link_heat:'Тепловая карта',link_analytics:'Аналитика',link_schedule:'График',
     kpi_active:'MEI активных',kpi_onshift:'🟢 На смене сейчас',kpi_done:'✅ Завершили сегодня',kpi_noshow:'❌ Не вышли сегодня',kpi_acttoday:'⚡ Действий сегодня',kpi_schedweek:'📅 Смен на неделе',
@@ -482,7 +539,8 @@ const I18N={
     lg_free:'свободна',lg_taken:'принята',lg_confirmed:'подтверждена ✓✓',lg_declined:'отказ (снова свободна)',lg_windows:'🌅 Утро 06–15 · ☀️ День 12–21 · 🌆 Вечер 15–00 · 🌙 Ночь 21–06',lg_roles:'🔌 = замена АКБ · 🛴 = перемещение самокатов · ставка в подсказке',sch_free_chip:'свободна',sch_decl_chip:'отказ',role_bat_full:'замена АКБ',role_scout_full:'перемещение самокатов',sch_tip_confirmed:'Подтверждена',sch_tip_taken:'Принята (ждёт подтверждения)',sch_tip_declined:'Был отказ — снова свободна',sch_tip_free:'Свободная смена',
     months:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],dow:['Вс','Пн','Вт','Ср','Чт','Пт','Сб']},
   pt:{tab_workers:'Funcionários',tab_slots:'Turnos',tab_tasks:'Tarefas',slots_ordered:'Turnos pedidos',slots_filled:'Aceitos',slots_empty:'Turnos vazios',tasks_done:'Tarefas feitas',current_period:'no período atual',leg_full:'Preenchido',leg_partial:'Parcial',leg_empty:'Vazio',leg_none:'Sem turno',all_cities:'🌐 Todos',status_sync:'Atualizado',status_msgs:'msgs',status_err:'Erro',tt_status:'Status',tt_ordered:'Pedidos',tt_filled:'Aceitos',tt_empty:'Vazios',tt_tasks:'Tarefas',tt_workers:'Trabalhadores',st_full:'Preenchido',st_partial:'Parcial',st_empty:'Vazio',pct_of:'% dos pedidos',pct_open:'% em aberto',order_shift:'Pedir turno',new_slot:'Novo turno',new_slot_title:'Novo turno',lbl_city:'Cidade',lbl_date:'Data',lbl_worker:'Funcionário',lbl_shift:'Tipo de turno',lbl_qty:'Qtd.',lbl_note:'Observação',btn_order:'Pedir',btn_cancel:'Cancelar',badge_open:'Aberto',badge_ordered:'Pedido',badge_filled:'Concluído',total_tasks:'Total de tarefas',avg_per_day:'Média/dia',best_worker:'Melhor func.',best_city:'Melhor cidade',working_days:'dias úteis',tt_tasks_count:'Tarefas no dia',
-    nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_team:'Executores',nav_schedule:'Escalas',nav_history:'Histórico',
+    nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_team:'Executores',nav_antifraud:'Antifraude',nav_schedule:'Escalas',nav_history:'Histórico',
+    af_title:'🛡 Antifraude de movimentações',af_score:'Score total',af_moves:'Movimentações',af_bad:'Ruins %',af_people:'Pessoas',af_bycity:'Por cidade',af_col_city:'Cidade',af_col_score:'Score',af_col_moves:'Movs.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Ruins%',af_col_ppl:'Pess.',af_detbtn:'👤 Detalhes por pessoa',af_dethint:'Digite a senha para ver os nomes:',af_show:'Mostrar',af_wrongpass:'Senha incorreta',af_col_fio:'Nome',af_col_type:'Tipo',af_col_pos:'Cargo',af_detectors:'Como ler os scores',af_d1:'D1 — pegou de monitor vazio',af_d2:'D2 — levou para monitor cheio',af_d3:'D3 — deixou fora do monitor do bloco atual',af_d4:'D4 — movimentação incorreta (ao menos um de D1/D2/D3)',af_scorehint:'Score = D1 + D2 + D3. Dados confiáveis desde 17/07/2026.',af_updated:'atualizado',af_period:'período',af_loading:'Carregando…',af_lowdata:'poucos dados (não avaliado)',
     tm_title:'Todos os executores',tm_search:'Buscar por nome, CNPJ, telefone…',tm_all:'Todas as cidades',tm_reg:'No bot',tm_urent:'Só Urent',tm_col_name:'Nome completo',tm_col_cnpj:'CNPJ',tm_col_phone:'Telefone',tm_col_tg:'Telegram',tm_col_city:'Cidade',tm_col_type:'Tipo',tm_col_status:'Status',tm_col_actions:'Ações/mês',tm_count:'executores',tm_export:'⬇ CSV',tm_notreg:'fora do bot',tm_active:'ativo',
     ov_title:'Painel Geral',link_heat:'Mapa de calor',link_analytics:'Analítica',link_schedule:'Escalas',
     kpi_active:'MEIs ativos',kpi_onshift:'🟢 Em turno agora',kpi_done:'✅ Concluíram hoje',kpi_noshow:'❌ Faltas hoje',kpi_acttoday:'⚡ Ações hoje',kpi_schedweek:'📅 Escalas na semana',
@@ -872,6 +930,9 @@ function switchTab(tab){
   if(tab==='team'&&typeof renderTeam==='function'){
     try{ if(!dailyActions.length)loadDailyActions().then(()=>renderTeam()); renderTeam(); }
     catch(e){console.error('switchTab→team failed',e);}
+  }
+  if(tab==='antifraud'&&typeof loadAntifraud==='function'){
+    try{ afData?renderAntifraud():loadAntifraud(); }catch(e){console.error('switchTab→antifraud failed',e);}
   }
   if(tab==='overview'&&typeof renderOverview==='function'){
     try{
@@ -1538,6 +1599,104 @@ function renderOverview(){
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
         scales:{x:{grid:{color:grid},ticks:{color:txt,maxTicksLimit:7}},y:{grid:{color:grid},ticks:{color:txt},beginAtZero:true}}}});
   }
+}
+
+// ── ANTIFRAUD (мост из jet-operation через VPS+Gist, ФИО шифрованы) ──
+let afData=null, afPeople=null;
+async function loadAntifraud(force){
+  try{
+    const url=`https://gist.githubusercontent.com/12danielmik1991-ops/e018dab17e69e1dea5e5e8aa0b48f6fb/raw/antifraud.json?_=${Date.now()}`;
+    const r=await fetch(url,{cache:'no-store'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    afData=await r.json();
+    renderAntifraud();
+  }catch(e){
+    console.error('loadAntifraud failed',e);
+    const el=document.getElementById('afCities');
+    if(el)el.innerHTML=`<div class="mon-empty">Erro: ${e.message}</div>`;
+  }
+}
+function renderAntifraud(){
+  if(!afData||!afData.cities){return;}
+  const c=afData.cities;
+  const totS=c.reduce((s,x)=>s+x.score,0), totM=c.reduce((s,x)=>s+x.moves,0),
+        totB=c.reduce((s,x)=>s+x.bad,0);
+  document.getElementById('afScore').textContent=totS;
+  document.getElementById('afMoves').textContent=totM;
+  document.getElementById('afBad').textContent=(totM?Math.round(totB/totM*100):0)+'%';
+  document.getElementById('afPeopleKpi').textContent=afData.people_count||0;
+  document.getElementById('afMeta').textContent=
+    `${t('af_period')}: ${afData.from}→${afData.to} · ${t('af_updated')} ${new Date(afData.updated_at).toLocaleString(lang==='ru'?'ru-RU':'pt-BR')}`;
+  const maxS=Math.max(...c.map(x=>x.score),1);
+  const red=anCssVar('--accent2'),org=anCssVar('--accent4');
+  let html=`<table class="af-table"><thead><tr>
+    <th>${t('af_col_city')}</th><th>${t('af_col_score')}</th><th>${t('af_col_moves')}</th>
+    <th>${t('af_col_d1')}</th><th>${t('af_col_d2')}</th><th>${t('af_col_d3')}</th>
+    <th>${t('af_col_bad')}</th><th>${t('af_col_ppl')}</th><th style="width:22%"></th></tr></thead><tbody>`;
+  c.forEach(x=>{
+    const w=Math.round(x.score/maxS*100);
+    html+=`<tr><td style="font-weight:700">${CITY_NAMES[resolveCityAF(x.city)]||x.city}</td>
+      <td style="font-family:'Space Mono',monospace;font-weight:700">${x.score}</td>
+      <td class="tm-mono">${x.moves}</td><td class="tm-mono">${x.d1}</td>
+      <td class="tm-mono">${x.d2}</td><td class="tm-mono">${x.d3}</td>
+      <td class="${x.bad_pct>=45?'af-badhi':''}">${x.bad_pct}%</td>
+      <td class="tm-mono">${x.ppl}</td>
+      <td><div class="af-bar" style="width:${w}%;background:${x.bad_pct>=45?red:org}"></div></td></tr>`;
+  });
+  html+='</tbody></table>';
+  document.getElementById('afCities').innerHTML=html;
+}
+function resolveCityAF(name){return ourCity(name)||name;}
+
+async function afReveal(){
+  const pass=document.getElementById('afPass').value;
+  const box=document.getElementById('afPeopleBox');
+  if(!afData||!afData.people_enc){box.innerHTML='<div class="mon-empty">—</div>';return;}
+  try{
+    const people=await afDecrypt(afData.people_enc,pass);
+    afPeople=people;
+    renderAfPeople(people);
+  }catch(e){
+    box.innerHTML=`<div class="mon-empty" style="color:var(--accent2)">🔒 ${t('af_wrongpass')}</div>`;
+  }
+}
+async function afDecrypt(enc,pass){
+  const encc=new TextEncoder();
+  const b=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
+  const km=await crypto.subtle.importKey('raw',encc.encode(pass),'PBKDF2',false,['deriveKey']);
+  const key=await crypto.subtle.deriveKey(
+    {name:'PBKDF2',salt:b(enc.salt),iterations:enc.it,hash:'SHA-256'},
+    km,{name:'AES-GCM',length:256},false,['decrypt']);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:b(enc.iv)},key,b(enc.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+function renderAfPeople(people){
+  const minMoves=afData.min_moves||30;
+  const sig=people.filter(p=>p.moves>=minMoves);
+  const med=sig.length?sig.map(p=>p.bad_pct).sort((a,b)=>a-b)[Math.floor(sig.length/2)]:0;
+  const maxS=Math.max(...people.map(p=>p.score),1);
+  const red=anCssVar('--accent2'),org=anCssVar('--accent4'),grn=anCssVar('--accent3');
+  let html=`<table class="af-table"><thead><tr>
+    <th>#</th><th>${t('af_col_fio')}</th><th>${t('af_col_type')}</th><th>${t('af_col_city')}</th>
+    <th>${t('af_col_moves')}</th><th>${t('af_col_score')}</th><th>${t('af_col_bad')}</th>
+    <th style="width:18%"></th></tr></thead><tbody>`;
+  people.forEach((p,i)=>{
+    const low=p.moves<minMoves;
+    const flag=(!low&&med&&p.bad_pct>med*1.3)?`<span class="af-flag">bad↑</span>`:'';
+    const chip=p.emp_type==='MEI'?`<span class="af-chip-mei">MEI</span>`:`<span class="af-chip-clt">CLT</span>`;
+    const w=Math.round(p.score/maxS*100);
+    const cityNames=(p.cities||[]).map(cn=>resolveCityAF(cn)).join(', ');
+    html+=`<tr class="${low?'af-low':''}">
+      <td class="tm-mono">${i+1}</td>
+      <td style="font-weight:700">${p.fio||'?'}${flag}${low?` <span style="font-size:9px;color:var(--text-dim)">${t('af_lowdata')}</span>`:''}</td>
+      <td>${chip}</td><td class="tm-mono">${cityNames}</td>
+      <td class="tm-mono">${p.moves}</td>
+      <td style="font-family:'Space Mono',monospace;font-weight:700">${p.score}</td>
+      <td class="${p.bad_pct>=med*1.3&&med?'af-badhi':''}">${p.bad_pct}%</td>
+      <td><div class="af-bar" style="width:${w}%;background:${low?grn:(p.bad_pct>med*1.3?red:org)}"></div></td></tr>`;
+  });
+  html+='</tbody></table>';
+  document.getElementById('afPeopleBox').innerHTML=html;
 }
 
 // ── TEAM (Executores — справочник исполнителей) ─────────────────────
