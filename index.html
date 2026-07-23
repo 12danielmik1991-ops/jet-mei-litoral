@@ -482,12 +482,7 @@
     <div id="afCities" style="overflow-x:auto"></div>
   </div>
   <div class="an-panel" style="margin:0 24px 30px">
-    <div class="an-title" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
-      <span data-i18n="af_detbtn">👤 Detalhes por pessoa</span>
-      <span style="flex:1"></span>
-      <input type="password" id="afPass" class="tm-input" style="max-width:180px" data-i18n-ph="af_dethint" placeholder="senha">
-      <button class="ov-link" onclick="afReveal()" data-i18n="af_show">Mostrar</button>
-    </div>
+    <div class="an-title"><span data-i18n="af_detbtn">👤 Detalhes por pessoa</span></div>
     <div id="afPeopleBox" style="overflow-x:auto;margin-top:10px"></div>
   </div>
 </div>
@@ -1645,23 +1640,19 @@ function renderAntifraud(){
   });
   html+='</tbody></table>';
   document.getElementById('afCities').innerHTML=html;
-  // Если пароль уже сохранён на устройстве — сразу показываем ФИО, без ввода
-  const saved=localStorage.getItem('jet_af_pass');
-  if(saved&&afData.people_enc){
-    const inp=document.getElementById('afPass'); if(inp)inp.value=saved;
-    afReveal(saved);
-  }
+  // ФИО расшифровываются паролем входа на сайт — тем же, что весь дашборд.
+  // Вошёл на сайт → фамилии видны сразу, без второго ввода.
+  if(afData.people_enc)afReveal(PASSWORD);
 }
 function resolveCityAF(name){return ourCity(name)||name;}
 
 async function afReveal(pass){
-  if(pass===undefined)pass=document.getElementById('afPass').value;
+  if(pass===undefined)pass=PASSWORD;
   const box=document.getElementById('afPeopleBox');
   if(!afData||!afData.people_enc){box.innerHTML='<div class="mon-empty">—</div>';return;}
   try{
     const people=await afDecrypt(afData.people_enc,pass);
     afPeople=people;
-    localStorage.setItem('jet_af_pass',pass); // запомнить на этом устройстве
     renderAfPeople(people);
   }catch(e){
     box.innerHTML=`<div class="mon-empty" style="color:var(--accent2)">🔒 ${t('af_wrongpass')}</div>`;
