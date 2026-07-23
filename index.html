@@ -537,6 +537,11 @@ function ourCity(v){
   const n=String(v).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
   return _NAME2CODE[n]||null; // не наш город → null
 }
+// Город записи ЦД: приоритет city_home (где прописан MEI), затем current/cidade.
+// MEI считается нашим, если ЛИБО дом, ЛИБО место работы — один из 9 городов.
+function recCity(rec){
+  return ourCity(rec.city_home)||ourCity(rec.city_current)||ourCity(rec.cidade);
+}
 const WORKERS={
   PG:[{id:'leandro',name:'Leandro Medeiros',tag:'@Leandro_Medeiros_SUO_PG',role:'SUP'},{id:'julio_j',name:'Julio Jesus',tag:'@Julio_Jesus_AUX_PG',role:'AUX'},{id:'mei_pg1',name:'MEI PG-1',tag:'@mei_pg1',role:'MEI'},{id:'mei_pg2',name:'MEI PG-2',tag:'@mei_pg2',role:'MEI'}],
   GR:[{id:'michael',name:'Michael Freitas',tag:'@Michael_Freitas_SUO_BRSPL',role:'SUP'},{id:'mei_gr1',name:'MEI GR-1',tag:'@mei_gr1',role:'MEI'},{id:'mei_gr2',name:'MEI GR-2',tag:'@mei_gr2',role:'MEI'}],
@@ -1354,7 +1359,7 @@ function anCompute(){
   dailyActions.forEach(rec=>{
     if(!rec.daily)return;
     // Только наши 9 городов — чужие (São Paulo, Santo André, интерьер) отбрасываем
-    const city=ourCity(rec.cidade||rec.city_current||rec.city_home);
+    const city=recCity(rec);
     if(!city)return;
     let recMonth=0, rDay=0, rNight=0;
     for(const iso in rec.daily){
@@ -1482,7 +1487,7 @@ function renderOverview(){
   const wk=[];for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);wk.push(ovBRTdate(d));}
   (dailyActions||[]).forEach(rec=>{
     if(!rec.daily)return;
-    if(!ourCity(rec.cidade||rec.city_current||rec.city_home))return; // только наши города
+    if(!recCity(rec))return; // только наши города
     for(const iso in rec.daily){
       const t=rec.daily[iso].total||0;
       if(iso===todayIso)actToday+=t;
@@ -1508,7 +1513,7 @@ function renderOverview(){
     const cDone=doneToday.filter(s=>s.cidade===c).length;
     let cAct=0;
     (dailyActions||[]).forEach(rec=>{
-      if(ourCity(rec.cidade||rec.city_current||rec.city_home)===c&&rec.daily&&rec.daily[todayIso])cAct+=rec.daily[todayIso].total||0;
+      if(recCity(rec)===c&&rec.daily&&rec.daily[todayIso])cAct+=rec.daily[todayIso].total||0;
     });
     if(cOn===0&&cDone===0&&cAct===0)return;
     ch+=`<div class="ov-city-row"><span class="ov-city-name">${c} · ${CITY_NAMES[c]||''}</span>`+
@@ -1523,7 +1528,7 @@ function renderOverview(){
     const labels=[],data=[];
     for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const iso=ovBRTdate(d);
       labels.push(iso.slice(8,10)+'/'+iso.slice(5,7));
-      let t=0;(dailyActions||[]).forEach(rec=>{if(ourCity(rec.cidade||rec.city_current||rec.city_home)&&rec.daily&&rec.daily[iso])t+=rec.daily[iso].total||0;});
+      let t=0;(dailyActions||[]).forEach(rec=>{if(recCity(rec)&&rec.daily&&rec.daily[iso])t+=rec.daily[iso].total||0;});
       data.push(t);}
     anDestroy('ovtrend');
     const acc2=anCssVar('--accent'),grid=anCssVar('--border'),txt=anCssVar('--text-dim');
