@@ -73,6 +73,21 @@
   .sch-chip.sch-taken{background:var(--slot-full);border:1px solid var(--slot-full-border);color:var(--text)}
   .sch-chip.sch-confirmed{background:var(--slot-full-border);border:1px solid var(--slot-full-border);color:#000;font-weight:700}
   .sch-empty-note{padding:30px;text-align:center;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:12px}
+  /* ── ANALYTICS TAB ── */
+  .an-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:6px 24px 18px}
+  @media(max-width:820px){.an-grid{grid-template-columns:1fr}}
+  .an-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;box-shadow:var(--shadow)}
+  .an-title{font-size:13px;font-weight:800;margin-bottom:12px}
+  .an-canvas-wrap{position:relative;height:230px}
+  .an-rank-table{width:100%;border-collapse:collapse;font-size:12px}
+  .an-rank-table th{text-align:left;padding:7px 10px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;border-bottom:1px solid var(--border);white-space:nowrap}
+  .an-rank-table td{padding:7px 10px;border-bottom:1px solid var(--border)}
+  .an-rank-table tr:hover td{background:var(--surface2)}
+  .an-rank-num{font-family:'Space Mono',monospace;color:var(--text-dim);width:34px}
+  .an-rank-bar-wrap{background:var(--surface2);border-radius:3px;height:16px;min-width:80px;overflow:hidden}
+  .an-rank-bar{height:100%;border-radius:3px}
+  .an-rank-low td{background:rgba(255,80,80,0.07)}
+  .an-badge-low{display:inline-block;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;background:var(--accent2);color:#fff;font-family:'Space Mono',monospace}
   /* ── Подложка JET MEI (как на maps.jetmd.online: диагональный повторяющийся узор) ── */
   body{background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzNjAiIGhlaWdodD0iMjAwIj48ZyB0cmFuc2Zvcm09InJvdGF0ZSgtMzAgMTgwIDEwMCkiPjx0ZXh0IHg9IjYwIiB5PSI5MCIgZmlsbD0iIzAwZTVmZiIgZmlsbC1vcGFjaXR5PSIwLjEwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjYiIGZvbnQtd2VpZ2h0PSI4MDAiPkpFVDwvdGV4dD48dGV4dCB4PSIxMCIgeT0iMTIwIiBmaWxsPSIjMDBlNWZmIiBmaWxsLW9wYWNpdHk9IjAuMTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCI+TUVJPC90ZXh0Pjx0ZXh0IHg9IjMwIiB5PSIxNDUiIGZpbGw9IiMwMGU1ZmYiIGZpbGwtb3BhY2l0eT0iMC4xMCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNjAwIj5CeSBEYW5pZWwgTTwvdGV4dD48L2c+PC9zdmc+');background-repeat:repeat}
   html.light body{background-image:url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzNjAiIGhlaWdodD0iMjAwIj48ZyB0cmFuc2Zvcm09InJvdGF0ZSgtMzAgMTgwIDEwMCkiPjx0ZXh0IHg9IjYwIiB5PSI5MCIgZmlsbD0iIzAwNzdjYyIgZmlsbC1vcGFjaXR5PSIwLjEwIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMjYiIGZvbnQtd2VpZ2h0PSI4MDAiPkpFVDwvdGV4dD48dGV4dCB4PSIxMCIgeT0iMTIwIiBmaWxsPSIjMDA3N2NjIiBmaWxsLW9wYWNpdHk9IjAuMTAiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNyIgZm9udC13ZWlnaHQ9IjcwMCI+TUVJPC90ZXh0Pjx0ZXh0IHg9IjMwIiB5PSIxNDUiIGZpbGw9IiMwMDc3Y2MiIGZpbGwtb3BhY2l0eT0iMC4xMCIgZm9udC1mYW1pbHk9IkFyaWFsIiBmb250LXNpemU9IjE0IiBmb250LXdlaWdodD0iNjAwIj5CeSBEYW5pZWwgTTwvdGV4dD48L2c+PC9zdmc+');background-repeat:repeat}
@@ -176,6 +191,7 @@
 <div class="tabs-bar">
   <div class="tab active" data-tab="slots" onclick="switchTab('slots')"><span>📝</span><span>Создать новый слот</span></div>
   <div class="tab" data-tab="tasks" onclick="switchTab('tasks')"><span>✅</span><span>Задачи</span></div>
+  <div class="tab" data-tab="analytics" onclick="switchTab('analytics')"><span>📈</span><span>Аналитика</span></div>
   <div class="tab" data-tab="schedule" onclick="switchTab('schedule')"><span>📅</span><span>График</span></div>
   <div class="tab" data-tab="active" onclick="switchTab('active')"><span>🟢</span><span>История создания слотов</span></div>
   </div>
@@ -298,6 +314,32 @@
   </div>
   <div class="city-filter" id="cityFilter2"></div>
   <div class="calendar-wrap"><table class="calendar-table" id="calTasks"></table></div>
+</div>
+
+<!-- TAB ANALYTICS (графики трендов + рейтинг Desempenho) -->
+<div class="tab-content" id="tab-analytics">
+  <div class="summary">
+    <div class="card"><div class="card-label">Действий за месяц</div><div class="card-val cyan" id="anTotal">—</div><div class="card-sub" id="anMonth"></div></div>
+    <div class="card"><div class="card-label">Активных MEI</div><div class="card-val green" id="anActive">—</div><div class="card-sub">с действиями</div></div>
+    <div class="card"><div class="card-label">Ср. на человека</div><div class="card-val cyan" id="anAvg">—</div><div class="card-sub">действий/мес</div></div>
+    <div class="card"><div class="card-label">Отстающих</div><div class="card-val red" id="anLow">—</div><div class="card-sub" id="anLowSub">ниже нормы</div></div>
+  </div>
+  <div class="an-grid">
+    <div class="an-panel"><div class="an-title">Действия по дням</div><div class="an-canvas-wrap"><canvas id="anChartDays"></canvas></div></div>
+    <div class="an-panel"><div class="an-title">🔌 АКБ vs 🛴 Самокаты</div><div class="an-canvas-wrap"><canvas id="anChartType"></canvas></div></div>
+    <div class="an-panel"><div class="an-title">По городам</div><div class="an-canvas-wrap"><canvas id="anChartCity"></canvas></div></div>
+    <div class="an-panel"><div class="an-title">День vs Ночь</div><div class="an-canvas-wrap"><canvas id="anChartDayNight"></canvas></div></div>
+  </div>
+  <div class="an-panel" style="margin:0 24px 30px">
+    <div class="an-title" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      🏆 Рейтинг Desempenho
+      <span style="font-size:11px;color:var(--text-dim);font-weight:400">порог отставания:</span>
+      <input type="number" id="anThreshold" value="115" min="0" style="width:70px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:2px 6px;font-family:'Space Mono',monospace" onchange="renderAnalytics()">
+      <span style="flex:1"></span>
+      <button class="icon-btn" onclick="exportRankingCsv()">⬇ CSV</button>
+    </div>
+    <div id="anRanking" style="overflow-x:auto"></div>
+  </div>
 </div>
 
 <!-- TAB SCHEDULE (недельный график смен из бота) -->
@@ -679,6 +721,10 @@ function switchTab(tab){
   if(tab==='schedule'&&typeof loadSchedule==='function'){
     try{schedRaw.length?renderSchedule():loadSchedule();}catch(e){console.error('switchTab→schedule failed',e);}
   }
+  if(tab==='analytics'&&typeof renderAnalytics==='function'){
+    try{ if(!dailyActions.length){loadDailyActions().then(()=>renderAnalytics());} else renderAnalytics(); }
+    catch(e){console.error('switchTab→analytics failed',e);}
+  }
 }
 
 // ── MONTH NAV ────────────────────────────────────────
@@ -907,6 +953,7 @@ window.updatedAtGlobal=null;
 .live-noshow{border-left-color:var(--accent2);background:rgba(255,80,80,0.08)}
 </style>
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <script>
 // === DAILY ACTIONS из таблицы ЦД ===
 let dailyActions=[];
@@ -987,6 +1034,9 @@ async function loadDailyActions(){
     }
     // Перерисовываем задачи
     if(typeof renderTasks==='function')renderTasks();
+    // Аналитика, если вкладка открыта
+    if(typeof renderAnalytics==='function' &&
+       document.getElementById('tab-analytics')?.classList.contains('active'))renderAnalytics();
   }catch(e){
     console.error('loadDailyActions failed:',e);
   }
@@ -1122,6 +1172,127 @@ window.addEventListener('load',()=>{
   setTimeout(loadSchedule,3000);
   setInterval(loadSchedule,5*60*1000);
 });
+
+// ── ANALYTICS (графики трендов + рейтинг Desempenho) ─────────────────
+let anCharts={};
+function anDestroy(k){if(anCharts[k]){anCharts[k].destroy();delete anCharts[k];}}
+function anCssVar(n){return getComputedStyle(document.documentElement).getPropertyValue(n).trim();}
+
+function anMonthIso(){return `${curYear}-${String(curMonth+1).padStart(2,'0')}`;}
+
+// Собрать статистику по dailyActions за текущий месяц
+function anCompute(){
+  const monthIso=anMonthIso();
+  const dim=new Date(curYear,curMonth+1,0).getDate();
+  const byDay=Array(dim+1).fill(0);              // действий по числам месяца
+  const dayNight={day:0,night:0};
+  const byType={BAT:0,MOV:0};
+  const byCity={};
+  const people=[];                                // {name, cidade, type, total}
+  let grandTotal=0, activeCount=0;
+
+  dailyActions.forEach(rec=>{
+    if(!rec.daily)return;
+    let recMonth=0, rDay=0, rNight=0;
+    for(const iso in rec.daily){
+      if(!iso.startsWith(monthIso))continue;
+      const c=rec.daily[iso]||{};
+      const t=c.total||0;
+      recMonth+=t; rDay+=(c.day||0); rNight+=(c.night||0);
+      const dnum=parseInt(iso.slice(8,10),10);
+      if(dnum>=1&&dnum<=dim)byDay[dnum]+=t;
+    }
+    if(recMonth<=0)return;
+    grandTotal+=recMonth; activeCount++;
+    dayNight.day+=rDay; dayNight.night+=rNight;
+    const ty=rec.action_type==='BAT'?'BAT':'MOV';
+    byType[ty]+=recMonth;
+    const city=rec.cidade||rec.city_current||rec.city_home||'?';
+    byCity[city]=(byCity[city]||0)+recMonth;
+    people.push({name:rec.name,cidade:city,type:ty,total:recMonth,day:rDay,night:rNight});
+  });
+  people.sort((a,b)=>b.total-a.total);
+  return {byDay,dayNight,byType,byCity,people,grandTotal,activeCount,dim};
+}
+
+function renderAnalytics(){
+  if(typeof Chart==='undefined'){setTimeout(renderAnalytics,400);return;}
+  const s=anCompute();
+  const threshold=parseInt(document.getElementById('anThreshold').value||'0',10);
+  const acc=anCssVar('--accent'),grn=anCssVar('--accent3'),red=anCssVar('--accent2'),org=anCssVar('--accent4');
+  const grid=anCssVar('--border'),txt=anCssVar('--text-dim');
+  Chart.defaults.color=txt; Chart.defaults.font.family="'Space Mono',monospace"; Chart.defaults.font.size=10;
+
+  // KPI
+  const lowCount=s.people.filter(p=>p.total<threshold).length;
+  document.getElementById('anTotal').textContent=s.grandTotal;
+  document.getElementById('anMonth').textContent=`${t('months')[curMonth]} ${curYear}`;
+  document.getElementById('anActive').textContent=s.activeCount;
+  document.getElementById('anAvg').textContent=s.activeCount?Math.round(s.grandTotal/s.activeCount):0;
+  document.getElementById('anLow').textContent=lowCount;
+  document.getElementById('anLowSub').textContent=`< ${threshold} действий`;
+
+  const gridCfg={grid:{color:grid},ticks:{color:txt}};
+  // 1) по дням (bar)
+  anDestroy('days');
+  anCharts.days=new Chart(document.getElementById('anChartDays'),{type:'bar',
+    data:{labels:Array.from({length:s.dim},(_,i)=>i+1),
+      datasets:[{data:s.byDay.slice(1),backgroundColor:acc,borderRadius:3}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:gridCfg,y:{...gridCfg,beginAtZero:true}}}});
+  // 2) тип (doughnut)
+  anDestroy('type');
+  anCharts.type=new Chart(document.getElementById('anChartType'),{type:'doughnut',
+    data:{labels:['🔌 АКБ','🛴 Самокаты'],datasets:[{data:[s.byType.BAT,s.byType.MOV],
+      backgroundColor:[org,acc],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+  // 3) города (horizontal bar)
+  const cities=Object.entries(s.byCity).sort((a,b)=>b[1]-a[1]);
+  anDestroy('city');
+  anCharts.city=new Chart(document.getElementById('anChartCity'),{type:'bar',
+    data:{labels:cities.map(c=>`${c[0]} ${CITY_NAMES[c[0]]||''}`.trim()),
+      datasets:[{data:cities.map(c=>c[1]),backgroundColor:grn,borderRadius:3}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
+      scales:{x:{...gridCfg,beginAtZero:true},y:gridCfg}}});
+  // 4) день/ночь (doughnut)
+  anDestroy('dn');
+  anCharts.dn=new Chart(document.getElementById('anChartDayNight'),{type:'doughnut',
+    data:{labels:['☀️ День','🌙 Ночь'],datasets:[{data:[s.dayNight.day,s.dayNight.night],
+      backgroundColor:[org,acc],borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
+
+  // Рейтинг
+  const max=s.people.length?s.people[0].total:1;
+  let html='<table class="an-rank-table"><thead><tr><th>#</th><th>MEI</th><th>Город</th><th>Тип</th><th>Действий</th><th style="width:35%">Прогресс</th></tr></thead><tbody>';
+  s.people.forEach((p,i)=>{
+    const low=p.total<threshold;
+    const pct=Math.round(p.total/max*100);
+    const barColor=low?red:(p.total>=threshold*1.5?grn:org);
+    html+=`<tr class="${low?'an-rank-low':''}">`+
+      `<td class="an-rank-num">${i+1}</td>`+
+      `<td>${p.name}${low?' <span class="an-badge-low">BAIXO</span>':''}</td>`+
+      `<td>${p.cidade}</td>`+
+      `<td>${p.type==='BAT'?'🔌':'🛴'}</td>`+
+      `<td style="font-family:'Space Mono',monospace;font-weight:700">${p.total}</td>`+
+      `<td><div class="an-rank-bar-wrap"><div class="an-rank-bar" style="width:${pct}%;background:${barColor}"></div></div></td>`+
+      `</tr>`;
+  });
+  html+='</tbody></table>';
+  if(!s.people.length)html='<div class="sch-empty-note">Нет данных за этот месяц.</div>';
+  document.getElementById('anRanking').innerHTML=html;
+}
+
+function exportRankingCsv(){
+  const s=anCompute();
+  const threshold=parseInt(document.getElementById('anThreshold').value||'0',10);
+  let csv='Posicao,MEI,Cidade,Tipo,Acoes,Baixo\n';
+  s.people.forEach((p,i)=>{
+    csv+=`${i+1},"${p.name}",${p.cidade},${p.type},${p.total},${p.total<threshold?'SIM':'nao'}\n`;
+  });
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`desempenho_${anMonthIso()}.csv`;a.click();
+}
 </script>
 
 <style>
