@@ -207,12 +207,12 @@
 </header>
 
 <div class="tabs-bar">
-  <div class="tab active" data-tab="overview" onclick="switchTab('overview')"><span>📊</span><span>Painel Geral</span></div>
-  <div class="tab" data-tab="slots" onclick="switchTab('slots')"><span>📝</span><span>Создать новый слот</span></div>
-  <div class="tab" data-tab="tasks" onclick="switchTab('tasks')"><span>✅</span><span>Задачи</span></div>
-  <div class="tab" data-tab="analytics" onclick="switchTab('analytics')"><span>📈</span><span>Аналитика</span></div>
-  <div class="tab" data-tab="schedule" onclick="switchTab('schedule')"><span>📅</span><span>График</span></div>
-  <div class="tab" data-tab="active" onclick="switchTab('active')"><span>🟢</span><span>История создания слотов</span></div>
+  <div class="tab active" data-tab="overview" onclick="switchTab('overview')"><span>📊</span><span data-i18n="nav_overview">Painel Geral</span></div>
+  <div class="tab" data-tab="slots" onclick="switchTab('slots')"><span>📝</span><span data-i18n="nav_slots">Criar turno</span></div>
+  <div class="tab" data-tab="tasks" onclick="switchTab('tasks')"><span>✅</span><span data-i18n="nav_tasks">Tarefas</span></div>
+  <div class="tab" data-tab="analytics" onclick="switchTab('analytics')"><span>📈</span><span data-i18n="nav_analytics">Analítica</span></div>
+  <div class="tab" data-tab="schedule" onclick="switchTab('schedule')"><span>📅</span><span data-i18n="nav_schedule">Escalas</span></div>
+  <div class="tab" data-tab="active" onclick="switchTab('active')"><span>🟢</span><span data-i18n="nav_history">Histórico</span></div>
   </div>
 
 <!-- TAB WORKERS -->
@@ -339,33 +339,33 @@
 <div class="tab-content active" id="tab-overview">
   <div class="ov-hero">
     <div class="ov-hero-left">
-      <div class="ov-hero-title">📊 Painel Geral</div>
+      <div class="ov-hero-title">📊 <span data-i18n="ov_title">Painel Geral</span></div>
       <div class="ov-hero-sub" id="ovDate">—</div>
     </div>
     <div class="ov-links">
-      <a class="ov-link ov-link-heat" href="https://maps.jetmd.online" target="_blank" rel="noopener">🔥 Mapa de calor</a>
-      <button class="ov-link" onclick="switchTab('analytics')">📈 Analítica</button>
-      <button class="ov-link" onclick="switchTab('schedule')">📅 Escalas</button>
+      <a class="ov-link ov-link-heat" href="https://maps.jetmd.online" target="_blank" rel="noopener">🔥 <span data-i18n="link_heat">Mapa de calor</span></a>
+      <button class="ov-link" onclick="switchTab('analytics')">📈 <span data-i18n="link_analytics">Analítica</span></button>
+      <button class="ov-link" onclick="switchTab('schedule')">📅 <span data-i18n="link_schedule">Escalas</span></button>
       <button class="icon-btn" onclick="fetchBotData();loadDailyActions();loadSchedule(true)">⟳ Sync</button>
     </div>
   </div>
 
   <div class="ov-kpis">
-    <div class="card"><div class="card-label">MEIs ativos</div><div class="card-val cyan" id="ovActive">—</div><div class="card-sub">cadastrados</div></div>
-    <div class="card"><div class="card-label">🟢 Em turno agora</div><div class="card-val green" id="ovOnShift">—</div><div class="card-sub">trabalhando</div></div>
-    <div class="card"><div class="card-label">✅ Concluíram hoje</div><div class="card-val cyan" id="ovDone">—</div><div class="card-sub">turnos encerrados</div></div>
-    <div class="card"><div class="card-label">❌ Faltas hoje</div><div class="card-val red" id="ovNoShow">—</div><div class="card-sub">não apareceram</div></div>
-    <div class="card"><div class="card-label">⚡ Ações hoje</div><div class="card-val orange" id="ovActToday">—</div><div class="card-sub" id="ovActWeek"></div></div>
-    <div class="card"><div class="card-label">📅 Escalas na semana</div><div class="card-val cyan" id="ovSchedTaken">—</div><div class="card-sub" id="ovSchedSub"></div></div>
+    <div class="card"><div class="card-label" data-i18n="kpi_active">MEIs ativos</div><div class="card-val cyan" id="ovActive">—</div><div class="card-sub" data-i18n="sub_registered">cadastrados</div></div>
+    <div class="card"><div class="card-label" data-i18n="kpi_onshift">🟢 Em turno agora</div><div class="card-val green" id="ovOnShift">—</div><div class="card-sub" data-i18n="sub_working">trabalhando</div></div>
+    <div class="card"><div class="card-label" data-i18n="kpi_done">✅ Concluíram hoje</div><div class="card-val cyan" id="ovDone">—</div><div class="card-sub" data-i18n="sub_donesub">turnos encerrados</div></div>
+    <div class="card"><div class="card-label" data-i18n="kpi_noshow">❌ Faltas hoje</div><div class="card-val red" id="ovNoShow">—</div><div class="card-sub" data-i18n="sub_noshowsub">não apareceram</div></div>
+    <div class="card"><div class="card-label" data-i18n="kpi_acttoday">⚡ Ações hoje</div><div class="card-val orange" id="ovActToday">—</div><div class="card-sub" id="ovActWeek"></div></div>
+    <div class="card"><div class="card-label" data-i18n="kpi_schedweek">📅 Escalas na semana</div><div class="card-val cyan" id="ovSchedTaken">—</div><div class="card-sub" id="ovSchedSub"></div></div>
   </div>
 
   <div class="ov-grid">
     <div class="an-panel">
-      <div class="an-title">🏙 Operação por cidade (hoje)</div>
+      <div class="an-title" data-i18n="ov_bycity">🏙 Operação por cidade (hoje)</div>
       <div id="ovByCity" style="overflow-x:auto"></div>
     </div>
     <div class="an-panel">
-      <div class="an-title">📈 Ações nos últimos 14 dias</div>
+      <div class="an-title" data-i18n="ov_trend">📈 Ações nos últimos 14 dias</div>
       <div class="an-canvas-wrap" style="height:200px"><canvas id="ovChartTrend"></canvas></div>
     </div>
   </div>
@@ -374,21 +374,21 @@
 <!-- TAB ANALYTICS (графики трендов + рейтинг Desempenho) -->
 <div class="tab-content" id="tab-analytics">
   <div class="summary">
-    <div class="card"><div class="card-label">Действий за месяц</div><div class="card-val cyan" id="anTotal">—</div><div class="card-sub" id="anMonth"></div></div>
-    <div class="card"><div class="card-label">Активных MEI</div><div class="card-val green" id="anActive">—</div><div class="card-sub">с действиями</div></div>
-    <div class="card"><div class="card-label">Ср. на человека</div><div class="card-val cyan" id="anAvg">—</div><div class="card-sub">действий/мес</div></div>
-    <div class="card"><div class="card-label">Отстающих</div><div class="card-val red" id="anLow">—</div><div class="card-sub" id="anLowSub">ниже нормы</div></div>
+    <div class="card"><div class="card-label" data-i18n="an_total">Ações no mês</div><div class="card-val cyan" id="anTotal">—</div><div class="card-sub" id="anMonth"></div></div>
+    <div class="card"><div class="card-label" data-i18n="an_active">MEIs ativos</div><div class="card-val green" id="anActive">—</div><div class="card-sub" data-i18n="an_withact">com ações</div></div>
+    <div class="card"><div class="card-label" data-i18n="an_avg">Média por pessoa</div><div class="card-val cyan" id="anAvg">—</div><div class="card-sub" data-i18n="an_permonth">ações/mês</div></div>
+    <div class="card"><div class="card-label" data-i18n="an_low">Abaixo da meta</div><div class="card-val red" id="anLow">—</div><div class="card-sub" id="anLowSub"></div></div>
   </div>
   <div class="an-grid">
-    <div class="an-panel"><div class="an-title">Действия по дням</div><div class="an-canvas-wrap"><canvas id="anChartDays"></canvas></div></div>
-    <div class="an-panel"><div class="an-title">🔌 АКБ vs 🛴 Самокаты</div><div class="an-canvas-wrap"><canvas id="anChartType"></canvas></div></div>
-    <div class="an-panel"><div class="an-title">По городам</div><div class="an-canvas-wrap"><canvas id="anChartCity"></canvas></div></div>
-    <div class="an-panel"><div class="an-title">День vs Ночь</div><div class="an-canvas-wrap"><canvas id="anChartDayNight"></canvas></div></div>
+    <div class="an-panel"><div class="an-title" data-i18n="an_chart_days">Ações por dia</div><div class="an-canvas-wrap"><canvas id="anChartDays"></canvas></div></div>
+    <div class="an-panel"><div class="an-title" data-i18n="an_chart_type">🔌 Baterias vs 🛴 Patinetes</div><div class="an-canvas-wrap"><canvas id="anChartType"></canvas></div></div>
+    <div class="an-panel"><div class="an-title" data-i18n="an_chart_city">Por cidade</div><div class="an-canvas-wrap"><canvas id="anChartCity"></canvas></div></div>
+    <div class="an-panel"><div class="an-title" data-i18n="an_chart_dn">Dia vs Noite</div><div class="an-canvas-wrap"><canvas id="anChartDayNight"></canvas></div></div>
   </div>
   <div class="an-panel" style="margin:0 24px 30px">
     <div class="an-title" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
-      🏆 Рейтинг Desempenho
-      <span style="font-size:11px;color:var(--text-dim);font-weight:400">порог отставания:</span>
+      <span data-i18n="an_ranking">🏆 Ranking de Desempenho</span>
+      <span style="font-size:11px;color:var(--text-dim);font-weight:400" data-i18n="an_threshold">meta mínima:</span>
       <input type="number" id="anThreshold" value="115" min="0" style="width:70px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);padding:2px 6px;font-family:'Space Mono',monospace" onchange="renderAnalytics()">
       <span style="flex:1"></span>
       <button class="icon-btn" onclick="exportRankingCsv()">⬇ CSV</button>
@@ -400,25 +400,25 @@
 <!-- TAB SCHEDULE (недельный график смен из бота) -->
 <div class="tab-content" id="tab-schedule">
   <div class="summary">
-    <div class="card"><div class="card-label">Заказано смен</div><div class="card-val cyan" id="schTotal">—</div><div class="card-sub" id="schWeekLabel"></div></div>
-    <div class="card"><div class="card-label">Принято</div><div class="card-val green" id="schTaken">—</div><div class="card-sub" id="schConfirmed"></div></div>
-    <div class="card"><div class="card-label">Свободно</div><div class="card-val red" id="schOpen">—</div><div class="card-sub">ждут исполнителя</div></div>
-    <div class="card"><div class="card-label">Отказов</div><div class="card-val orange" id="schDeclined">—</div><div class="card-sub">вернулись в пул</div></div>
+    <div class="card"><div class="card-label" data-i18n="sch_total">Turnos pedidos</div><div class="card-val cyan" id="schTotal">—</div><div class="card-sub" id="schWeekLabel"></div></div>
+    <div class="card"><div class="card-label" data-i18n="sch_taken">Aceitos</div><div class="card-val green" id="schTaken">—</div><div class="card-sub" id="schConfirmed"></div></div>
+    <div class="card"><div class="card-label" data-i18n="sch_open">Livres</div><div class="card-val red" id="schOpen">—</div><div class="card-sub" data-i18n="sch_wait_worker">aguardando MEI</div></div>
+    <div class="card"><div class="card-label" data-i18n="sch_declined">Desistências</div><div class="card-val orange" id="schDeclined">—</div><div class="card-sub" data-i18n="sch_returned">voltaram ao pool</div></div>
   </div>
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:0 24px 10px">
-    <button class="icon-btn" onclick="schShiftWeek(-1)">◀ пред. неделя</button>
+    <button class="icon-btn" onclick="schShiftWeek(-1)" data-i18n="sch_prevweek">◀ semana ant.</button>
     <span id="schWeekNav" style="font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--accent)"></span>
-    <button class="icon-btn" onclick="schShiftWeek(1)">след. неделя ▶</button>
+    <button class="icon-btn" onclick="schShiftWeek(1)" data-i18n="sch_nextweek">próx. semana ▶</button>
     <span style="flex:1"></span>
     <button class="icon-btn sync-btn" onclick="loadSchedule(true)">⟳ Sync</button>
   </div>
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-empty);border:1px solid var(--slot-empty-border)"></div>свободна</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-full);border:1px solid var(--slot-full-border)"></div>принята</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-full-border)"></div>подтверждена ✓✓</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-partial);border:1px solid var(--slot-partial-border)"></div>отказ (снова свободна)</div>
-    <div class="legend-item" style="margin-left:12px">🌅 Утро 06–15 · ☀️ День 12–21 · 🌆 Вечер 15–00 · 🌙 Ночь 21–06</div>
-    <div class="legend-item">🔌 = замена АКБ · 🛴 = перемещение самокатов · ставка в подсказке чипа</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-empty);border:1px solid var(--slot-empty-border)"></div><span data-i18n="lg_free">livre</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-full);border:1px solid var(--slot-full-border)"></div><span data-i18n="lg_taken">pego</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-full-border)"></div><span data-i18n="lg_confirmed">confirmado ✓✓</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-partial);border:1px solid var(--slot-partial-border)"></div><span data-i18n="lg_declined">desistiu (livre de novo)</span></div>
+    <div class="legend-item" style="margin-left:12px"><span data-i18n="lg_windows">🌅 Manhã 06–15 · ☀️ Dia 12–21 · 🌆 Noite 15–00 · 🌙 Madrugada 21–06</span></div>
+    <div class="legend-item"><span data-i18n="lg_roles">🔌 = troca de baterias · 🛴 = movimentação de patinetes · valor na dica</span></div>
   </div>
   <div class="calendar-wrap" id="schGridWrap">
     <div id="schGrid" style="min-width:760px"></div>
@@ -430,18 +430,42 @@
 <script>
 // ── i18n ─────────────────────────────────────────────
 const I18N={
-  ru:{tab_workers:'Сотрудники',tab_slots:'Slots',tab_tasks:'Задачи',slots_ordered:'Слотов заказано',slots_filled:'Принято',slots_empty:'Пустых слотов',tasks_done:'Задач выполнено',current_period:'за текущий период',leg_full:'Заполнен',leg_partial:'Частично',leg_empty:'Пустой',leg_none:'Нет слота',all_cities:'🌐 Все',status_sync:'Обновлено',status_msgs:'сообщ.',status_err:'Ошибка',tt_status:'Статус',tt_ordered:'Заказано',tt_filled:'Принято',tt_empty:'Пустых',tt_tasks:'Задач',tt_workers:'Работники',st_full:'Заполнен',st_partial:'Частично',st_empty:'Пустой',pct_of:'% от заказ.',pct_open:'% незакр.',order_shift:'Заказать смену',new_slot:'Новый слот',new_slot_title:'Новый слот смены',lbl_city:'Город',lbl_date:'Дата',lbl_worker:'Сотрудник',lbl_shift:'Тип смены',lbl_qty:'Кол-во',lbl_note:'Примечание',btn_order:'Заказать',btn_cancel:'Отмена',badge_open:'Открыт',badge_ordered:'Заказан',badge_filled:'Выполнен',total_tasks:'Всего задач',avg_per_day:'Ср. в день',best_worker:'Лучший сотр.',best_city:'Лучший город',working_days:'рабочих дней',tt_tasks_count:'Задач за день',months:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],dow:['Вс','Пн','Вт','Ср','Чт','Пт','Сб']},
-  pt:{tab_workers:'Funcionários',tab_slots:'Turnos',tab_tasks:'Tarefas',slots_ordered:'Turnos pedidos',slots_filled:'Aceitos',slots_empty:'Turnos vazios',tasks_done:'Tarefas feitas',current_period:'no período atual',leg_full:'Preenchido',leg_partial:'Parcial',leg_empty:'Vazio',leg_none:'Sem turno',all_cities:'🌐 Todos',status_sync:'Atualizado',status_msgs:'msgs',status_err:'Erro',tt_status:'Status',tt_ordered:'Pedidos',tt_filled:'Aceitos',tt_empty:'Vazios',tt_tasks:'Tarefas',tt_workers:'Trabalhadores',st_full:'Preenchido',st_partial:'Parcial',st_empty:'Vazio',pct_of:'% dos pedidos',pct_open:'% em aberto',order_shift:'Pedir turno',new_slot:'Novo turno',new_slot_title:'Novo turno',lbl_city:'Cidade',lbl_date:'Data',lbl_worker:'Funcionário',lbl_shift:'Tipo de turno',lbl_qty:'Qtd.',lbl_note:'Observação',btn_order:'Pedir',btn_cancel:'Cancelar',badge_open:'Aberto',badge_ordered:'Pedido',badge_filled:'Concluído',total_tasks:'Total de tarefas',avg_per_day:'Média/dia',best_worker:'Melhor func.',best_city:'Melhor cidade',working_days:'dias úteis',tt_tasks_count:'Tarefas no dia',months:['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],dow:['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']}
+  ru:{tab_workers:'Сотрудники',tab_slots:'Slots',tab_tasks:'Задачи',slots_ordered:'Слотов заказано',slots_filled:'Принято',slots_empty:'Пустых слотов',tasks_done:'Задач выполнено',current_period:'за текущий период',leg_full:'Заполнен',leg_partial:'Частично',leg_empty:'Пустой',leg_none:'Нет слота',all_cities:'🌐 Все',status_sync:'Обновлено',status_msgs:'сообщ.',status_err:'Ошибка',tt_status:'Статус',tt_ordered:'Заказано',tt_filled:'Принято',tt_empty:'Пустых',tt_tasks:'Задач',tt_workers:'Работники',st_full:'Заполнен',st_partial:'Частично',st_empty:'Пустой',pct_of:'% от заказ.',pct_open:'% незакр.',order_shift:'Заказать смену',new_slot:'Новый слот',new_slot_title:'Новый слот смены',lbl_city:'Город',lbl_date:'Дата',lbl_worker:'Сотрудник',lbl_shift:'Тип смены',lbl_qty:'Кол-во',lbl_note:'Примечание',btn_order:'Заказать',btn_cancel:'Отмена',badge_open:'Открыт',badge_ordered:'Заказан',badge_filled:'Выполнен',total_tasks:'Всего задач',avg_per_day:'Ср. в день',best_worker:'Лучший сотр.',best_city:'Лучший город',working_days:'рабочих дней',tt_tasks_count:'Задач за день',
+    nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_schedule:'График',nav_history:'История слотов',
+    ov_title:'Обзор',link_heat:'Тепловая карта',link_analytics:'Аналитика',link_schedule:'График',
+    kpi_active:'MEI активных',kpi_onshift:'🟢 На смене сейчас',kpi_done:'✅ Завершили сегодня',kpi_noshow:'❌ Не вышли сегодня',kpi_acttoday:'⚡ Действий сегодня',kpi_schedweek:'📅 Смен на неделе',
+    sub_registered:'зарегистрировано',sub_working:'работают',sub_donesub:'смен закрыто',sub_noshowsub:'не появились',ov_bycity:'🏙 Операция по городам (сегодня)',ov_trend:'📈 Действия за 14 дней',
+    ov_emturno:'на смене',ov_ok:'ок',ov_acoes:'действий',ov_empty:'Операций сегодня пока нет.',ov_livres:'свободно',ov_total:'всего',ov_last7:'за 7 дней',
+    an_total:'Действий за месяц',an_active:'Активных MEI',an_avg:'Ср. на человека',an_low:'Отстающих',an_permonth:'действий/мес',an_withact:'с действиями',an_belownorm:'ниже нормы',
+    an_chart_days:'Действия по дням',an_chart_type:'🔌 АКБ vs 🛴 Самокаты',an_chart_city:'По городам',an_chart_dn:'День vs Ночь',an_ranking:'🏆 Рейтинг Desempenho',an_threshold:'порог отставания:',an_nodata:'Нет данных за этот месяц.',an_col_mei:'MEI',an_col_city:'Город',an_col_type:'Тип',an_col_actions:'Действий',an_col_progress:'Прогресс',an_day:'☀️ День',an_night:'🌙 Ночь',an_akb:'🔌 АКБ',an_scooter:'🛴 Самокаты',
+    sch_total:'Заказано смен',sch_taken:'Принято',sch_open:'Свободно',sch_declined:'Отказов',sch_confirmed_of:'из них подтвердили:',sch_wait_worker:'ждут исполнителя',sch_returned:'вернулись в пул',sch_week:'неделя',sch_prevweek:'◀ пред. неделя',sch_nextweek:'след. неделя ▶',sch_empty:'На эту неделю смен нет. Создай план в боте: /escala → города → дни → 🚀 Опубликовать.',sch_accepted:'принято',
+    lg_free:'свободна',lg_taken:'принята',lg_confirmed:'подтверждена ✓✓',lg_declined:'отказ (снова свободна)',lg_windows:'🌅 Утро 06–15 · ☀️ День 12–21 · 🌆 Вечер 15–00 · 🌙 Ночь 21–06',lg_roles:'🔌 = замена АКБ · 🛴 = перемещение самокатов · ставка в подсказке',sch_free_chip:'свободна',sch_decl_chip:'отказ',role_bat_full:'замена АКБ',role_scout_full:'перемещение самокатов',sch_tip_confirmed:'Подтверждена',sch_tip_taken:'Принята (ждёт подтверждения)',sch_tip_declined:'Был отказ — снова свободна',sch_tip_free:'Свободная смена',
+    months:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],dow:['Вс','Пн','Вт','Ср','Чт','Пт','Сб']},
+  pt:{tab_workers:'Funcionários',tab_slots:'Turnos',tab_tasks:'Tarefas',slots_ordered:'Turnos pedidos',slots_filled:'Aceitos',slots_empty:'Turnos vazios',tasks_done:'Tarefas feitas',current_period:'no período atual',leg_full:'Preenchido',leg_partial:'Parcial',leg_empty:'Vazio',leg_none:'Sem turno',all_cities:'🌐 Todos',status_sync:'Atualizado',status_msgs:'msgs',status_err:'Erro',tt_status:'Status',tt_ordered:'Pedidos',tt_filled:'Aceitos',tt_empty:'Vazios',tt_tasks:'Tarefas',tt_workers:'Trabalhadores',st_full:'Preenchido',st_partial:'Parcial',st_empty:'Vazio',pct_of:'% dos pedidos',pct_open:'% em aberto',order_shift:'Pedir turno',new_slot:'Novo turno',new_slot_title:'Novo turno',lbl_city:'Cidade',lbl_date:'Data',lbl_worker:'Funcionário',lbl_shift:'Tipo de turno',lbl_qty:'Qtd.',lbl_note:'Observação',btn_order:'Pedir',btn_cancel:'Cancelar',badge_open:'Aberto',badge_ordered:'Pedido',badge_filled:'Concluído',total_tasks:'Total de tarefas',avg_per_day:'Média/dia',best_worker:'Melhor func.',best_city:'Melhor cidade',working_days:'dias úteis',tt_tasks_count:'Tarefas no dia',
+    nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_schedule:'Escalas',nav_history:'Histórico',
+    ov_title:'Painel Geral',link_heat:'Mapa de calor',link_analytics:'Analítica',link_schedule:'Escalas',
+    kpi_active:'MEIs ativos',kpi_onshift:'🟢 Em turno agora',kpi_done:'✅ Concluíram hoje',kpi_noshow:'❌ Faltas hoje',kpi_acttoday:'⚡ Ações hoje',kpi_schedweek:'📅 Escalas na semana',
+    sub_registered:'cadastrados',sub_working:'trabalhando',sub_donesub:'turnos encerrados',sub_noshowsub:'não apareceram',ov_bycity:'🏙 Operação por cidade (hoje)',ov_trend:'📈 Ações nos últimos 14 dias',
+    ov_emturno:'em turno',ov_ok:'ok',ov_acoes:'ações',ov_empty:'Sem operação registrada hoje ainda.',ov_livres:'livres',ov_total:'no total',ov_last7:'nos últimos 7 dias',
+    an_total:'Ações no mês',an_active:'MEIs ativos',an_avg:'Média por pessoa',an_low:'Abaixo da meta',an_permonth:'ações/mês',an_withact:'com ações',an_belownorm:'abaixo de',
+    an_chart_days:'Ações por dia',an_chart_type:'🔌 Baterias vs 🛴 Patinetes',an_chart_city:'Por cidade',an_chart_dn:'Dia vs Noite',an_ranking:'🏆 Ranking de Desempenho',an_threshold:'meta mínima:',an_nodata:'Sem dados neste mês.',an_col_mei:'MEI',an_col_city:'Cidade',an_col_type:'Tipo',an_col_actions:'Ações',an_col_progress:'Progresso',an_day:'☀️ Dia',an_night:'🌙 Noite',an_akb:'🔌 Baterias',an_scooter:'🛴 Patinetes',
+    sch_total:'Turnos pedidos',sch_taken:'Aceitos',sch_open:'Livres',sch_declined:'Desistências',sch_confirmed_of:'confirmados:',sch_wait_worker:'aguardando MEI',sch_returned:'voltaram ao pool',sch_week:'semana',sch_prevweek:'◀ semana ant.',sch_nextweek:'próx. semana ▶',sch_empty:'Nenhum turno nesta semana. Crie o plano no bot: /escala → cidades → dias → 🚀 Publicar.',sch_accepted:'aceitos',
+    lg_free:'livre',lg_taken:'pego',lg_confirmed:'confirmado ✓✓',lg_declined:'desistiu (livre de novo)',lg_windows:'🌅 Manhã 06–15 · ☀️ Dia 12–21 · 🌆 Noite 15–00 · 🌙 Madrugada 21–06',lg_roles:'🔌 = troca de baterias · 🛴 = movimentação de patinetes · valor na dica',sch_free_chip:'livre',sch_decl_chip:'desistiu',role_bat_full:'troca de baterias',role_scout_full:'movimentação de patinetes',sch_tip_confirmed:'Confirmado',sch_tip_taken:'Aceito (aguardando confirmação)',sch_tip_declined:'Houve desistência — livre de novo',sch_tip_free:'Turno livre',
+    months:['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],dow:['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']}
 };
-let lang=localStorage.getItem('jet_lang')||'ru';
+let lang=localStorage.getItem('jet_lang')||'pt';
 let theme=localStorage.getItem('jet_theme')||'dark';
 function t(k){return I18N[lang][k]||k;}
 function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
   document.getElementById('langBtn').textContent=lang==='ru'?'🌐 PT':'🌐 RU';
+  document.documentElement.setAttribute('lang',lang);
   renderSummary();renderTaskSummary();try{renderSlotsGrid();}catch(e){console.warn('renderSlotsGrid skipped:',e.message);}renderCityFilters();
   if(document.getElementById('calWorkers').innerHTML)renderWorkers();
   if(document.getElementById('calTasks').innerHTML)renderTasks();
+  try{if(typeof renderOverview==='function')renderOverview();}catch(e){}
+  try{if(typeof renderAnalytics==='function'&&dailyActions.length)renderAnalytics();}catch(e){}
+  try{if(typeof renderSchedule==='function')renderSchedule();}catch(e){}
 }
 function toggleLang(){lang=lang==='ru'?'pt':'ru';localStorage.setItem('jet_lang',lang);applyLang();}
 function applyTheme(){document.documentElement.classList.toggle('light',theme==='light');document.getElementById('themeBtn').textContent=theme==='dark'?'🌙':'☀️';}
@@ -1127,13 +1151,18 @@ function schShiftWeek(dir){
   renderSchedule();
 }
 
+const SCH_TYPE_NAMES={ru:{manha:'Утро',dia:'День',noite:'Вечер',madrugada:'Ночь'},
+                      pt:{manha:'Manhã',dia:'Dia',noite:'Noite',madrugada:'Madrugada'}};
 const SCH_TYPES=[
-  {key:'manha',     emoji:'🌅', name:'Утро',  time:'06:00–15:00'},
-  {key:'dia',       emoji:'☀️', name:'День',  time:'12:00–21:00'},
-  {key:'noite',     emoji:'🌆', name:'Вечер', time:'15:00–00:00'},
-  {key:'madrugada', emoji:'🌙', name:'Ночь',  time:'21:00–06:00'},
+  {key:'manha',     emoji:'🌅', time:'06:00–15:00'},
+  {key:'dia',       emoji:'☀️', time:'12:00–21:00'},
+  {key:'noite',     emoji:'🌆', time:'15:00–00:00'},
+  {key:'madrugada', emoji:'🌙', time:'21:00–06:00'},
 ];
-const SCH_DOW=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+const SCH_DOW_ALL={ru:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],
+                   pt:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom']};
+function schDow(){return SCH_DOW_ALL[lang]||SCH_DOW_ALL.pt;}
+function schTypeName(k){return (SCH_TYPE_NAMES[lang]||SCH_TYPE_NAMES.pt)[k]||k;}
 
 async function loadSchedule(force){
   try{
@@ -1167,7 +1196,7 @@ function renderSchedule(){
   const wkEnd=new Date(schWeekStart);wkEnd.setDate(wkEnd.getDate()+6);
   const fmt=d=>`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}`;
   document.getElementById('schWeekNav').textContent=`${fmt(schWeekStart)} – ${fmt(wkEnd)}`;
-  document.getElementById('schWeekLabel').textContent=`неделя ${fmt(schWeekStart)}`;
+  document.getElementById('schWeekLabel').textContent=`${t('sch_week')} ${fmt(schWeekStart)}`;
 
   const week=schedRaw.filter(s=>days.includes(s.data));
 
@@ -1179,12 +1208,12 @@ function renderSchedule(){
   const declined=week.filter(s=>s.declined).length;
   document.getElementById('schTotal').textContent=total;
   document.getElementById('schTaken').textContent=taken;
-  document.getElementById('schConfirmed').textContent=`из них подтвердили: ${confirmed}`;
+  document.getElementById('schConfirmed').textContent=`${t('sch_confirmed_of')} ${confirmed}`;
   document.getElementById('schOpen').textContent=open;
   document.getElementById('schDeclined').textContent=declined;
 
   if(!week.length){
-    grid.innerHTML='<div class="sch-empty-note">На эту неделю смен нет.<br>Создай план в боте: /escala → города → дни → 🚀 Опубликовать.</div>';
+    grid.innerHTML=`<div class="sch-empty-note">${t('sch_empty')}</div>`;
     return;
   }
 
@@ -1201,29 +1230,30 @@ function renderSchedule(){
     const cityShifts=week.filter(s=>s.cidade===city);
     const cTaken=cityShifts.filter(s=>s.status==='taken'||s.status==='confirmed').length;
     html+=`<div class="sch-city"><div class="sch-city-head">🏙 ${CITY_NAMES[city]||city}`+
-      `<span class="sch-city-stats">${cTaken}/${cityShifts.length} принято</span></div>`;
+      `<span class="sch-city-stats">${cTaken}/${cityShifts.length} ${t('sch_accepted')}</span></div>`;
     html+='<table class="sch-table"><thead><tr><th style="width:118px"></th>';
     days.forEach((iso,i)=>{
       const cls=(i>=5?'sch-we':'')+(iso===today?' today':'');
-      html+=`<th class="${cls}">${SCH_DOW[i]}<br>${iso.slice(8,10)}.${iso.slice(5,7)}</th>`;
+      html+=`<th class="${cls}">${schDow()[i]}<br>${iso.slice(8,10)}.${iso.slice(5,7)}</th>`;
     });
     html+='</tr></thead><tbody>';
     SCH_TYPES.forEach(t=>{
       const typeDays=byCity[city][t.key];
       if(!typeDays)return; // тип не заказан в этом городе
-      html+=`<tr><td class="sch-type-cell">${t.emoji} ${t.name}<span class="sch-time">${t.time}</span></td>`;
+      html+=`<tr><td class="sch-type-cell">${t.emoji} ${schTypeName(t.key)}<span class="sch-time">${t.time}</span></td>`;
       days.forEach(iso=>{
         const shifts=(typeDays[iso]||[]);
         html+='<td class="sch-day-cell">';
         shifts.forEach(s=>{
           let cls,label,tip;
+          const L=I18N[lang];
           const rEmoji=s.role==='SCOUT'?'🛴':'🔌';
-          const rName=s.role==='SCOUT'?'перемещение самокатов':'замена АКБ';
+          const rName=s.role==='SCOUT'?L.role_scout_full:L.role_bat_full;
           const rateStr=s.rate?` · R$${Number(s.rate).toFixed(2).replace('.',',')}/ação`:'';
-          if(s.status==='confirmed'){cls='sch-confirmed';label='✓✓ '+rEmoji+' '+schShortName(s.taken_by_name);tip='Подтверждена: '+(s.taken_by_name||'');}
-          else if(s.status==='taken'){cls='sch-taken';label='✓ '+rEmoji+' '+schShortName(s.taken_by_name);tip='Принята (ждёт подтверждения): '+(s.taken_by_name||'');}
-          else if(s.declined){cls='sch-declined';label='↩ '+rEmoji+' отказ';tip='Был отказ — смена снова свободна';}
-          else{cls='sch-open';label=rEmoji+' свободна';tip='Свободная смена';}
+          if(s.status==='confirmed'){cls='sch-confirmed';label='✓✓ '+rEmoji+' '+schShortName(s.taken_by_name);tip=L.sch_tip_confirmed+': '+(s.taken_by_name||'');}
+          else if(s.status==='taken'){cls='sch-taken';label='✓ '+rEmoji+' '+schShortName(s.taken_by_name);tip=L.sch_tip_taken+': '+(s.taken_by_name||'');}
+          else if(s.declined){cls='sch-declined';label='↩ '+rEmoji+' '+L.sch_decl_chip;tip=L.sch_tip_declined;}
+          else{cls='sch-open';label=rEmoji+' '+L.sch_free_chip;tip=L.sch_tip_free;}
           html+=`<div class="sch-chip ${cls}" title="${tip} · ${t.emoji}${t.time} · ${rName}${rateStr}">${label}</div>`;
         });
         html+='</td>';
@@ -1297,7 +1327,7 @@ function renderAnalytics(){
   document.getElementById('anActive').textContent=s.activeCount;
   document.getElementById('anAvg').textContent=s.activeCount?Math.round(s.grandTotal/s.activeCount):0;
   document.getElementById('anLow').textContent=lowCount;
-  document.getElementById('anLowSub').textContent=`< ${threshold} действий`;
+  document.getElementById('anLowSub').textContent=`${t('an_belownorm')} ${threshold}`;
 
   const gridCfg={grid:{color:grid},ticks:{color:txt}};
   // 1) по дням (bar)
@@ -1310,7 +1340,7 @@ function renderAnalytics(){
   // 2) тип (doughnut)
   anDestroy('type');
   anCharts.type=new Chart(document.getElementById('anChartType'),{type:'doughnut',
-    data:{labels:['🔌 АКБ','🛴 Самокаты'],datasets:[{data:[s.byType.BAT,s.byType.MOV],
+    data:{labels:[t('an_akb'),t('an_scooter')],datasets:[{data:[s.byType.BAT,s.byType.MOV],
       backgroundColor:[org,acc],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
   // 3) города (horizontal bar)
@@ -1324,13 +1354,13 @@ function renderAnalytics(){
   // 4) день/ночь (doughnut)
   anDestroy('dn');
   anCharts.dn=new Chart(document.getElementById('anChartDayNight'),{type:'doughnut',
-    data:{labels:['☀️ День','🌙 Ночь'],datasets:[{data:[s.dayNight.day,s.dayNight.night],
+    data:{labels:[t('an_day'),t('an_night')],datasets:[{data:[s.dayNight.day,s.dayNight.night],
       backgroundColor:[org,acc],borderWidth:0}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom'}}}});
 
   // Рейтинг
   const max=s.people.length?s.people[0].total:1;
-  let html='<table class="an-rank-table"><thead><tr><th>#</th><th>MEI</th><th>Город</th><th>Тип</th><th>Действий</th><th style="width:35%">Прогресс</th></tr></thead><tbody>';
+  let html=`<table class="an-rank-table"><thead><tr><th>#</th><th>${t('an_col_mei')}</th><th>${t('an_col_city')}</th><th>${t('an_col_type')}</th><th>${t('an_col_actions')}</th><th style="width:35%">${t('an_col_progress')}</th></tr></thead><tbody>`;
   s.people.forEach((p,i)=>{
     const low=p.total<threshold;
     const pct=Math.round(p.total/max*100);
@@ -1345,7 +1375,7 @@ function renderAnalytics(){
       `</tr>`;
   });
   html+='</tbody></table>';
-  if(!s.people.length)html='<div class="sch-empty-note">Нет данных за этот месяц.</div>';
+  if(!s.people.length)html=`<div class="sch-empty-note">${t('an_nodata')}</div>`;
   document.getElementById('anRanking').innerHTML=html;
 }
 
@@ -1394,7 +1424,7 @@ function renderOverview(){
     }
   });
   document.getElementById('ovActToday').textContent=actToday;
-  document.getElementById('ovActWeek').textContent=`${act7} nos últimos 7 dias`;
+  document.getElementById('ovActWeek').textContent=`${act7} ${t('ov_last7')}`;
 
   // Эскалы недели (из schedRaw)
   const wkStart=schMonday(new Date()),days=[];
@@ -1402,7 +1432,7 @@ function renderOverview(){
   const wkSched=(typeof schedRaw!=='undefined'?schedRaw:[]).filter(s=>days.includes(s.data));
   const taken=wkSched.filter(s=>s.status==='taken'||s.status==='confirmed').length;
   document.getElementById('ovSchedTaken').textContent=taken;
-  document.getElementById('ovSchedSub').textContent=`${wkSched.filter(s=>s.status==='open').length} livres · ${wkSched.length} no total`;
+  document.getElementById('ovSchedSub').textContent=`${wkSched.filter(s=>s.status==='open').length} ${t('ov_livres')} · ${wkSched.length} ${t('ov_total')}`;
 
   // Операция по городам сегодня
   const grn=anCssVar('--accent3'),red=anCssVar('--accent2'),acc=anCssVar('--accent');
@@ -1417,11 +1447,11 @@ function renderOverview(){
     });
     if(cOn===0&&cDone===0&&cAct===0)return;
     ch+=`<div class="ov-city-row"><span class="ov-city-name">${c} · ${CITY_NAMES[c]||''}</span>`+
-      `<span class="ov-city-stat"><span class="ov-city-dot" style="background:${grn}"></span>${cOn} em turno</span>`+
-      `<span class="ov-city-stat"><span class="ov-city-dot" style="background:${acc}"></span>${cDone} ok</span>`+
-      `<span class="ov-city-stat">⚡ ${cAct} ações</span></div>`;
+      `<span class="ov-city-stat"><span class="ov-city-dot" style="background:${grn}"></span>${cOn} ${t('ov_emturno')}</span>`+
+      `<span class="ov-city-stat"><span class="ov-city-dot" style="background:${acc}"></span>${cDone} ${t('ov_ok')}</span>`+
+      `<span class="ov-city-stat">⚡ ${cAct} ${t('ov_acoes')}</span></div>`;
   });
-  document.getElementById('ovByCity').innerHTML=ch||'<div class="mon-empty">Sem operação registrada hoje ainda.</div>';
+  document.getElementById('ovByCity').innerHTML=ch||`<div class="mon-empty">${t('ov_empty')}</div>`;
 
   // Тренд 14 дней
   if(typeof Chart!=='undefined'){
