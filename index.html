@@ -91,6 +91,27 @@
   .ov-city-name{width:130px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .ov-city-stat{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);white-space:nowrap}
   .ov-city-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:3px}
+  /* ── TEAM (Executores) ── */
+  .tm-toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:14px 24px 10px}
+  .tm-input{flex:1;min-width:200px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 12px;font-size:13px;font-family:'Space Mono',monospace;outline:none}
+  .tm-input:focus{border-color:var(--accent)}
+  .tm-select{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:8px 10px;font-size:12px;font-family:'Space Mono',monospace;cursor:pointer}
+  .tm-count{font-family:'Space Mono',monospace;font-size:12px;color:var(--text-dim);font-weight:700}
+  .tm-wrap{padding:0 24px 40px;overflow-x:auto}
+  .tm-table{width:100%;border-collapse:collapse;font-size:12px;min-width:720px}
+  .tm-table th{position:sticky;top:0;background:var(--bg);text-align:left;padding:9px 10px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;border-bottom:2px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+  .tm-table th:hover{color:var(--accent)}
+  .tm-table td{padding:8px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+  .tm-table tr:hover td{background:var(--surface2)}
+  .tm-name{font-weight:700}
+  .tm-mono{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim)}
+  .tm-tg{color:var(--accent);text-decoration:none}
+  .tm-tg:hover{text-decoration:underline}
+  .tm-chip{display:inline-block;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:700;font-family:'Space Mono',monospace}
+  .tm-chip-c{background:rgba(255,165,2,.18);color:var(--accent4)}
+  .tm-chip-s{background:rgba(0,229,255,.15);color:var(--accent)}
+  .tm-chip-urent{background:var(--surface2);color:var(--text-dim)}
+  .tm-chip-active{background:rgba(46,213,115,.15);color:var(--accent3)}
   /* ── ANALYTICS TAB ── */
   .an-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;padding:6px 24px 18px}
   @media(max-width:820px){.an-grid{grid-template-columns:1fr}}
@@ -211,6 +232,7 @@
   <div class="tab" data-tab="slots" onclick="switchTab('slots')"><span>📝</span><span data-i18n="nav_slots">Criar turno</span></div>
   <div class="tab" data-tab="tasks" onclick="switchTab('tasks')"><span>✅</span><span data-i18n="nav_tasks">Tarefas</span></div>
   <div class="tab" data-tab="analytics" onclick="switchTab('analytics')"><span>📈</span><span data-i18n="nav_analytics">Analítica</span></div>
+  <div class="tab" data-tab="team" onclick="switchTab('team')"><span>👥</span><span data-i18n="nav_team">Executores</span></div>
   <div class="tab" data-tab="schedule" onclick="switchTab('schedule')"><span>📅</span><span data-i18n="nav_schedule">Escalas</span></div>
   <div class="tab" data-tab="active" onclick="switchTab('active')"><span>🟢</span><span data-i18n="nav_history">Histórico</span></div>
   </div>
@@ -371,6 +393,23 @@
   </div>
 </div>
 
+<!-- TAB TEAM (Executores — справочник исполнителей) -->
+<div class="tab-content" id="tab-team">
+  <div class="tm-toolbar">
+    <input type="text" id="tmSearch" class="tm-input" oninput="renderTeam()" data-i18n-ph="tm_search" placeholder="Buscar por nome, CNPJ, telefone…">
+    <select id="tmCity" class="tm-select" onchange="renderTeam()"></select>
+    <select id="tmReg" class="tm-select" onchange="renderTeam()">
+      <option value="all">👥 —</option>
+      <option value="reg" data-i18n="tm_reg">No bot</option>
+      <option value="urent" data-i18n="tm_urent">Só Urent</option>
+    </select>
+    <span id="tmCount" class="tm-count"></span>
+    <span style="flex:1"></span>
+    <button class="icon-btn" onclick="exportTeamCsv()" data-i18n="tm_export">⬇ CSV</button>
+  </div>
+  <div class="tm-wrap"><table class="tm-table" id="tmTable"></table></div>
+</div>
+
 <!-- TAB ANALYTICS (графики трендов + рейтинг Desempenho) -->
 <div class="tab-content" id="tab-analytics">
   <div class="summary">
@@ -431,7 +470,8 @@
 // ── i18n ─────────────────────────────────────────────
 const I18N={
   ru:{tab_workers:'Сотрудники',tab_slots:'Slots',tab_tasks:'Задачи',slots_ordered:'Слотов заказано',slots_filled:'Принято',slots_empty:'Пустых слотов',tasks_done:'Задач выполнено',current_period:'за текущий период',leg_full:'Заполнен',leg_partial:'Частично',leg_empty:'Пустой',leg_none:'Нет слота',all_cities:'🌐 Все',status_sync:'Обновлено',status_msgs:'сообщ.',status_err:'Ошибка',tt_status:'Статус',tt_ordered:'Заказано',tt_filled:'Принято',tt_empty:'Пустых',tt_tasks:'Задач',tt_workers:'Работники',st_full:'Заполнен',st_partial:'Частично',st_empty:'Пустой',pct_of:'% от заказ.',pct_open:'% незакр.',order_shift:'Заказать смену',new_slot:'Новый слот',new_slot_title:'Новый слот смены',lbl_city:'Город',lbl_date:'Дата',lbl_worker:'Сотрудник',lbl_shift:'Тип смены',lbl_qty:'Кол-во',lbl_note:'Примечание',btn_order:'Заказать',btn_cancel:'Отмена',badge_open:'Открыт',badge_ordered:'Заказан',badge_filled:'Выполнен',total_tasks:'Всего задач',avg_per_day:'Ср. в день',best_worker:'Лучший сотр.',best_city:'Лучший город',working_days:'рабочих дней',tt_tasks_count:'Задач за день',
-    nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_schedule:'График',nav_history:'История слотов',
+    nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_team:'Исполнители',nav_schedule:'График',nav_history:'История слотов',
+    tm_title:'Все исполнители',tm_search:'Поиск по имени, CNPJ, телефону…',tm_all:'Все города',tm_reg:'В боте',tm_urent:'Только Urent',tm_col_name:'Полное имя',tm_col_cnpj:'CNPJ',tm_col_phone:'Телефон',tm_col_tg:'Telegram',tm_col_city:'Город',tm_col_type:'Тип',tm_col_status:'Статус',tm_col_actions:'Действий/мес',tm_count:'исполнителей',tm_export:'⬇ CSV',tm_notreg:'не в боте',tm_active:'активен',
     ov_title:'Обзор',link_heat:'Тепловая карта',link_analytics:'Аналитика',link_schedule:'График',
     kpi_active:'MEI активных',kpi_onshift:'🟢 На смене сейчас',kpi_done:'✅ Завершили сегодня',kpi_noshow:'❌ Не вышли сегодня',kpi_acttoday:'⚡ Действий сегодня',kpi_schedweek:'📅 Смен на неделе',
     sub_registered:'зарегистрировано',sub_working:'работают',sub_donesub:'смен закрыто',sub_noshowsub:'не появились',ov_bycity:'🏙 Операция по городам (сегодня)',ov_trend:'📈 Действия за 14 дней',
@@ -442,7 +482,8 @@ const I18N={
     lg_free:'свободна',lg_taken:'принята',lg_confirmed:'подтверждена ✓✓',lg_declined:'отказ (снова свободна)',lg_windows:'🌅 Утро 06–15 · ☀️ День 12–21 · 🌆 Вечер 15–00 · 🌙 Ночь 21–06',lg_roles:'🔌 = замена АКБ · 🛴 = перемещение самокатов · ставка в подсказке',sch_free_chip:'свободна',sch_decl_chip:'отказ',role_bat_full:'замена АКБ',role_scout_full:'перемещение самокатов',sch_tip_confirmed:'Подтверждена',sch_tip_taken:'Принята (ждёт подтверждения)',sch_tip_declined:'Был отказ — снова свободна',sch_tip_free:'Свободная смена',
     months:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],dow:['Вс','Пн','Вт','Ср','Чт','Пт','Сб']},
   pt:{tab_workers:'Funcionários',tab_slots:'Turnos',tab_tasks:'Tarefas',slots_ordered:'Turnos pedidos',slots_filled:'Aceitos',slots_empty:'Turnos vazios',tasks_done:'Tarefas feitas',current_period:'no período atual',leg_full:'Preenchido',leg_partial:'Parcial',leg_empty:'Vazio',leg_none:'Sem turno',all_cities:'🌐 Todos',status_sync:'Atualizado',status_msgs:'msgs',status_err:'Erro',tt_status:'Status',tt_ordered:'Pedidos',tt_filled:'Aceitos',tt_empty:'Vazios',tt_tasks:'Tarefas',tt_workers:'Trabalhadores',st_full:'Preenchido',st_partial:'Parcial',st_empty:'Vazio',pct_of:'% dos pedidos',pct_open:'% em aberto',order_shift:'Pedir turno',new_slot:'Novo turno',new_slot_title:'Novo turno',lbl_city:'Cidade',lbl_date:'Data',lbl_worker:'Funcionário',lbl_shift:'Tipo de turno',lbl_qty:'Qtd.',lbl_note:'Observação',btn_order:'Pedir',btn_cancel:'Cancelar',badge_open:'Aberto',badge_ordered:'Pedido',badge_filled:'Concluído',total_tasks:'Total de tarefas',avg_per_day:'Média/dia',best_worker:'Melhor func.',best_city:'Melhor cidade',working_days:'dias úteis',tt_tasks_count:'Tarefas no dia',
-    nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_schedule:'Escalas',nav_history:'Histórico',
+    nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_team:'Executores',nav_schedule:'Escalas',nav_history:'Histórico',
+    tm_title:'Todos os executores',tm_search:'Buscar por nome, CNPJ, telefone…',tm_all:'Todas as cidades',tm_reg:'No bot',tm_urent:'Só Urent',tm_col_name:'Nome completo',tm_col_cnpj:'CNPJ',tm_col_phone:'Telefone',tm_col_tg:'Telegram',tm_col_city:'Cidade',tm_col_type:'Tipo',tm_col_status:'Status',tm_col_actions:'Ações/mês',tm_count:'executores',tm_export:'⬇ CSV',tm_notreg:'fora do bot',tm_active:'ativo',
     ov_title:'Painel Geral',link_heat:'Mapa de calor',link_analytics:'Analítica',link_schedule:'Escalas',
     kpi_active:'MEIs ativos',kpi_onshift:'🟢 Em turno agora',kpi_done:'✅ Concluíram hoje',kpi_noshow:'❌ Faltas hoje',kpi_acttoday:'⚡ Ações hoje',kpi_schedweek:'📅 Escalas na semana',
     sub_registered:'cadastrados',sub_working:'trabalhando',sub_donesub:'turnos encerrados',sub_noshowsub:'não apareceram',ov_bycity:'🏙 Operação por cidade (hoje)',ov_trend:'📈 Ações nos últimos 14 dias',
@@ -458,6 +499,7 @@ let theme=localStorage.getItem('jet_theme')||'dark';
 function t(k){return I18N[lang][k]||k;}
 function applyLang(){
   document.querySelectorAll('[data-i18n]').forEach(el=>el.textContent=t(el.dataset.i18n));
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
   document.getElementById('langBtn').textContent=lang==='ru'?'🌐 PT':'🌐 RU';
   document.documentElement.setAttribute('lang',lang);
   renderSummary();renderTaskSummary();try{renderSlotsGrid();}catch(e){console.warn('renderSlotsGrid skipped:',e.message);}renderCityFilters();
@@ -466,6 +508,7 @@ function applyLang(){
   try{if(typeof renderOverview==='function')renderOverview();}catch(e){}
   try{if(typeof renderAnalytics==='function'&&dailyActions.length)renderAnalytics();}catch(e){}
   try{if(typeof renderSchedule==='function')renderSchedule();}catch(e){}
+  try{if(typeof renderTeam==='function'&&document.getElementById('tab-team')?.classList.contains('active'))renderTeam();}catch(e){}
 }
 function toggleLang(){lang=lang==='ru'?'pt':'ru';localStorage.setItem('jet_lang',lang);applyLang();}
 function applyTheme(){document.documentElement.classList.toggle('light',theme==='light');document.getElementById('themeBtn').textContent=theme==='dark'?'🌙':'☀️';}
@@ -482,6 +525,18 @@ function logout(){sessionStorage.removeItem(SESSION_KEY);location.reload();}
 // ── DATA ─────────────────────────────────────────────
 const CITIES=['PG','GR','KG','IB','UB','MN','BR','IT','PE'];
 const CITY_NAMES={PG:'Praia Grande',GR:'Guarujá',KG:'Caraguatatuba',IB:'Ilhabela',UB:'Ubatuba',MN:'Mongaguá',BR:'Bertioga',IT:'Itanhaém',PE:'Peruíbe'};
+// Глобальный резолвер: полное имя/код города → наш код (или null если НЕ наш город).
+// Фильтрует чужие города (São Paulo, Santo André, интерьер SJ/CP/SO/CJ и т.п.).
+const _NAME2CODE={};
+Object.entries(CITY_NAMES).forEach(([code,nm])=>{
+  _NAME2CODE[nm.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim()]=code;
+});
+function ourCity(v){
+  if(!v)return null;
+  if(CITIES.includes(v))return v;
+  const n=String(v).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
+  return _NAME2CODE[n]||null; // не наш город → null
+}
 const WORKERS={
   PG:[{id:'leandro',name:'Leandro Medeiros',tag:'@Leandro_Medeiros_SUO_PG',role:'SUP'},{id:'julio_j',name:'Julio Jesus',tag:'@Julio_Jesus_AUX_PG',role:'AUX'},{id:'mei_pg1',name:'MEI PG-1',tag:'@mei_pg1',role:'MEI'},{id:'mei_pg2',name:'MEI PG-2',tag:'@mei_pg2',role:'MEI'}],
   GR:[{id:'michael',name:'Michael Freitas',tag:'@Michael_Freitas_SUO_BRSPL',role:'SUP'},{id:'mei_gr1',name:'MEI GR-1',tag:'@mei_gr1',role:'MEI'},{id:'mei_gr2',name:'MEI GR-2',tag:'@mei_gr2',role:'MEI'}],
@@ -686,6 +741,10 @@ async function fetchBotData(){
         role:role,
         cnpj:w.cnpj||'',
         tg_id:w.tg_id,
+        tg_username:tg_username||'',
+        phone:w.telefone||w.phone||'',
+        tipo:w.tipo||'',
+        status:w.status||'',
         notRegistered: !!w.not_registered,
         source: w.source||(w.not_registered?'urent_sheet':'bot_db')
       });
@@ -804,6 +863,10 @@ function switchTab(tab){
   if(tab==='analytics'&&typeof renderAnalytics==='function'){
     try{ if(!dailyActions.length){loadDailyActions().then(()=>renderAnalytics());} else renderAnalytics(); }
     catch(e){console.error('switchTab→analytics failed',e);}
+  }
+  if(tab==='team'&&typeof renderTeam==='function'){
+    try{ if(!dailyActions.length)loadDailyActions().then(()=>renderTeam()); renderTeam(); }
+    catch(e){console.error('switchTab→team failed',e);}
   }
   if(tab==='overview'&&typeof renderOverview==='function'){
     try{
@@ -1290,6 +1353,9 @@ function anCompute(){
 
   dailyActions.forEach(rec=>{
     if(!rec.daily)return;
+    // Только наши 9 городов — чужие (São Paulo, Santo André, интерьер) отбрасываем
+    const city=ourCity(rec.cidade||rec.city_current||rec.city_home);
+    if(!city)return;
     let recMonth=0, rDay=0, rNight=0;
     for(const iso in rec.daily){
       if(!iso.startsWith(monthIso))continue;
@@ -1304,7 +1370,6 @@ function anCompute(){
     dayNight.day+=rDay; dayNight.night+=rNight;
     const ty=rec.action_type==='BAT'?'BAT':'MOV';
     byType[ty]+=recMonth;
-    const city=rec.cidade||rec.city_current||rec.city_home||'?';
     byCity[city]=(byCity[city]||0)+recMonth;
     people.push({name:rec.name,cidade:city,type:ty,total:recMonth,day:rDay,night:rNight});
   });
@@ -1417,6 +1482,7 @@ function renderOverview(){
   const wk=[];for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);wk.push(ovBRTdate(d));}
   (dailyActions||[]).forEach(rec=>{
     if(!rec.daily)return;
+    if(!ourCity(rec.cidade||rec.city_current||rec.city_home))return; // только наши города
     for(const iso in rec.daily){
       const t=rec.daily[iso].total||0;
       if(iso===todayIso)actToday+=t;
@@ -1442,8 +1508,7 @@ function renderOverview(){
     const cDone=doneToday.filter(s=>s.cidade===c).length;
     let cAct=0;
     (dailyActions||[]).forEach(rec=>{
-      const rc=rec.cidade||rec.city_current||rec.city_home;
-      if(rc===c&&rec.daily&&rec.daily[todayIso])cAct+=rec.daily[todayIso].total||0;
+      if(ourCity(rec.cidade||rec.city_current||rec.city_home)===c&&rec.daily&&rec.daily[todayIso])cAct+=rec.daily[todayIso].total||0;
     });
     if(cOn===0&&cDone===0&&cAct===0)return;
     ch+=`<div class="ov-city-row"><span class="ov-city-name">${c} · ${CITY_NAMES[c]||''}</span>`+
@@ -1458,7 +1523,7 @@ function renderOverview(){
     const labels=[],data=[];
     for(let i=13;i>=0;i--){const d=new Date();d.setDate(d.getDate()-i);const iso=ovBRTdate(d);
       labels.push(iso.slice(8,10)+'/'+iso.slice(5,7));
-      let t=0;(dailyActions||[]).forEach(rec=>{if(rec.daily&&rec.daily[iso])t+=rec.daily[iso].total||0;});
+      let t=0;(dailyActions||[]).forEach(rec=>{if(ourCity(rec.cidade||rec.city_current||rec.city_home)&&rec.daily&&rec.daily[iso])t+=rec.daily[iso].total||0;});
       data.push(t);}
     anDestroy('ovtrend');
     const acc2=anCssVar('--accent'),grid=anCssVar('--border'),txt=anCssVar('--text-dim');
@@ -1468,6 +1533,98 @@ function renderOverview(){
       options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},
         scales:{x:{grid:{color:grid},ticks:{color:txt,maxTicksLimit:7}},y:{grid:{color:grid},ticks:{color:txt},beginAtZero:true}}}});
   }
+}
+
+// ── TEAM (Executores — справочник исполнителей) ─────────────────────
+let tmSort={col:'name',dir:1};
+function tmActionsMonth(name){
+  const rec=(typeof findActionsForMei==='function')?findActionsForMei(name):null;
+  return rec?(rec.total_actions||0):0;
+}
+function tmCollect(){
+  // Все MEI наших 9 городов из WORKERS (bot + synthetic urent)
+  const rows=[];
+  (typeof CITIES!=='undefined'?CITIES:[]).forEach(c=>{
+    (WORKERS[c]||[]).forEach(w=>{
+      rows.push({
+        name:w.name||'', cnpj:w.cnpj||'', phone:w.phone||w.telefone||'',
+        tg:w.tg_username||'', tg_id:w.tg_id||'', city:c, cityName:CITY_NAMES[c]||c,
+        type:w.tipo||w.type||'', status:w.status||'', notReg:!!w.notRegistered,
+        actions:tmActionsMonth(w.name)
+      });
+    });
+  });
+  return rows;
+}
+function tmSortRows(rows){
+  const {col,dir}=tmSort;
+  return rows.sort((a,b)=>{
+    let x=a[col],y=b[col];
+    if(col==='actions'){x=+x;y=+y;}else{x=String(x).toLowerCase();y=String(y).toLowerCase();}
+    return x<y?-dir:x>y?dir:0;
+  });
+}
+function tmSetSort(col){
+  if(tmSort.col===col)tmSort.dir*=-1;else{tmSort.col=col;tmSort.dir=1;}
+  renderTeam();
+}
+function renderTeam(){
+  // Селект городов
+  const citySel=document.getElementById('tmCity');
+  if(citySel&&!citySel.dataset.filled){
+    citySel.innerHTML=`<option value="ALL">${t('tm_all')}</option>`+
+      CITIES.map(c=>`<option value="${c}">${c} · ${CITY_NAMES[c]}</option>`).join('');
+    citySel.dataset.filled='1';
+  }
+  const q=(document.getElementById('tmSearch').value||'').toLowerCase().trim();
+  const fCity=document.getElementById('tmCity').value||'ALL';
+  const fReg=document.getElementById('tmReg').value||'all';
+  document.getElementById('tmReg').options[0].textContent='👥 '+t('tm_all');
+
+  let rows=tmCollect();
+  if(fCity!=='ALL')rows=rows.filter(r=>r.city===fCity);
+  if(fReg==='reg')rows=rows.filter(r=>!r.notReg);
+  if(fReg==='urent')rows=rows.filter(r=>r.notReg);
+  if(q)rows=rows.filter(r=>(r.name+' '+r.cnpj+' '+r.phone+' '+r.tg).toLowerCase().includes(q));
+  rows=tmSortRows(rows);
+
+  document.getElementById('tmCount').textContent=`${rows.length} ${t('tm_count')}`;
+  const arrow=c=>tmSort.col===c?(tmSort.dir>0?' ▲':' ▼'):'';
+  let html=`<thead><tr>
+    <th onclick="tmSetSort('name')">${t('tm_col_name')}${arrow('name')}</th>
+    <th onclick="tmSetSort('cnpj')">${t('tm_col_cnpj')}${arrow('cnpj')}</th>
+    <th onclick="tmSetSort('phone')">${t('tm_col_phone')}${arrow('phone')}</th>
+    <th onclick="tmSetSort('tg')">${t('tm_col_tg')}${arrow('tg')}</th>
+    <th onclick="tmSetSort('city')">${t('tm_col_city')}${arrow('city')}</th>
+    <th onclick="tmSetSort('type')">${t('tm_col_type')}${arrow('type')}</th>
+    <th onclick="tmSetSort('actions')">${t('tm_col_actions')}${arrow('actions')}</th>
+  </tr></thead><tbody>`;
+  rows.forEach(r=>{
+    const typeChip=r.type==='CHARGER'?`<span class="tm-chip tm-chip-c">🔌 Charger</span>`:
+      r.type==='LOGISTICA'?`<span class="tm-chip tm-chip-s">🛴 Scout</span>`:'—';
+    const tgCell=r.tg?`<a class="tm-tg" href="https://t.me/${r.tg}" target="_blank" rel="noopener">@${r.tg}</a>`:
+      (r.tg_id?`<span class="tm-mono">id ${r.tg_id}</span>`:'—');
+    const statusChip=r.notReg?`<span class="tm-chip tm-chip-urent">${t('tm_notreg')}</span>`:'';
+    html+=`<tr>
+      <td class="tm-name">${r.name} ${statusChip}</td>
+      <td class="tm-mono">${r.cnpj||'—'}</td>
+      <td class="tm-mono">${r.phone||'—'}</td>
+      <td>${tgCell}</td>
+      <td>${r.city} · ${r.cityName}</td>
+      <td>${typeChip}</td>
+      <td class="tm-mono" style="font-weight:700;color:var(--text)">${r.actions||0}</td>
+    </tr>`;
+  });
+  html+='</tbody>';
+  document.getElementById('tmTable').innerHTML=html;
+}
+function exportTeamCsv(){
+  const rows=tmSortRows(tmCollect());
+  let csv='Nome,CNPJ,Telefone,Telegram,tg_id,Cidade,Tipo,Status,AcoesMes\n';
+  rows.forEach(r=>{csv+=`"${r.name}",${r.cnpj},${r.phone},${r.tg},${r.tg_id},${r.city},${r.type||''},${r.notReg?'urent':'bot'},${r.actions}\n`;});
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download='executores_jet.csv';a.click();
 }
 
 function exportRankingCsv(){
