@@ -57,6 +57,22 @@
   .city-chip{padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);transition:all .15s;font-family:'Space Mono',monospace}
   .city-chip.active{background:var(--accent);color:#000;border-color:var(--accent)}
   .calendar-wrap{padding:0 24px 40px;overflow-x:auto}
+  /* ── SCHEDULE TAB ── */
+  .sch-city{margin-bottom:22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .sch-city-head{padding:9px 14px;font-weight:800;font-size:13px;background:var(--surface2);display:flex;gap:10px;align-items:center}
+  .sch-city-head .sch-city-stats{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);font-weight:400}
+  .sch-table{width:100%;border-collapse:separate;border-spacing:2px;table-layout:fixed}
+  .sch-table th{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);padding:6px 4px;text-align:center}
+  .sch-table th.sch-we{color:var(--accent4)}
+  .sch-type-cell{font-size:11px;font-weight:700;padding:4px 8px;white-space:nowrap;width:118px}
+  .sch-type-cell .sch-time{display:block;font-family:'Space Mono',monospace;font-size:9px;color:var(--text-dim);font-weight:400}
+  .sch-day-cell{vertical-align:top;padding:3px;min-height:30px}
+  .sch-chip{display:block;border-radius:4px;padding:3px 6px;font-size:10px;font-family:'Space Mono',monospace;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default}
+  .sch-chip.sch-open{background:var(--slot-empty);border:1px solid var(--slot-empty-border);color:var(--slot-empty-border)}
+  .sch-chip.sch-declined{background:var(--slot-partial);border:1px solid var(--slot-partial-border);color:var(--slot-partial-border)}
+  .sch-chip.sch-taken{background:var(--slot-full);border:1px solid var(--slot-full-border);color:var(--text)}
+  .sch-chip.sch-confirmed{background:var(--slot-full-border);border:1px solid var(--slot-full-border);color:#000;font-weight:700}
+  .sch-empty-note{padding:30px;text-align:center;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:12px}
   .calendar-table{border-collapse:separate;border-spacing:2px;min-width:100%;table-layout:fixed}
   .calendar-table th,.calendar-table td{padding:0}
   .col-name{width:155px;min-width:130px;position:sticky;left:0;z-index:10}
@@ -157,6 +173,7 @@
 <div class="tabs-bar">
   <div class="tab active" data-tab="slots" onclick="switchTab('slots')"><span>📝</span><span>Создать новый слот</span></div>
   <div class="tab" data-tab="tasks" onclick="switchTab('tasks')"><span>✅</span><span>Задачи</span></div>
+  <div class="tab" data-tab="schedule" onclick="switchTab('schedule')"><span>📅</span><span>График</span></div>
   <div class="tab" data-tab="active" onclick="switchTab('active')"><span>🟢</span><span>История создания слотов</span></div>
   </div>
 
@@ -278,6 +295,33 @@
   </div>
   <div class="city-filter" id="cityFilter2"></div>
   <div class="calendar-wrap"><table class="calendar-table" id="calTasks"></table></div>
+</div>
+
+<!-- TAB SCHEDULE (недельный график смен из бота) -->
+<div class="tab-content" id="tab-schedule">
+  <div class="summary">
+    <div class="card"><div class="card-label">Заказано смен</div><div class="card-val cyan" id="schTotal">—</div><div class="card-sub" id="schWeekLabel"></div></div>
+    <div class="card"><div class="card-label">Принято</div><div class="card-val green" id="schTaken">—</div><div class="card-sub" id="schConfirmed"></div></div>
+    <div class="card"><div class="card-label">Свободно</div><div class="card-val red" id="schOpen">—</div><div class="card-sub">ждут исполнителя</div></div>
+    <div class="card"><div class="card-label">Отказов</div><div class="card-val orange" id="schDeclined">—</div><div class="card-sub">вернулись в пул</div></div>
+  </div>
+  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:0 24px 10px">
+    <button class="icon-btn" onclick="schShiftWeek(-1)">◀ пред. неделя</button>
+    <span id="schWeekNav" style="font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--accent)"></span>
+    <button class="icon-btn" onclick="schShiftWeek(1)">след. неделя ▶</button>
+    <span style="flex:1"></span>
+    <button class="icon-btn sync-btn" onclick="loadSchedule(true)">⟳ Sync</button>
+  </div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-empty);border:1px solid var(--slot-empty-border)"></div>свободна</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-full);border:1px solid var(--slot-full-border)"></div>принята</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-full-border)"></div>подтверждена ✓✓</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-partial);border:1px solid var(--slot-partial-border)"></div>отказ (снова свободна)</div>
+    <div class="legend-item" style="margin-left:12px">🌅 Утро 06–15 · ☀️ День 12–21 · 🌆 Вечер 15–00 · 🌙 Ночь 21–06</div>
+  </div>
+  <div class="calendar-wrap" id="schGridWrap">
+    <div id="schGrid" style="min-width:760px"></div>
+  </div>
 </div>
 
 <div class="tooltip" id="tooltip"></div>
@@ -628,6 +672,9 @@ function switchTab(tab){
       renderMonitor();
     }catch(e){console.error('switchTab→active renderMonitor failed',e);}
   }
+  if(tab==='schedule'&&typeof loadSchedule==='function'){
+    try{schedRaw.length?renderSchedule():loadSchedule();}catch(e){console.error('switchTab→schedule failed',e);}
+  }
 }
 
 // ── MONTH NAV ────────────────────────────────────────
@@ -945,6 +992,128 @@ async function loadDailyActions(){
 window.addEventListener('load',()=>{
   setTimeout(loadDailyActions,2500);
   setInterval(loadDailyActions,5*60*1000);
+});
+
+// ── SCHEDULE TAB (недельный график смен из бота) ─────────────────────
+let schedRaw=[];
+let schWeekStart=null; // Date понедельника отображаемой недели
+
+function schMonday(d){
+  const x=new Date(d); const dow=(x.getDay()+6)%7; x.setDate(x.getDate()-dow);
+  x.setHours(0,0,0,0); return x;
+}
+function schIso(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function schShiftWeek(dir){
+  schWeekStart.setDate(schWeekStart.getDate()+dir*7);
+  renderSchedule();
+}
+
+const SCH_TYPES=[
+  {key:'manha',     emoji:'🌅', name:'Утро',  time:'06:00–15:00'},
+  {key:'dia',       emoji:'☀️', name:'День',  time:'12:00–21:00'},
+  {key:'noite',     emoji:'🌆', name:'Вечер', time:'15:00–00:00'},
+  {key:'madrugada', emoji:'🌙', name:'Ночь',  time:'21:00–06:00'},
+];
+const SCH_DOW=['Пн','Вт','Ср','Чт','Пт','Сб','Вс'];
+
+async function loadSchedule(force){
+  try{
+    const url=`https://gist.githubusercontent.com/12danielmik1991-ops/54c012a98e6d8f34986afca9d76f3539/raw/schedule.json?_=${Date.now()}`;
+    const r=await fetch(url);
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const data=await r.json();
+    schedRaw=data.schedule||[];
+    console.log(`[schedule] loaded ${schedRaw.length} shifts`);
+    if(!schWeekStart)schWeekStart=schMonday(new Date());
+    renderSchedule();
+  }catch(e){console.error('loadSchedule failed:',e);
+    const g=document.getElementById('schGrid');
+    if(g&&!schedRaw.length)g.innerHTML='<div class="sch-empty-note">Не удалось загрузить график: '+e.message+'</div>';
+  }
+}
+
+function schShortName(full){
+  if(!full)return '';
+  const p=full.trim().split(/\s+/);
+  return p.length>1?`${p[0]} ${p[1][0]}.`:p[0];
+}
+
+function renderSchedule(){
+  const grid=document.getElementById('schGrid');
+  if(!grid)return;
+  if(!schWeekStart)schWeekStart=schMonday(new Date());
+  const days=[]; for(let i=0;i<7;i++){const d=new Date(schWeekStart);d.setDate(d.getDate()+i);days.push(schIso(d));}
+  const wkEnd=new Date(schWeekStart);wkEnd.setDate(wkEnd.getDate()+6);
+  const fmt=d=>`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}`;
+  document.getElementById('schWeekNav').textContent=`${fmt(schWeekStart)} – ${fmt(wkEnd)}`;
+  document.getElementById('schWeekLabel').textContent=`неделя ${fmt(schWeekStart)}`;
+
+  const week=schedRaw.filter(s=>days.includes(s.data));
+
+  // Сводка
+  const total=week.length;
+  const taken=week.filter(s=>s.status==='taken'||s.status==='confirmed').length;
+  const confirmed=week.filter(s=>s.status==='confirmed').length;
+  const open=week.filter(s=>s.status==='open').length;
+  const declined=week.filter(s=>s.declined).length;
+  document.getElementById('schTotal').textContent=total;
+  document.getElementById('schTaken').textContent=taken;
+  document.getElementById('schConfirmed').textContent=`из них подтвердили: ${confirmed}`;
+  document.getElementById('schOpen').textContent=open;
+  document.getElementById('schDeclined').textContent=declined;
+
+  if(!week.length){
+    grid.innerHTML='<div class="sch-empty-note">На эту неделю смен нет.<br>Создай план в боте: /escala → города → дни → 🚀 Опубликовать.</div>';
+    return;
+  }
+
+  // Группировка city → type → date → [shifts]
+  const byCity={};
+  week.forEach(s=>{
+    ((byCity[s.cidade]=byCity[s.cidade]||{})[s.shift_type]=byCity[s.cidade][s.shift_type]||{});
+    (byCity[s.cidade][s.shift_type][s.data]=byCity[s.cidade][s.shift_type][s.data]||[]).push(s);
+  });
+
+  const today=schIso(new Date());
+  let html='';
+  Object.keys(byCity).sort().forEach(city=>{
+    const cityShifts=week.filter(s=>s.cidade===city);
+    const cTaken=cityShifts.filter(s=>s.status==='taken'||s.status==='confirmed').length;
+    html+=`<div class="sch-city"><div class="sch-city-head">🏙 ${CITY_NAMES[city]||city}`+
+      `<span class="sch-city-stats">${cTaken}/${cityShifts.length} принято</span></div>`;
+    html+='<table class="sch-table"><thead><tr><th style="width:118px"></th>';
+    days.forEach((iso,i)=>{
+      const cls=(i>=5?'sch-we':'')+(iso===today?' today':'');
+      html+=`<th class="${cls}">${SCH_DOW[i]}<br>${iso.slice(8,10)}.${iso.slice(5,7)}</th>`;
+    });
+    html+='</tr></thead><tbody>';
+    SCH_TYPES.forEach(t=>{
+      const typeDays=byCity[city][t.key];
+      if(!typeDays)return; // тип не заказан в этом городе
+      html+=`<tr><td class="sch-type-cell">${t.emoji} ${t.name}<span class="sch-time">${t.time}</span></td>`;
+      days.forEach(iso=>{
+        const shifts=(typeDays[iso]||[]);
+        html+='<td class="sch-day-cell">';
+        shifts.forEach(s=>{
+          let cls,label,tip;
+          if(s.status==='confirmed'){cls='sch-confirmed';label='✓✓ '+schShortName(s.taken_by_name);tip='Подтверждена: '+(s.taken_by_name||'');}
+          else if(s.status==='taken'){cls='sch-taken';label='✓ '+schShortName(s.taken_by_name);tip='Принята (ждёт подтверждения): '+(s.taken_by_name||'');}
+          else if(s.declined){cls='sch-declined';label='↩ отказ';tip='Был отказ — смена снова свободна';}
+          else{cls='sch-open';label='свободна';tip='Свободная смена';}
+          html+=`<div class="sch-chip ${cls}" title="${tip} · ${t.emoji}${t.time}">${label}</div>`;
+        });
+        html+='</td>';
+      });
+      html+='</tr>';
+    });
+    html+='</tbody></table></div>';
+  });
+  grid.innerHTML=html;
+}
+
+window.addEventListener('load',()=>{
+  setTimeout(loadSchedule,3000);
+  setInterval(loadSchedule,5*60*1000);
 });
 </script>
 
