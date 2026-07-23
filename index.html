@@ -321,6 +321,7 @@
     <div class="legend-item"><div class="legend-dot" style="background:var(--slot-full-border)"></div>подтверждена ✓✓</div>
     <div class="legend-item"><div class="legend-dot" style="background:var(--slot-partial);border:1px solid var(--slot-partial-border)"></div>отказ (снова свободна)</div>
     <div class="legend-item" style="margin-left:12px">🌅 Утро 06–15 · ☀️ День 12–21 · 🌆 Вечер 15–00 · 🌙 Ночь 21–06</div>
+    <div class="legend-item">🔌 = замена АКБ · 🛴 = перемещение самокатов · ставка в подсказке чипа</div>
   </div>
   <div class="calendar-wrap" id="schGridWrap">
     <div id="schGrid" style="min-width:760px"></div>
@@ -1099,11 +1100,14 @@ function renderSchedule(){
         html+='<td class="sch-day-cell">';
         shifts.forEach(s=>{
           let cls,label,tip;
-          if(s.status==='confirmed'){cls='sch-confirmed';label='✓✓ '+schShortName(s.taken_by_name);tip='Подтверждена: '+(s.taken_by_name||'');}
-          else if(s.status==='taken'){cls='sch-taken';label='✓ '+schShortName(s.taken_by_name);tip='Принята (ждёт подтверждения): '+(s.taken_by_name||'');}
-          else if(s.declined){cls='sch-declined';label='↩ отказ';tip='Был отказ — смена снова свободна';}
-          else{cls='sch-open';label='свободна';tip='Свободная смена';}
-          html+=`<div class="sch-chip ${cls}" title="${tip} · ${t.emoji}${t.time}">${label}</div>`;
+          const rEmoji=s.role==='SCOUT'?'🛴':'🔌';
+          const rName=s.role==='SCOUT'?'перемещение самокатов':'замена АКБ';
+          const rateStr=s.rate?` · R$${Number(s.rate).toFixed(2).replace('.',',')}/ação`:'';
+          if(s.status==='confirmed'){cls='sch-confirmed';label='✓✓ '+rEmoji+' '+schShortName(s.taken_by_name);tip='Подтверждена: '+(s.taken_by_name||'');}
+          else if(s.status==='taken'){cls='sch-taken';label='✓ '+rEmoji+' '+schShortName(s.taken_by_name);tip='Принята (ждёт подтверждения): '+(s.taken_by_name||'');}
+          else if(s.declined){cls='sch-declined';label='↩ '+rEmoji+' отказ';tip='Был отказ — смена снова свободна';}
+          else{cls='sch-open';label=rEmoji+' свободна';tip='Свободная смена';}
+          html+=`<div class="sch-chip ${cls}" title="${tip} · ${t.emoji}${t.time} · ${rName}${rateStr}">${label}</div>`;
         });
         html+='</td>';
       });
