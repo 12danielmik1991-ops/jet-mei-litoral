@@ -373,6 +373,11 @@
     <div class="card"><div class="card-label" data-i18n="best_city">Лучший город</div><div class="card-val orange" id="tskBestCity" style="font-size:16px;padding-top:4px">—</div><div class="card-sub" id="tskBestCityVal"></div></div>
   </div>
   <div class="city-filter" id="cityFilter2"></div>
+  <div class="legend" style="padding:0 24px 10px">
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(46,213,115,.5);border:1px solid rgba(46,213,115,.9)"></div><span data-i18n="lgt_green">со слотом · ≥45 действий</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(255,165,2,.5);border:1px solid rgba(255,165,2,.9)"></div><span data-i18n="lgt_orange">со слотом · &lt;45 действий</span></div>
+    <div class="legend-item"><div class="legend-dot" style="background:rgba(255,71,87,.5);border:1px solid rgba(255,71,87,.9)"></div><span data-i18n="lgt_red">работал без слота</span></div>
+  </div>
   <div class="calendar-wrap"><table class="calendar-table" id="calTasks"></table></div>
 </div>
 
@@ -523,7 +528,7 @@
 <script>
 // ── i18n ─────────────────────────────────────────────
 const I18N={
-  ru:{tab_workers:'Сотрудники',tab_slots:'Slots',tab_tasks:'Задачи',slots_ordered:'Слотов заказано',slots_filled:'Принято',slots_empty:'Пустых слотов',tasks_done:'Задач выполнено',current_period:'за текущий период',leg_full:'Заполнен',leg_partial:'Частично',leg_empty:'Пустой',leg_none:'Нет слота',all_cities:'🌐 Все',status_sync:'Обновлено',status_msgs:'сообщ.',status_err:'Ошибка',tt_status:'Статус',tt_ordered:'Заказано',tt_filled:'Принято',tt_empty:'Пустых',tt_tasks:'Задач',tt_workers:'Работники',st_full:'Заполнен',st_partial:'Частично',st_empty:'Пустой',pct_of:'% от заказ.',pct_open:'% незакр.',order_shift:'Заказать смену',new_slot:'Новый слот',new_slot_title:'Новый слот смены',lbl_city:'Город',lbl_date:'Дата',lbl_worker:'Сотрудник',lbl_shift:'Тип смены',lbl_qty:'Кол-во',lbl_note:'Примечание',btn_order:'Заказать',btn_cancel:'Отмена',badge_open:'Открыт',badge_ordered:'Заказан',badge_filled:'Выполнен',total_tasks:'Всего задач',avg_per_day:'Ср. в день',best_worker:'Лучший сотр.',best_city:'Лучший город',working_days:'рабочих дней',tt_tasks_count:'Задач за день',
+  ru:{tab_workers:'Сотрудники',tab_slots:'Slots',tab_tasks:'Задачи',slots_ordered:'Слотов заказано',slots_filled:'Принято',slots_empty:'Пустых слотов',tasks_done:'Задач выполнено',current_period:'за текущий период',leg_full:'Заполнен',leg_partial:'Частично',leg_empty:'Пустой',leg_none:'Нет слота',all_cities:'🌐 Все',status_sync:'Обновлено',status_msgs:'сообщ.',status_err:'Ошибка',tt_status:'Статус',tt_ordered:'Заказано',tt_filled:'Принято',tt_empty:'Пустых',tt_tasks:'Задач',tt_workers:'Работники',st_full:'Заполнен',st_partial:'Частично',st_empty:'Пустой',pct_of:'% от заказ.',pct_open:'% незакр.',order_shift:'Заказать смену',new_slot:'Новый слот',new_slot_title:'Новый слот смены',lbl_city:'Город',lbl_date:'Дата',lbl_worker:'Сотрудник',lbl_shift:'Тип смены',lbl_qty:'Кол-во',lbl_note:'Примечание',btn_order:'Заказать',btn_cancel:'Отмена',badge_open:'Открыт',badge_ordered:'Заказан',badge_filled:'Выполнен',total_tasks:'Всего задач',avg_per_day:'Ср. в день',best_worker:'Лучший сотр.',best_city:'Лучший город',working_days:'рабочих дней',tt_tasks_count:'Задач за день',lgt_green:'со слотом · ≥45 действий',lgt_orange:'со слотом · <45 действий',lgt_red:'работал без слота',
     nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_team:'Исполнители',nav_antifraud:'Антифрод',nav_schedule:'График',nav_history:'История слотов',
     af_title:'🛡 Антифрод перемещений',af_score:'Балл всего',af_moves:'Перемещений',af_bad:'Плохих %',af_people:'Человек',af_bycity:'По городам',af_col_city:'Город',af_col_score:'Балл',af_col_moves:'Перем.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Плохих%',af_col_ppl:'Чел.',af_detbtn:'👤 Детализация по людям',af_dethint:'Введите пароль для просмотра ФИО:',af_show:'Показать',af_wrongpass:'Неверный пароль',af_col_fio:'ФИО',af_col_type:'Тип',af_col_pos:'Должность',af_detectors:'Как читать баллы',af_d1:'D1 — забрал с пустого монитора',af_d2:'D2 — привёз на полный монитор',af_d3:'D3 — поставил не на монитор текущего блока',af_d4:'D4 — неправильное перемещение (хотя бы одно из D1/D2/D3)',af_scorehint:'Балл = D1 + D2 + D3. Данные достоверны с 17.07.2026.',af_updated:'обновлено',af_period:'период',af_loading:'Загрузка…',af_lowdata:'мало данных (не оценивается)',af_inc_time:'Время',af_inc_bike:'Самокат',af_inc_kind:'Тип',af_inc_park:'Парковка',af_inc_none:'нет детализации',af_inc_click:'клик по строке — детали по самокатам',af_kind_d1:'забрал с пустого',af_kind_d2:'привёз на полный',af_kind_d3:'не тот монитор',af_kind_d4:'неверное перемещение',
     tm_title:'Все исполнители',tm_search:'Поиск по имени, CNPJ, телефону…',tm_all:'Все города',tm_reg:'В боте',tm_urent:'Только Urent',tm_col_name:'Полное имя',tm_col_cnpj:'CNPJ',tm_col_phone:'Телефон',tm_col_tg:'Telegram',tm_col_city:'Город',tm_col_type:'Тип',tm_col_status:'Статус',tm_col_actions:'Действий/мес',tm_count:'исполнителей',tm_export:'⬇ CSV',tm_notreg:'не в боте',tm_active:'активен',
@@ -536,7 +541,7 @@ const I18N={
     sch_total:'Заказано смен',sch_taken:'Принято',sch_open:'Свободно',sch_declined:'Отказов',sch_confirmed_of:'из них подтвердили:',sch_wait_worker:'ждут исполнителя',sch_returned:'вернулись в пул',sch_week:'неделя',sch_prevweek:'◀ пред. неделя',sch_nextweek:'след. неделя ▶',sch_empty:'На эту неделю смен нет. Создай план в боте: /escala → города → дни → 🚀 Опубликовать.',sch_accepted:'принято',
     lg_free:'свободна',lg_taken:'принята',lg_confirmed:'подтверждена ✓✓',lg_declined:'отказ (снова свободна)',lg_windows:'🌅 Утро 06–15 · ☀️ День 12–21 · 🌆 Вечер 15–00 · 🌙 Ночь 21–06',lg_roles:'🔌 = замена АКБ · 🛴 = перемещение самокатов · ставка в подсказке',sch_free_chip:'свободна',sch_decl_chip:'отказ',role_bat_full:'замена АКБ',role_scout_full:'перемещение самокатов',sch_tip_confirmed:'Подтверждена',sch_tip_taken:'Принята (ждёт подтверждения)',sch_tip_declined:'Был отказ — снова свободна',sch_tip_free:'Свободная смена',
     months:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],dow:['Вс','Пн','Вт','Ср','Чт','Пт','Сб']},
-  pt:{tab_workers:'Funcionários',tab_slots:'Turnos',tab_tasks:'Tarefas',slots_ordered:'Turnos pedidos',slots_filled:'Aceitos',slots_empty:'Turnos vazios',tasks_done:'Tarefas feitas',current_period:'no período atual',leg_full:'Preenchido',leg_partial:'Parcial',leg_empty:'Vazio',leg_none:'Sem turno',all_cities:'🌐 Todos',status_sync:'Atualizado',status_msgs:'msgs',status_err:'Erro',tt_status:'Status',tt_ordered:'Pedidos',tt_filled:'Aceitos',tt_empty:'Vazios',tt_tasks:'Tarefas',tt_workers:'Trabalhadores',st_full:'Preenchido',st_partial:'Parcial',st_empty:'Vazio',pct_of:'% dos pedidos',pct_open:'% em aberto',order_shift:'Pedir turno',new_slot:'Novo turno',new_slot_title:'Novo turno',lbl_city:'Cidade',lbl_date:'Data',lbl_worker:'Funcionário',lbl_shift:'Tipo de turno',lbl_qty:'Qtd.',lbl_note:'Observação',btn_order:'Pedir',btn_cancel:'Cancelar',badge_open:'Aberto',badge_ordered:'Pedido',badge_filled:'Concluído',total_tasks:'Total de tarefas',avg_per_day:'Média/dia',best_worker:'Melhor func.',best_city:'Melhor cidade',working_days:'dias úteis',tt_tasks_count:'Tarefas no dia',
+  pt:{tab_workers:'Funcionários',tab_slots:'Turnos',tab_tasks:'Tarefas',slots_ordered:'Turnos pedidos',slots_filled:'Aceitos',slots_empty:'Turnos vazios',tasks_done:'Tarefas feitas',current_period:'no período atual',leg_full:'Preenchido',leg_partial:'Parcial',leg_empty:'Vazio',leg_none:'Sem turno',all_cities:'🌐 Todos',status_sync:'Atualizado',status_msgs:'msgs',status_err:'Erro',tt_status:'Status',tt_ordered:'Pedidos',tt_filled:'Aceitos',tt_empty:'Vazios',tt_tasks:'Tarefas',tt_workers:'Trabalhadores',st_full:'Preenchido',st_partial:'Parcial',st_empty:'Vazio',pct_of:'% dos pedidos',pct_open:'% em aberto',order_shift:'Pedir turno',new_slot:'Novo turno',new_slot_title:'Novo turno',lbl_city:'Cidade',lbl_date:'Data',lbl_worker:'Funcionário',lbl_shift:'Tipo de turno',lbl_qty:'Qtd.',lbl_note:'Observação',btn_order:'Pedir',btn_cancel:'Cancelar',badge_open:'Aberto',badge_ordered:'Pedido',badge_filled:'Concluído',total_tasks:'Total de tarefas',avg_per_day:'Média/dia',best_worker:'Melhor func.',best_city:'Melhor cidade',working_days:'dias úteis',tt_tasks_count:'Tarefas no dia',lgt_green:'com slot · ≥45 ações',lgt_orange:'com slot · <45 ações',lgt_red:'trabalhou sem slot',
     nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_team:'Executores',nav_antifraud:'Antifraude',nav_schedule:'Escalas',nav_history:'Histórico',
     af_title:'🛡 Antifraude de movimentações',af_score:'Score total',af_moves:'Movimentações',af_bad:'Ruins %',af_people:'Pessoas',af_bycity:'Por cidade',af_col_city:'Cidade',af_col_score:'Score',af_col_moves:'Movs.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Ruins%',af_col_ppl:'Pess.',af_detbtn:'👤 Detalhes por pessoa',af_dethint:'Digite a senha para ver os nomes:',af_show:'Mostrar',af_wrongpass:'Senha incorreta',af_col_fio:'Nome',af_col_type:'Tipo',af_col_pos:'Cargo',af_detectors:'Como ler os scores',af_d1:'D1 — pegou de monitor vazio',af_d2:'D2 — levou para monitor cheio',af_d3:'D3 — deixou fora do monitor do bloco atual',af_d4:'D4 — movimentação incorreta (ao menos um de D1/D2/D3)',af_scorehint:'Score = D1 + D2 + D3. Dados confiáveis desde 17/07/2026.',af_updated:'atualizado',af_period:'período',af_loading:'Carregando…',af_lowdata:'poucos dados (não avaliado)',af_inc_time:'Hora',af_inc_bike:'Patinete',af_inc_kind:'Tipo',af_inc_park:'Parada',af_inc_none:'sem detalhes',af_inc_click:'clique na linha — detalhes por patinete',af_kind_d1:'pegou de vazio',af_kind_d2:'levou para cheio',af_kind_d3:'monitor errado',af_kind_d4:'movimentação incorreta',
     tm_title:'Todos os executores',tm_search:'Buscar por nome, CNPJ, telefone…',tm_all:'Todas as cidades',tm_reg:'No bot',tm_urent:'Só Urent',tm_col_name:'Nome completo',tm_col_cnpj:'CNPJ',tm_col_phone:'Telefone',tm_col_tg:'Telegram',tm_col_city:'Cidade',tm_col_type:'Tipo',tm_col_status:'Status',tm_col_actions:'Ações/mês',tm_count:'executores',tm_export:'⬇ CSV',tm_notreg:'fora do bot',tm_active:'ativo',
@@ -580,6 +585,7 @@ function logout(){sessionStorage.removeItem(SESSION_KEY);location.reload();}
 
 // ── DATA ─────────────────────────────────────────────
 const CITIES=['PG','GR','KG','IB','UB','MN','BR','IT','PE'];
+const TASK_GOAL=45; // норма действий за смену: ≥ зелёный, < оранжевый
 const CITY_NAMES={PG:'Praia Grande',GR:'Guarujá',KG:'Caraguatatuba',IB:'Ilhabela',UB:'Ubatuba',MN:'Mongaguá',BR:'Bertioga',IT:'Itanhaém',PE:'Peruíbe'};
 // Глобальный резолвер: полное имя/код города → наш код (или null если НЕ наш город).
 // Фильтрует чужие города (São Paulo, Santo André, интерьер SJ/CP/SO/CJ и т.п.).
@@ -1071,15 +1077,21 @@ function renderTasks(){
         if(totalA===0){
           html+=`<td class="task-cell task-none-cell"></td>`;
         } else {
-          const isBat=actType==='BAT';
-          const baseHue=isBat?45:200;
-          const intensity=Math.min(totalA/80,1);
-          const lightness=isLight?(90-intensity*40):(15+intensity*30);
-          const saturation=50+intensity*40;
-          const bg=`hsl(${baseHue},${saturation}%,${lightness}%)`;
-          const brd=`hsl(${baseHue},80%,${isLight?'40%':'55%'})`;
-          const fg=isLight?(intensity>0.5?'#fff':'#222'):(intensity>0.4?'#fff':'#aaa');
-          html+=`<td class="task-cell" style="background:${bg};border:1px solid ${brd};color:${fg};font-weight:600" data-day="${d}" data-wname="${w.name}" data-city="${city}" data-tasks="${totalA}" data-day-cnt="${dayA}" data-night-cnt="${nightA}" data-type="${actType}" onmouseenter="showTaskTT(event,this)" onmouseleave="hideTT()">${totalA}</td>`;
+          // Статус ячейки:
+          //   🔴 без слота (нет ни принятого слота, ни начала смены в боте)
+          //   🟢 со слотом И ≥45 действий (норма выполнена)
+          //   🟠 со слотом НО <45 действий (норма не выполнена)
+          let hasWork=false;
+          if(typeof getTurnoForMei==='function'){
+            const gi=getTurnoForMei(w.tag,w.name,dateStr);
+            hasWork=!!(gi.hasSlot||gi.shiftStartedAt);
+          }
+          let bg,brd;
+          if(!hasWork){bg='rgba(255,71,87,.20)';brd='rgba(255,71,87,.75)';}
+          else if(totalA>=TASK_GOAL){bg='rgba(46,213,115,.22)';brd='rgba(46,213,115,.8)';}
+          else{bg='rgba(255,165,2,.22)';brd='rgba(255,165,2,.8)';}
+          const fg=isLight?'#1a1a1a':'#e8edf5';
+          html+=`<td class="task-cell" style="background:${bg};border:1px solid ${brd};color:${fg};font-weight:700" data-day="${d}" data-wname="${w.name}" data-city="${city}" data-tasks="${totalA}" data-day-cnt="${dayA}" data-night-cnt="${nightA}" data-type="${actType}" onmouseenter="showTaskTT(event,this)" onmouseleave="hideTT()">${totalA}</td>`;
         }
       }
       html+='</tr>';
@@ -1907,6 +1919,9 @@ function showTaskTT(e,cell){
   let slotBlock='';
   if(info.hasSlot){
     slotBlock=`<div style="background:rgba(46,213,115,.12);padding:5px 8px;border-radius:4px;margin-top:6px;font-size:11px;color:var(--accent3)">${lang==='ru'?'✅ Слот принят':'✅ Slot aceito'} ${fmt(info.slotCreatedAt)} BRT</div>`;
+  } else if(info.shiftStartedAt){
+    // Начал смену через бота — работал легально, слот не оформлял формально
+    slotBlock=`<div style="background:rgba(46,213,115,.10);padding:5px 8px;border-radius:4px;margin-top:6px;font-size:11px;color:var(--accent3)">${lang==='ru'?'🟢 Работал (смена в боте)':'🟢 Trabalhou (turno no bot)'}</div>`;
   } else if(parseInt(total)>0){
     slotBlock=`<div style="background:rgba(255,71,87,.15);padding:5px 8px;border-radius:4px;margin-top:6px;font-size:11px;color:var(--accent2);font-weight:600">${lang==='ru'?'⚠️ БЕЗ СЛОТА':'⚠️ SEM SLOT'}</div>`;
   }
