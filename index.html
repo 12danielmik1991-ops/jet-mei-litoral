@@ -264,7 +264,7 @@
       <button class="ctrl-btn" onclick="shiftMonDate(-1)" style="padding:6px 10px;font-size:14px">◀</button>
       <input type="date" id="monDate" class="form-input" style="padding:6px 10px;font-size:14px;width:160px"/>
       <button class="ctrl-btn" onclick="shiftMonDate(1)" style="padding:6px 10px;font-size:14px">▶</button>
-      <button class="ctrl-btn" onclick="setMonDateToday()" style="padding:6px 10px;font-size:11px;background:var(--accent3);color:#000">Сегодня</button>
+      <button class="ctrl-btn" onclick="setMonDateToday()" style="padding:6px 10px;font-size:11px;background:var(--accent3);color:#000" data-i18n="mon_today">Сегодня</button>
     </div>
     <span id="monDateLabel" style="margin-left:8px;font-weight:600;color:var(--accent)"></span>
     <span style="flex:1"></span>
@@ -276,7 +276,7 @@
   <div id="monSlots" class="mon-section">
     <div class="mon-header" onclick="toggleMonSection('Slots')" style="cursor:pointer">
       <span class="mon-icon" style="color:var(--accent1)">📋</span>
-      <span class="mon-title">ЗАКАЗАННЫЕ СЛОТЫ</span>
+      <span class="mon-title" data-i18n="mon_ordered">ЗАКАЗАННЫЕ СЛОТЫ</span>
       <span class="mon-count" id="monSlotsCount">(0)</span>
       <span class="mon-meta" id="monSlotsMeta"></span>
       <span class="mon-toggle">▼</span>
@@ -287,7 +287,7 @@
   <div id="monOnShift" class="mon-section">
     <div class="mon-header" onclick="toggleMonSection('OnShift')" style="cursor:pointer">
       <span class="mon-icon" style="color:var(--accent3)">🟢</span>
-      <span class="mon-title">СЕЙЧАС НА СМЕНЕ</span>
+      <span class="mon-title" data-i18n="mon_onshift">СЕЙЧАС НА СМЕНЕ</span>
       <span class="mon-count" id="monOnShiftCount">(0)</span>
       <span class="mon-meta" id="monOnShiftMeta"></span>
       <span class="mon-toggle">▼</span>
@@ -298,7 +298,7 @@
   <div id="monExpected" class="mon-section">
     <div class="mon-header" onclick="toggleMonSection('Expected')" style="cursor:pointer">
       <span class="mon-icon" style="color:var(--accent4)">⌛</span>
-      <span class="mon-title">ДОЛЖНЫ ВЫЙТИ</span>
+      <span class="mon-title" data-i18n="mon_expected">ДОЛЖНЫ ВЫЙТИ</span>
       <span class="mon-count" id="monExpectedCount">(0)</span>
       <span class="mon-meta" id="monExpectedMeta"></span>
       <span class="mon-toggle">▼</span>
@@ -309,7 +309,7 @@
   <div id="monNoShow" class="mon-section">
     <div class="mon-header" onclick="toggleMonSection('NoShow')" style="cursor:pointer">
       <span class="mon-icon" style="color:var(--accent2)">❌</span>
-      <span class="mon-title">НЕ ВЫШЛИ</span>
+      <span class="mon-title" data-i18n="mon_noshow">НЕ ВЫШЛИ</span>
       <span class="mon-count" id="monNoShowCount">(0)</span>
       <span class="mon-meta" id="monNoShowMeta"></span>
       <span class="mon-toggle">▼</span>
@@ -320,7 +320,7 @@
   <div id="monCompleted" class="mon-section">
     <div class="mon-header" onclick="toggleMonSection('Completed')" style="cursor:pointer">
       <span class="mon-icon" style="color:var(--accent1)">✅</span>
-      <span class="mon-title">ЗАВЕРШИЛИ СМЕНУ</span>
+      <span class="mon-title" data-i18n="mon_completed">ЗАВЕРШИЛИ СМЕНУ</span>
       <span class="mon-count" id="monCompletedCount">(0)</span>
       <span class="mon-meta" id="monCompletedMeta"></span>
       <span class="mon-toggle">▼</span>
@@ -543,6 +543,10 @@
 // ── i18n ─────────────────────────────────────────────
 const I18N={
   ru:{tab_workers:'Сотрудники',tab_slots:'Slots',tab_tasks:'Задачи',slots_ordered:'Слотов заказано',slots_filled:'Принято',slots_empty:'Пустых слотов',tasks_done:'Задач выполнено',current_period:'за текущий период',leg_full:'Заполнен',leg_partial:'Частично',leg_empty:'Пустой',leg_none:'Нет слота',all_cities:'🌐 Все',status_sync:'Обновлено',status_msgs:'сообщ.',status_err:'Ошибка',tt_status:'Статус',tt_ordered:'Заказано',tt_filled:'Принято',tt_empty:'Пустых',tt_tasks:'Задач',tt_workers:'Работники',st_full:'Заполнен',st_partial:'Частично',st_empty:'Пустой',pct_of:'% от заказ.',pct_open:'% незакр.',order_shift:'Заказать смену',new_slot:'Новый слот',new_slot_title:'Новый слот смены',lbl_city:'Город',lbl_date:'Дата',lbl_worker:'Сотрудник',lbl_shift:'Тип смены',lbl_qty:'Кол-во',lbl_note:'Примечание',lbl_tipo:'Тип работы',lbl_preco:'Ставка R$/действие',lbl_mode:'Период',mode_day:'Только на этот день',mode_week:'На всю неделю (7 дней)',btn_order:'Создать и разослать',btn_cancel:'Отмена',badge_open:'Открыт',badge_ordered:'Заказан',badge_filled:'Выполнен',total_tasks:'Всего задач',avg_per_day:'Ср. в день',best_worker:'Лучший сотр.',best_city:'Лучший город',working_days:'рабочих дней',tt_tasks_count:'Задач за день',lgt_green:'со слотом · ≥45 действий',lgt_orange:'со слотом · <45 действий',lgt_red:'работал без слота',
+    mon_today:'Сегодня',mon_ordered:'ЗАКАЗАННЫЕ СЛОТЫ',mon_onshift:'СЕЙЧАС НА СМЕНЕ',mon_expected:'ДОЛЖНЫ ВЫЙТИ',mon_noshow:'НЕ ВЫШЛИ',mon_completed:'ЗАВЕРШИЛИ СМЕНУ',
+    mon_empty_slots:'Слотов на эту дату нет',mon_only_today:'только для сегодня',mon_avail_today:'Доступно только для сегодняшней даты',mon_noone_shift:'Никого на смене',mon_all_checked:'Все вышедшие отметились ✓',mon_only_past:'только для прошедших дат',mon_for_past:'Для прошедших дат',mon_all_out:'Все вышли ✓',mon_noone_yet:'Пока никто',mon_upd_ago:'обновлено',mon_min_ago:'мин назад',
+    sb_slots:'сл',sb_workers:'р',sb_min:'мин',sb_upd:'обн',dur_h:'ч',dur_m:'м',sch_load_err:'Не удалось загрузить график',
+    lbl_tip:'Тип',lbl_cidade2:'Город',lbl_data2:'Дата',lbl_turno2:'Турно',lbl_aceitou:'Принял',lbl_vagas2:'Вакансии',lbl_criado:'Создан',lbl_criou:'Создал',lbl_aceitos:'Принявшие',
     nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_team:'Исполнители',nav_antifraud:'Антифрод',nav_schedule:'График',nav_history:'История слотов',
     af_title:'🛡 Антифрод перемещений',af_score:'Балл всего',af_moves:'Перемещений',af_bad:'Плохих %',af_people:'Человек',af_bycity:'По городам',af_col_city:'Город',af_col_score:'Балл',af_col_moves:'Перем.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Плохих%',af_col_ppl:'Чел.',af_detbtn:'👤 Детализация по людям',af_dethint:'Введите пароль для просмотра ФИО:',af_show:'Показать',af_wrongpass:'Неверный пароль',af_col_fio:'ФИО',af_col_type:'Тип',af_col_pos:'Должность',af_detectors:'Как читать баллы',af_d1:'D1 — забрал с пустого монитора',af_d2:'D2 — привёз на полный монитор',af_d3:'D3 — поставил не на монитор текущего блока',af_d4:'D4 — неправильное перемещение (хотя бы одно из D1/D2/D3)',af_scorehint:'Балл = D1 + D2 + D3. Данные достоверны с 17.07.2026.',af_updated:'обновлено',af_period:'период',af_loading:'Загрузка…',af_lowdata:'мало данных (не оценивается)',af_inc_time:'Время',af_inc_bike:'Самокат',af_inc_kind:'Тип',af_inc_park:'Парковка',af_inc_none:'нет детализации',af_inc_click:'клик по строке — детали по самокатам',af_kind_d1:'забрал с пустого',af_kind_d2:'привёз на полный',af_kind_d3:'не тот монитор',af_kind_d4:'неверное перемещение',
     tm_title:'Все исполнители',tm_search:'Поиск по имени, CNPJ, телефону…',tm_all:'Все города',tm_reg:'В боте',tm_urent:'Только Urent',tm_col_name:'Полное имя',tm_col_cnpj:'CNPJ',tm_col_phone:'Телефон',tm_col_tg:'Telegram',tm_col_city:'Город',tm_col_type:'Тип',tm_col_status:'Статус',tm_col_actions:'Действий/мес',tm_count:'исполнителей',tm_export:'⬇ CSV',tm_notreg:'не в боте',tm_active:'активен',
@@ -551,11 +555,15 @@ const I18N={
     sub_registered:'зарегистрировано',sub_working:'работают',sub_donesub:'смен закрыто',sub_noshowsub:'не появились',ov_bycity:'🏙 Операция по городам (сегодня)',ov_trend:'📈 Действия за 14 дней',
     ov_emturno:'на смене',ov_ok:'ок',ov_acoes:'действий',ov_empty:'Операций сегодня пока нет.',ov_livres:'свободно',ov_total:'всего',ov_last7:'за 7 дней',
     an_total:'Действий за месяц',an_active:'Активных MEI',an_avg:'Ср. на человека',an_low:'Отстающих',an_permonth:'действий/мес',an_withact:'с действиями',an_belownorm:'ниже нормы',
-    an_chart_days:'Действия по дням',an_chart_type:'🔌 АКБ vs 🛴 Самокаты',an_chart_city:'По городам',an_chart_dn:'День vs Ночь',an_ranking:'🏆 Рейтинг Desempenho',an_threshold:'порог отставания:',an_nodata:'Нет данных за этот месяц.',an_col_mei:'MEI',an_col_city:'Город',an_col_type:'Тип',an_col_actions:'Действий',an_col_progress:'Прогресс',an_day:'☀️ День',an_night:'🌙 Ночь',an_akb:'🔌 АКБ',an_scooter:'🛴 Самокаты',
+    an_chart_days:'Действия по дням',an_chart_type:'🔌 АКБ vs 🛴 Самокаты',an_chart_city:'По городам',an_chart_dn:'День vs Ночь',an_ranking:'🏆 Рейтинг эффективности',an_threshold:'порог отставания:',an_nodata:'Нет данных за этот месяц.',an_col_mei:'MEI',an_col_city:'Город',an_col_type:'Тип',an_col_actions:'Действий',an_col_progress:'Прогресс',an_day:'☀️ День',an_night:'🌙 Ночь',an_akb:'🔌 АКБ',an_scooter:'🛴 Самокаты',
     sch_total:'Заказано смен',sch_taken:'Принято',sch_open:'Свободно',sch_declined:'Отказов',sch_confirmed_of:'из них подтвердили:',sch_wait_worker:'ждут исполнителя',sch_returned:'вернулись в пул',sch_week:'неделя',sch_prevweek:'◀ пред. неделя',sch_nextweek:'след. неделя ▶',sch_empty:'На эту неделю смен нет. Создай план в боте: /escala → города → дни → 🚀 Опубликовать.',sch_accepted:'принято',
     lg_free:'свободна',lg_taken:'принята',lg_confirmed:'подтверждена ✓✓',lg_declined:'отказ (снова свободна)',lg_windows:'🌅 Утро 06–15 · ☀️ День 12–21 · 🌆 Вечер 15–00 · 🌙 Ночь 21–06',lg_roles:'🔌 = замена АКБ · 🛴 = перемещение самокатов · ставка в подсказке',sch_free_chip:'свободна',sch_decl_chip:'отказ',role_bat_full:'замена АКБ',role_scout_full:'перемещение самокатов',sch_tip_confirmed:'Подтверждена',sch_tip_taken:'Принята (ждёт подтверждения)',sch_tip_declined:'Был отказ — снова свободна',sch_tip_free:'Свободная смена',
     months:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],dow:['Вс','Пн','Вт','Ср','Чт','Пт','Сб']},
   pt:{tab_workers:'Funcionários',tab_slots:'Turnos',tab_tasks:'Tarefas',slots_ordered:'Turnos pedidos',slots_filled:'Aceitos',slots_empty:'Turnos vazios',tasks_done:'Tarefas feitas',current_period:'no período atual',leg_full:'Preenchido',leg_partial:'Parcial',leg_empty:'Vazio',leg_none:'Sem turno',all_cities:'🌐 Todos',status_sync:'Atualizado',status_msgs:'msgs',status_err:'Erro',tt_status:'Status',tt_ordered:'Pedidos',tt_filled:'Aceitos',tt_empty:'Vazios',tt_tasks:'Tarefas',tt_workers:'Trabalhadores',st_full:'Preenchido',st_partial:'Parcial',st_empty:'Vazio',pct_of:'% dos pedidos',pct_open:'% em aberto',order_shift:'Pedir turno',new_slot:'Novo turno',new_slot_title:'Novo turno',lbl_city:'Cidade',lbl_date:'Data',lbl_worker:'Funcionário',lbl_shift:'Tipo de turno',lbl_qty:'Qtd.',lbl_note:'Observação',lbl_tipo:'Tipo de serviço',lbl_preco:'Valor R$/ação',lbl_mode:'Período',mode_day:'Só neste dia',mode_week:'Semana toda (7 dias)',btn_order:'Criar e enviar',btn_cancel:'Cancelar',badge_open:'Aberto',badge_ordered:'Pedido',badge_filled:'Concluído',total_tasks:'Total de tarefas',avg_per_day:'Média/dia',best_worker:'Melhor func.',best_city:'Melhor cidade',working_days:'dias úteis',tt_tasks_count:'Tarefas no dia',lgt_green:'com slot · ≥45 ações',lgt_orange:'com slot · <45 ações',lgt_red:'trabalhou sem slot',
+    mon_today:'Hoje',mon_ordered:'TURNOS PEDIDOS',mon_onshift:'EM TURNO AGORA',mon_expected:'DEVEM COMPARECER',mon_noshow:'FALTARAM',mon_completed:'ENCERRARAM O TURNO',
+    mon_empty_slots:'Nenhum turno nesta data',mon_only_today:'só para hoje',mon_avail_today:'Disponível apenas para a data de hoje',mon_noone_shift:'Ninguém em turno',mon_all_checked:'Todos que saíram registraram ✓',mon_only_past:'só para datas passadas',mon_for_past:'Para datas passadas',mon_all_out:'Todos saíram ✓',mon_noone_yet:'Ninguém ainda',mon_upd_ago:'atualizado há',mon_min_ago:'min',
+    sb_slots:'trn',sb_workers:'p',sb_min:'min',sb_upd:'atu',dur_h:'h',dur_m:'m',sch_load_err:'Não foi possível carregar as escalas',
+    lbl_tip:'Tipo',lbl_cidade2:'Cidade',lbl_data2:'Data',lbl_turno2:'Turno',lbl_aceitou:'Aceitou',lbl_vagas2:'Vagas',lbl_criado:'Criado',lbl_criou:'Criou',lbl_aceitos:'Aceitos',
     nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_team:'Executores',nav_antifraud:'Antifraude',nav_schedule:'Escalas',nav_history:'Histórico',
     af_title:'🛡 Antifraude de movimentações',af_score:'Score total',af_moves:'Movimentações',af_bad:'Ruins %',af_people:'Pessoas',af_bycity:'Por cidade',af_col_city:'Cidade',af_col_score:'Score',af_col_moves:'Movs.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Ruins%',af_col_ppl:'Pess.',af_detbtn:'👤 Detalhes por pessoa',af_dethint:'Digite a senha para ver os nomes:',af_show:'Mostrar',af_wrongpass:'Senha incorreta',af_col_fio:'Nome',af_col_type:'Tipo',af_col_pos:'Cargo',af_detectors:'Como ler os scores',af_d1:'D1 — pegou de monitor vazio',af_d2:'D2 — levou para monitor cheio',af_d3:'D3 — deixou fora do monitor do bloco atual',af_d4:'D4 — movimentação incorreta (ao menos um de D1/D2/D3)',af_scorehint:'Score = D1 + D2 + D3. Dados confiáveis desde 17/07/2026.',af_updated:'atualizado',af_period:'período',af_loading:'Carregando…',af_lowdata:'poucos dados (não avaliado)',af_inc_time:'Hora',af_inc_bike:'Patinete',af_inc_kind:'Tipo',af_inc_park:'Parada',af_inc_none:'sem detalhes',af_inc_click:'clique na linha — detalhes por patinete',af_kind_d1:'pegou de vazio',af_kind_d2:'levou para cheio',af_kind_d3:'monitor errado',af_kind_d4:'movimentação incorreta',
     tm_title:'Todos os executores',tm_search:'Buscar por nome, CNPJ, telefone…',tm_all:'Todas as cidades',tm_reg:'No bot',tm_urent:'Só Urent',tm_col_name:'Nome completo',tm_col_cnpj:'CNPJ',tm_col_phone:'Telefone',tm_col_tg:'Telegram',tm_col_city:'Cidade',tm_col_type:'Tipo',tm_col_status:'Status',tm_col_actions:'Ações/mês',tm_count:'executores',tm_export:'⬇ CSV',tm_notreg:'fora do bot',tm_active:'ativo',
@@ -584,6 +592,8 @@ function applyLang(){
   try{if(typeof renderAnalytics==='function'&&dailyActions.length)renderAnalytics();}catch(e){}
   try{if(typeof renderSchedule==='function')renderSchedule();}catch(e){}
   try{if(typeof renderTeam==='function'&&document.getElementById('tab-team')?.classList.contains('active'))renderTeam();}catch(e){}
+  try{if(typeof renderMonitor==='function')renderMonitor();}catch(e){}
+  try{if(typeof renderAntifraud==='function'&&afData)renderAntifraud();}catch(e){}
 }
 function toggleLang(){lang=lang==='ru'?'pt':'ru';localStorage.setItem('jet_lang',lang);applyLang();}
 function applyTheme(){document.documentElement.classList.toggle('light',theme==='light');document.getElementById('themeBtn').textContent=theme==='dark'?'🌙':'☀️';}
@@ -917,7 +927,7 @@ async function fetchBotData(){
     const now=new Date();
     const srcLabel=source==="gist"?"🔥 Bot LIVE":"📊 Sheet";
     const ageMin=updatedAt?Math.round((Date.now()-new Date(updatedAt).getTime())/60000):"?";
-    document.getElementById('statusText').textContent=`${srcLabel} · ${now.toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · ${slotsRaw.length}сл/${workersRaw.length}р · upd ${ageMin}мин`;
+    document.getElementById('statusText').textContent=`${srcLabel} · ${now.toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · ${slotsRaw.length}${t('sb_slots')}/${workersRaw.length}${t('sb_workers')} · ${t('sb_upd')} ${ageMin}${t('sb_min')}`;
     document.getElementById('statusDot').style.background='var(--accent3)';
   }catch(err){
     console.error('Fetch error:',err);
@@ -1355,7 +1365,7 @@ async function loadSchedule(force){
        document.getElementById('tab-overview')?.classList.contains('active'))renderOverview();
   }catch(e){console.error('loadSchedule failed:',e);
     const g=document.getElementById('schGrid');
-    if(g&&!schedRaw.length)g.innerHTML='<div class="sch-empty-note">Не удалось загрузить график: '+e.message+'</div>';
+    if(g&&!schedRaw.length)g.innerHTML=`<div class="sch-empty-note">${t('sch_load_err')}: ${e.message}</div>`;
   }
 }
 
@@ -2236,17 +2246,17 @@ function renderMonitor(){
     // Подробности (раскрытие)
     const bodyHtml=`<div class="mon-card-body" id="${cardId}_body" style="display:none">
       <div class="mon-card-grid">
-        <div><b>${lang==='ru'?'Тип:':'Tipo:'}</b> ${typeIcon} ${o.slot_tipo||'—'}</div>
-        <div><b>${lang==='ru'?'Город:':'Cidade:'}</b> ${cidade}</div>
-        <div><b>${lang==='ru'?'Дата:':'Data:'}</b> ${o.slot_date}</div>
-        <div><b>${lang==='ru'?'Турно:':'Turno:'}</b> ${o.turno_code||'—'}</div>
-        <div><b>${lang==='ru'?'Принял:':'Aceitou:'}</b> ${_fmtBRT(o.accepted_at)} BRT</div>
-        ${vagas?`<div><b>${lang==='ru'?'Вакансии:':'Vagas:'}</b> ${vagas}</div>`:''}
-        ${created?`<div><b>${lang==='ru'?'Создан:':'Criado:'}</b> ${new Date(new Date(created).getTime()-3*3600*1000).toLocaleString('ru-RU')}</div>`:''}
-        ${(o.slot_created_by_name||o.slot_created_by_username)?`<div style="grid-column:1/-1"><b>${lang==='ru'?'Создал:':'Criou:'}</b> ${o.slot_created_by_name||'?'} ${o.slot_created_by_username?'<a href="https://t.me/'+o.slot_created_by_username+'" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent1);text-decoration:none">@'+o.slot_created_by_username+'</a>':''}</div>`:''}
+        <div><b>${t('lbl_tip')}:</b> ${typeIcon} ${o.slot_tipo||'—'}</div>
+        <div><b>${t('lbl_cidade2')}:</b> ${cidade}</div>
+        <div><b>${t('lbl_data2')}:</b> ${o.slot_date}</div>
+        <div><b>${t('lbl_turno2')}:</b> ${o.turno_code||'—'}</div>
+        <div><b>${t('lbl_aceitou')}:</b> ${_fmtBRT(o.accepted_at)} BRT</div>
+        ${vagas?`<div><b>${t('lbl_vagas2')}:</b> ${vagas}</div>`:''}
+        ${created?`<div><b>${t('lbl_criado')}:</b> ${new Date(new Date(created).getTime()-3*3600*1000).toLocaleString(lang==='ru'?'ru-RU':'pt-BR')}</div>`:''}
+        ${(o.slot_created_by_name||o.slot_created_by_username)?`<div style="grid-column:1/-1"><b>${t('lbl_criou')}:</b> ${o.slot_created_by_name||'?'} ${o.slot_created_by_username?'<a href="https://t.me/'+o.slot_created_by_username+'" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent1);text-decoration:none">@'+o.slot_created_by_username+'</a>':''}</div>`:''}
         <div style="grid-column:1/-1"><b>MEI:</b> ${o.nome||'?'} ${tg}</div>
         ${desc?`<div style="grid-column:1/-1;background:var(--bg);padding:8px;border-radius:4px;font-size:11px;white-space:pre-wrap;color:var(--muted);margin-top:4px">${desc}</div>`:''}
-        ${acceptances.length>1?`<div style="grid-column:1/-1"><b>${lang==='ru'?'Принявшие':'Aceitos'} (${acceptances.length}):</b> ${acceptances.map(a=>a.name||a.tg_username).join(', ')}</div>`:''}
+        ${acceptances.length>1?`<div style="grid-column:1/-1"><b>${t('lbl_aceitos')} (${acceptances.length}):</b> ${acceptances.map(a=>a.name||a.tg_username).join(', ')}</div>`:''}
       </div>
     </div>`;
 
@@ -2274,7 +2284,7 @@ function renderMonitor(){
     if(kind==='onshift'){
       const h=(Date.now()-new Date(s.started_at).getTime())/3600000;
       const hh=Math.floor(h),mm=Math.floor((h-hh)*60);
-      timeBlock=`<div class="mon-item-time" style="color:var(--accent3)">${hh}ч${String(mm).padStart(2,'0')}м</div>`;
+      timeBlock=`<div class="mon-item-time" style="color:var(--accent3)">${hh}${t('dur_h')}${String(mm).padStart(2,'0')}${t('dur_m')}</div>`;
     } else if(kind==='completed'){
       const dur=s.started_at&&s.ended_at?((new Date(s.ended_at)-new Date(s.started_at))/3600000).toFixed(1):'?';
       timeBlock=`<div class="mon-item-time">${dur}ч</div>`;
@@ -2291,9 +2301,9 @@ function renderMonitor(){
       </div>
       <div class="mon-card-body" id="${cardId}_body" style="display:none">
         <div class="mon-card-grid">
-          <div><b>${lang==='ru'?'Тип:':'Tipo:'}</b> ${typeIcon} ${s.slot_tipo||'—'}</div>
-          <div><b>${lang==='ru'?'Город:':'Cidade:'}</b> ${cidade}</div>
-          <div><b>${lang==='ru'?'Турно:':'Turno:'}</b> ${turnoCode||'—'}</div>
+          <div><b>${t('lbl_tip')}:</b> ${typeIcon} ${s.slot_tipo||'—'}</div>
+          <div><b>${t('lbl_cidade2')}:</b> ${cidade}</div>
+          <div><b>${t('lbl_turno2')}:</b> ${turnoCode||'—'}</div>
           <div><b>${lang==='ru'?'Начало:':'Início:'}</b> ${_fmtBRT(s.started_at)} BRT</div>
           ${s.ended_at?`<div><b>${lang==='ru'?'Конец:':'Fim:'}</b> ${_fmtBRT(s.ended_at)} BRT</div>`:`<div style="color:var(--accent3)"><b>${lang==='ru'?'Статус:':'Status:'}</b> 🟢 на смене</div>`}
           ${(s.slot_created_by_name||s.slot_created_by_username)?`<div style="grid-column:1/-1"><b>${lang==='ru'?'Слот создал:':'Slot criado por:'}</b> ${s.slot_created_by_name||'?'} ${s.slot_created_by_username?'<a href="https://t.me/'+s.slot_created_by_username+'" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent1);text-decoration:none">@'+s.slot_created_by_username+'</a>':''}</div>`:''}
@@ -2308,7 +2318,7 @@ function renderMonitor(){
   document.getElementById('monSlotsCount').textContent=`(${offersForDay.length})`;
   document.getElementById('monSlotsMeta').innerHTML=_cityChips(offersForDay,o=>o.cidade);
   document.getElementById('monSlotsBody').innerHTML=offersForDay.length===0?
-    '<div class="mon-empty">Слотов на эту дату нет</div>':
+    `<div class="mon-empty">${t('mon_empty_slots')}</div>`:
     offersForDay.sort((a,b)=>(a.cidade||'').localeCompare(b.cidade||'')||new Date(b.accepted_at)-new Date(a.accepted_at))
       .map(o=>renderOfferCard(o,'slot')).join('');
 
@@ -2323,10 +2333,10 @@ function renderMonitor(){
     });
   }
   document.getElementById('monOnShiftCount').textContent=`(${onShift.length})`;
-  document.getElementById('monOnShiftMeta').innerHTML=isToday?_cityChips(onShift,s=>s.cidade):'<span style="opacity:.5">только для сегодня</span>';
+  document.getElementById('monOnShiftMeta').innerHTML=isToday?_cityChips(onShift,s=>s.cidade):`<span style="opacity:.5">${t('mon_only_today')}</span>`;
   document.getElementById('monOnShiftBody').innerHTML=!isToday?
-    '<div class="mon-empty">Доступно только для сегодняшней даты</div>':
-    (onShift.length===0?'<div class="mon-empty">Никого на смене</div>':
+    `<div class="mon-empty">${t('mon_avail_today')}</div>`:
+    (onShift.length===0?`<div class="mon-empty">${t('mon_noone_shift')}</div>`:
     onShift.sort((a,b)=>new Date(b.started_at)-new Date(a.started_at)).map(s=>renderShiftCard(s,'onshift')).join(''));
 
   // === 3. Должны выйти ===
@@ -2341,7 +2351,7 @@ function renderMonitor(){
   document.getElementById('monExpectedCount').textContent=`(${expected.length})`;
   document.getElementById('monExpectedMeta').innerHTML=_cityChips(expected,o=>o.cidade);
   document.getElementById('monExpectedBody').innerHTML=expected.length===0?
-    '<div class="mon-empty">Все вышедшие отметились ✓</div>':
+    `<div class="mon-empty">${t('mon_all_checked')}</div>`:
     expected.sort((a,b)=>new Date(a.accepted_at)-new Date(b.accepted_at)).map(o=>renderOfferCard(o,'expected')).join('');
 
   // === 4. Не вышли (только прошлое) ===
@@ -2350,10 +2360,10 @@ function renderMonitor(){
     noShow=offersForDay.filter(o=>!startedTgIds.has(o.tg_id));
   }
   document.getElementById('monNoShowCount').textContent=`(${noShow.length})`;
-  document.getElementById('monNoShowMeta').innerHTML=isPast?_cityChips(noShow,o=>o.cidade):'<span style="opacity:.5">только для прошедших дат</span>';
+  document.getElementById('monNoShowMeta').innerHTML=isPast?_cityChips(noShow,o=>o.cidade):`<span style="opacity:.5">${t('mon_only_past')}</span>`;
   document.getElementById('monNoShowBody').innerHTML=!isPast?
-    '<div class="mon-empty">Для прошедших дат</div>':
-    (noShow.length===0?'<div class="mon-empty">Все вышли ✓</div>':
+    `<div class="mon-empty">${t('mon_for_past')}</div>`:
+    (noShow.length===0?`<div class="mon-empty">${t('mon_all_out')}</div>`:
     noShow.map(o=>renderOfferCard(o,'noshow')).join(''));
 
   // === 5. Завершили смену ===
@@ -2365,14 +2375,14 @@ function renderMonitor(){
   document.getElementById('monCompletedCount').textContent=`(${completed.length})`;
   document.getElementById('monCompletedMeta').innerHTML=_cityChips(completed,s=>s.cidade);
   document.getElementById('monCompletedBody').innerHTML=completed.length===0?
-    '<div class="mon-empty">Пока никто</div>':
+    `<div class="mon-empty">${t('mon_noone_yet')}</div>`:
     completed.sort((a,b)=>new Date(b.ended_at)-new Date(a.ended_at)).map(s=>renderShiftCard(s,'completed')).join('');
 
   // last update
   if(typeof updatedAtGlobal!=='undefined'&&updatedAtGlobal){
     const min=Math.round((Date.now()-new Date(updatedAtGlobal).getTime())/60000);
     const upd=document.getElementById('monLastUpdate');
-    if(upd)upd.textContent=`обновлено ${min}мин назад`;
+    if(upd)upd.textContent=`${t('mon_upd_ago')} ${min}${t('mon_min_ago')}`;
   }
 }
 
