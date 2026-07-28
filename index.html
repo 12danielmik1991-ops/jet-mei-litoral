@@ -601,7 +601,7 @@ const I18N={
     tm_title:'Все исполнители',tm_search:'Поиск по имени, CNPJ, телефону…',tm_all:'Все города',tm_reg:'В боте',tm_urent:'Только Urent',tm_col_name:'Полное имя',tm_col_cnpj:'CNPJ',tm_col_phone:'Телефон',tm_col_tg:'Telegram',tm_col_city:'Город',tm_col_type:'Тип',tm_col_status:'Статус',tm_col_actions:'Действий/мес',tm_count:'исполнителей',tm_export:'⬇ CSV',tm_notreg:'не в боте',tm_active:'активен',
     ov_title:'Обзор',link_heat:'Тепловая карта',link_analytics:'Аналитика',link_schedule:'График',
     kpi_active:'MEI активных',kpi_onshift:'🟢 На смене сейчас',kpi_done:'✅ Завершили сегодня',kpi_noshow:'❌ Не вышли сегодня',kpi_acttoday:'⚡ Действий сегодня',kpi_schedweek:'📅 Смен на неделе',
-    sub_registered:'зарегистрировано',sub_working:'работают',sub_donesub:'смен закрыто',sub_noshowsub:'не появились',ov_bycity:'🏙 Операция по городам (сегодня)',ov_trend:'📈 Действия за 14 дней',
+    sub_registered:'зарегистрировано',sub_working:'работают',ov_unclosed:'смену не закрыли',ov_notyet:'ещё не вышли',sub_donesub:'смен закрыто',sub_noshowsub:'не появились',ov_bycity:'🏙 Операция по городам (сегодня)',ov_trend:'📈 Действия за 14 дней',
     ov_emturno:'на смене',ov_ok:'ок',ov_acoes:'действий',ov_empty:'Операций сегодня пока нет.',ov_livres:'свободно',ov_total:'всего',ov_last7:'за 7 дней',
     an_total:'Действий за месяц',an_active:'Активных MEI',an_avg:'Ср. на человека',an_low:'Отстающих',an_permonth:'действий/мес',an_withact:'с действиями',an_belownorm:'ниже нормы',
     an_chart_days:'Действия по дням',an_chart_type:'🔌 АКБ vs 🛴 Самокаты',an_chart_city:'По городам',an_chart_dn:'День vs Ночь',an_ranking:'🏆 Рейтинг эффективности',an_threshold:'порог отставания:',an_nodata:'Нет данных за этот месяц.',an_col_mei:'MEI',an_col_city:'Город',an_col_type:'Тип',an_col_actions:'Действий',an_col_progress:'Прогресс',an_day:'☀️ День',an_night:'🌙 Ночь',an_akb:'🔌 АКБ',an_scooter:'🛴 Самокаты',
@@ -632,7 +632,7 @@ const I18N={
     tm_title:'Todos os executores',tm_search:'Buscar por nome, CNPJ, telefone…',tm_all:'Todas as cidades',tm_reg:'No bot',tm_urent:'Só Urent',tm_col_name:'Nome completo',tm_col_cnpj:'CNPJ',tm_col_phone:'Telefone',tm_col_tg:'Telegram',tm_col_city:'Cidade',tm_col_type:'Tipo',tm_col_status:'Status',tm_col_actions:'Ações/mês',tm_count:'executores',tm_export:'⬇ CSV',tm_notreg:'fora do bot',tm_active:'ativo',
     ov_title:'Painel Geral',link_heat:'Mapa de calor',link_analytics:'Analítica',link_schedule:'Escalas',
     kpi_active:'MEIs ativos',kpi_onshift:'🟢 Em turno agora',kpi_done:'✅ Concluíram hoje',kpi_noshow:'❌ Faltas hoje',kpi_acttoday:'⚡ Ações hoje',kpi_schedweek:'📅 Escalas na semana',
-    sub_registered:'cadastrados',sub_working:'trabalhando',sub_donesub:'turnos encerrados',sub_noshowsub:'não apareceram',ov_bycity:'🏙 Operação por cidade (hoje)',ov_trend:'📈 Ações nos últimos 14 dias',
+    sub_registered:'cadastrados',sub_working:'trabalhando',ov_unclosed:'não encerraram o turno',ov_notyet:'ainda não saíram',sub_donesub:'turnos encerrados',sub_noshowsub:'não apareceram',ov_bycity:'🏙 Operação por cidade (hoje)',ov_trend:'📈 Ações nos últimos 14 dias',
     ov_emturno:'em turno',ov_ok:'ok',ov_acoes:'ações',ov_empty:'Sem operação registrada hoje ainda.',ov_livres:'livres',ov_total:'no total',ov_last7:'nos últimos 7 dias',
     an_total:'Ações no mês',an_active:'MEIs ativos',an_avg:'Média por pessoa',an_low:'Abaixo da meta',an_permonth:'ações/mês',an_withact:'com ações',an_belownorm:'abaixo de',
     an_chart_days:'Ações por dia',an_chart_type:'🔌 Baterias vs 🛴 Patinetes',an_chart_city:'Por cidade',an_chart_dn:'Dia vs Noite',an_ranking:'🏆 Ranking de Desempenho',an_threshold:'meta mínima:',an_nodata:'Sem dados neste mês.',an_col_mei:'MEI',an_col_city:'Cidade',an_col_type:'Tipo',an_col_actions:'Ações',an_col_progress:'Progresso',an_day:'☀️ Dia',an_night:'🌙 Noite',an_akb:'🔌 Baterias',an_scooter:'🛴 Patinetes',
@@ -1574,8 +1574,26 @@ function schShortName(full){
   const p=String(full).trim().split(/\s+/);
   return p.length>1?`${p[0]} ${p[1][0].toUpperCase()}.`:p[0];
 }
+// Бот отдаёт время как «2026-07-28 14:43:40.114988+00»: пробел вместо T,
+// микросекунды и часовой пояс без минут. Такую строку стандартный Date
+// разбирать не обязан — Chrome делал это по legacy-правилам и мог принять
+// её за локальное время, сдвинув всё расписание. Разбираем сами.
 function schParse(iso){
   if(!iso)return null;
+  const m=String(iso).trim().match(
+    /^(\d{4})-(\d{2})-(\d{2})[T ](\d{2}):(\d{2})(?::(\d{2}))?(?:\.(\d+))?\s*(Z|[+-]\d{2}(?::?\d{2})?)?$/);
+  if(m){
+    let ms=Date.UTC(+m[1],+m[2]-1,+m[3],+m[4],+m[5],+(m[6]||0),
+                    m[7]?Math.round(Number('0.'+m[7])*1000):0);
+    const tz=m[8];
+    if(tz&&tz!=='Z'){
+      const sign=tz[0]==='-'?-1:1;
+      const hh=+tz.slice(1,3), mm=+(tz.slice(3).replace(':','')||0);
+      ms-=sign*(hh*60+mm)*60000;
+    }
+    // Без указания пояса выгрузки бота всегда в UTC — Date.UTC выше это и даёт.
+    return new Date(ms);
+  }
   const d=new Date(String(iso).replace(' ','T'));
   return isNaN(d)?null:d;
 }
@@ -1955,6 +1973,7 @@ function renderAnalytics(){
 
 // ── OVERVIEW (Painel Geral) ─────────────────────────────────────────
 function ovBRTdate(d){ // Date -> iso по BRT
+  if(!d||isNaN(d.getTime()))return null;
   const b=new Date((d||new Date()).getTime()-3*3600*1000);
   return b.toISOString().slice(0,10);
 }
@@ -1970,21 +1989,38 @@ function renderOverview(){
   });
   document.getElementById('ovActive').textContent=active;
 
-  // Статусы смен сегодня — из liveShifts (started_at/ended_at) — как в мониторе бота
+  // Статусы смен сегодня — из liveShifts (started_at/ended_at).
+  // «На смене» = начал сегодня и не дольше 12 часов назад: без этого условия
+  // сюда попадали все забытые /fim за прошлые недели и счётчик врал в разы.
   const sh=(typeof liveShifts!=='undefined'?liveShifts:[]);
-  const onShift=sh.filter(s=>s.started_at&&!s.ended_at);
-  const doneToday=sh.filter(s=>s.started_at&&s.ended_at&&ovBRTdate(new Date(s.started_at))===todayIso);
+  const _uniqTg=arr=>{const seen=new Set();return arr.filter(x=>{
+    const k=x.tg_id?String(x.tg_id):('n:'+(x.nome||''));
+    if(seen.has(k))return false;seen.add(k);return true;});};
+  const _hrs=iso=>{const d=schParse(iso);return d?(Date.now()-d.getTime())/3600000:1e9;};
+  const _brt=iso=>{const d=schParse(iso);return d?ovBRTdate(d):null;};
+  const _isNow=s=>_brt(s.started_at)===todayIso&&_hrs(s.started_at)<12;
+  const onShift=_uniqTg(sh.filter(s=>s.started_at&&!s.ended_at&&_isNow(s)));
+  const unclosed=sh.filter(s=>s.started_at&&!s.ended_at&&!_isNow(s)).length;
+  const doneToday=_uniqTg(sh.filter(s=>s.started_at&&s.ended_at&&_brt(s.ended_at)===todayIso));
   document.getElementById('ovOnShift').textContent=onShift.length;
   document.getElementById('ovDone').textContent=doneToday.length;
+  const _osSub=document.querySelector('#ovOnShift + .card-sub');
+  if(_osSub)_osSub.textContent=unclosed?`${t('sub_working')} · ${unclosed} ${t('ov_unclosed')}`:t('sub_working');
 
   // Faltas: слоты на сегодня (принятые), по которым нет shift_start
   const slots=(window.allSlots||[]);
-  const startedTg=new Set(sh.filter(s=>s.started_at).map(s=>String(s.tg_id)));
+  // Только смены сегодняшнего дня: со списком «начинал когда-либо» любой,
+  // кто раньше выходил, автоматически считался вышедшим и сегодня.
+  const startedTg=new Set(sh.filter(s=>s.started_at&&_brt(s.started_at)===todayIso).map(s=>String(s.tg_id)));
   const todaySlots=slots.filter(s=>s.data===todayIso&&s.status==='full');
   // сколько принятых сегодня без старта (грубо: full-слоты без стартовавшего исполнителя)
   const noShow=(typeof liveOffers!=='undefined'?liveOffers:[])
     .filter(o=>o.slot_date===todayIso && !startedTg.has(String(o.tg_id)));
   document.getElementById('ovNoShow').textContent=noShow.length;
+  // Днём это ещё не «прогул», а ожидание выхода — настоящие прогулы за
+  // прошедшие дни видно в «Escalas».
+  const _nsSub=document.querySelector('#ovNoShow + .card-sub');
+  if(_nsSub)_nsSub.textContent=t('ov_notyet');
 
   // Действия сегодня / за 7 дней (из dailyActions)
   let actToday=0,act7=0;
@@ -1998,8 +2034,14 @@ function renderOverview(){
       if(wk.includes(iso))act7+=t;
     }
   });
-  document.getElementById('ovActToday').textContent=actToday;
-  document.getElementById('ovActWeek').textContent=`${act7} ${t('ov_last7')}`;
+  // Лист ЦД доезжает с задержкой ~сутки: пока данных за сегодня нет,
+  // «0» было бы враньём — показываем ⏳ и дату последней выгрузки.
+  const cdMax=(typeof schCdMaxDate==='function')?schCdMaxDate():'';
+  const cdStale=cdMax&&cdMax<todayIso;
+  document.getElementById('ovActToday').textContent=(actToday===0&&cdStale)?'⏳':actToday;
+  document.getElementById('ovActWeek').textContent=cdStale
+    ?`${act7} ${t('ov_last7')} · ${t('sch_cd_upto')} ${cdMax.slice(8,10)}.${cdMax.slice(5,7)}`
+    :`${act7} ${t('ov_last7')}`;
 
   // Слоты недели: считаем по фактически созданным слотам (slots.json).
   // Раньше здесь был план /escala — он приходит пустым, и KPI всегда показывал 0.
@@ -2016,18 +2058,23 @@ function renderOverview(){
   // Операция по городам сегодня
   const grn=anCssVar('--accent3'),red=anCssVar('--accent2'),acc=anCssVar('--accent');
   let ch='';
+  // Действия: за сегодня выгрузки ЦД ещё нет — показываем последний
+  // закрытый день, чтобы строка города не выглядела пустой.
+  const actIso=(cdStale&&cdMax)?cdMax:todayIso;
   (typeof CITIES!=='undefined'?CITIES:[]).forEach(c=>{
     const cOn=onShift.filter(s=>s.cidade===c).length;
     const cDone=doneToday.filter(s=>s.cidade===c).length;
     let cAct=0;
     (dailyActions||[]).forEach(rec=>{
-      if(recCity(rec)===c&&rec.daily&&rec.daily[todayIso])cAct+=rec.daily[todayIso].total||0;
+      if(recCity(rec)===c&&rec.daily&&rec.daily[actIso])cAct+=rec.daily[actIso].total||0;
     });
     if(cOn===0&&cDone===0&&cAct===0)return;
+    const actLbl=cdStale?`⚡ ${cAct} ${t('ov_acoes')} (${actIso.slice(8,10)}.${actIso.slice(5,7)})`
+                        :`⚡ ${cAct} ${t('ov_acoes')}`;
     ch+=`<div class="ov-city-row"><span class="ov-city-name">${c} · ${CITY_NAMES[c]||''}</span>`+
       `<span class="ov-city-stat"><span class="ov-city-dot" style="background:${grn}"></span>${cOn} ${t('ov_emturno')}</span>`+
       `<span class="ov-city-stat"><span class="ov-city-dot" style="background:${acc}"></span>${cDone} ${t('ov_ok')}</span>`+
-      `<span class="ov-city-stat">⚡ ${cAct} ${t('ov_acoes')}</span></div>`;
+      `<span class="ov-city-stat">${actLbl}</span></div>`;
   });
   document.getElementById('ovByCity').innerHTML=ch||`<div class="mon-empty">${t('ov_empty')}</div>`;
 
