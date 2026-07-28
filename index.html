@@ -136,6 +136,16 @@
   .pl-sum{font-size:12px;font-family:'Space Mono',monospace;color:var(--text-dim)}
   .pl-sum b{color:var(--accent);font-size:14px}
   .pl-note{flex:1;min-width:220px}
+  .pl-modal{display:none;position:fixed;inset:0;z-index:900;background:rgba(0,0,0,.55);
+    align-items:center;justify-content:center;padding:20px}
+  .pl-modal-box{background:var(--surface);border:1px solid var(--accent);border-radius:10px;
+    padding:18px 20px;max-width:520px;width:100%;max-height:80vh;overflow:auto;box-shadow:var(--shadow)}
+  .pl-modal-title{font-size:14px;font-weight:800;color:var(--accent);margin-bottom:10px}
+  .pl-confirm-list{margin:10px 0;font-size:11.5px;font-family:'Space Mono',monospace;
+    color:var(--text-dim);max-height:210px;overflow:auto}
+  .pl-prev-row{padding:3px 0;border-bottom:1px solid var(--border)}
+  .pl-prev-row b{color:var(--accent);margin-right:6px}
+  .slot-btn.is-idle{opacity:.55}
   .pl-confirm{margin-top:10px;background:var(--surface);border:1px solid var(--accent4);
     border-radius:var(--radius);padding:12px 14px}
   .pl-confirm-txt{font-size:12.5px;margin-bottom:10px}
@@ -1561,32 +1571,73 @@ function renderPlanner(){
        (precos.length?` · ${precos.sort((a,b)=>a-b).map(plFmtMoney).join(' / ')}`:'')
       :`<span style="opacity:.6">${t('pl_sum_empty')}</span>`;
   }
+  // Кнопку не гасим: молчаливая серая кнопка читается как «сломалась».
+  // Если публиковать нечего — по клику объясним, чего не хватает.
   const btn=document.getElementById('plPublishBtn');
-  if(btn)btn.disabled=!slots||plBusy;
+  if(btn){
+    btn.disabled=plBusy;
+    btn.classList.toggle('is-idle',!slots);
+  }
 }
 
 // ── Публикация: сначала подтверждение (уходит рассылка исполнителям) ───
+// Модалка планировщика: подтверждение, прогресс и отчёт всегда по центру
+// экрана — иначе они появлялись ниже кнопки, вне видимой области.
+function plModal(html,closable){
+  let m=document.getElementById('plModal');
+  if(!m){
+    m=document.createElement('div');
+    m.id='plModal';m.className='pl-modal';
+    m.innerHTML='<div class="pl-modal-box" id="plModalBox"></div>';
+    m.addEventListener('click',e=>{if(e.target===m&&m.dataset.closable==='1')plModalClose();});
+    document.body.appendChild(m);
+  }
+  m.dataset.closable=closable?'1':'0';
+  const box=document.getElementById('plModalBox');
+  if(box)box.innerHTML=html;
+  m.style.display='flex';
+}
+function plModalClose(){
+  const m=document.getElementById('plModal');
+  if(m)m.style.display='none';
+}
+
 function plAskPublish(){
-  const box=document.getElementById('plConfirm');
-  if(!box)return;
   const keys=Object.keys(plCells);
-  if(!keys.length)return;
+  if(!plCity){plModal(`<div class="pl-confirm-txt">${t('pl_pick_city')}</div>`+
+    `<div class="pl-confirm-btns"><button class="slot-btn" onclick="plModalClose()">OK</button></div>`,true);return;}
+  if(!keys.length){plModal(`<div class="pl-confirm-txt">${t('pl_sum_empty')}</div>`+
+    `<div class="pl-confirm-btns"><button class="slot-btn" onclick="plModalClose()">OK</button></div>`,true);return;}
   const vagas=keys.reduce((a,k)=>a+(plCells[k].qty||1),0);
-  box.style.display='block';
-  box.innerHTML=`<div class="pl-confirm-txt">${t('pl_confirm')
-    .replace('{n}',keys.length).replace('{v}',vagas)
-    .replace('{c}',CITY_NAMES[plCity]||plCity)}</div>`+
+  plModal(`<div class="pl-modal-title">${t('pl_publish')}</div>`+
+    `<div class="pl-confirm-txt">${t('pl_confirm')
+      .replace('{n}',keys.length).replace('{v}',vagas)
+      .replace('{c}',CITY_NAMES[plCity]||plCity)}</div>`+
+    `<div class="pl-confirm-list">${plPlanPreview()}</div>`+
     `<div class="pl-confirm-btns">`+
     `<button class="slot-btn slot-btn-order" onclick="plPublish()">${t('pl_confirm_yes')}</button>`+
-    `<button class="slot-btn" style="background:var(--surface2);color:var(--text)" onclick="document.getElementById('plConfirm').style.display='none'">${t('btn_cancel')}</button>`+
-    `</div>`;
+    `<button class="slot-btn" style="background:var(--surface2);color:var(--text)" onclick="plModalClose()">${t('btn_cancel')}</button>`+
+    `</div>`,true);
+}
+
+// Что именно уйдёт — списком, по дням
+function plPlanPreview(){
+  const byDay={};
+  Object.keys(plCells).sort().forEach(k=>{
+    const [iso,shift]=k.split('|');
+    (byDay[iso]=byDay[iso]||[]).push({shift:shift,c:plCells[k]});
+  });
+  return Object.keys(byDay).sort().map(iso=>{
+    const d=`${iso.slice(8,10)}.${iso.slice(5,7)}`;
+    const items=byDay[iso].map(x=>`${x.c.tipo==='SCOUT'?'🛴':'🔌'} ${plShiftName(x.shift)} ×${x.c.qty}`+
+      (x.c.preco!==''?` · ${plFmtMoney(x.c.preco)}`:'')).join(' · ');
+    return `<div class="pl-prev-row"><b>${d}</b> ${items}</div>`;
+  }).join('');
 }
 
 async function plPublish(){
   if(plBusy)return;
-  const box=document.getElementById('plConfirm');
   const res=document.getElementById('plResult');
-  if(box)box.style.display='none';
   const keys=Object.keys(plCells).sort();
   if(!keys.length||!plCity)return;
   plBusy=true;
@@ -1599,6 +1650,9 @@ async function plPublish(){
   for(const k of keys){
     const [iso,shift]=k.split('|');
     const c=plCells[k];
+    const prog=`<div class="pl-modal-title">${t('pl_publish')}</div>`+
+      `<div class="pl-progress">${t('pl_sending')} ${done+1}/${keys.length}…</div>`;
+    plModal(prog,false);
     if(res)res.innerHTML=`<div class="pl-progress">${t('pl_sending')} ${done+1}/${keys.length}…</div>`;
     try{
       const r=await fetch(API_BASE+'/api/slot',{method:'POST',headers:{'Content-Type':'application/json'},
@@ -1615,10 +1669,11 @@ async function plPublish(){
   }
   plBusy=false;
   if(btn)btn.disabled=false;
-  if(res){
-    res.innerHTML=`<div class="pl-done">✅ ${t('pl_created')}: <b>${done}</b> · ${t('pl_notified')}: <b>${sent}</b></div>`+
-      (failed.length?`<div class="pl-failed">❌ ${t('pl_failed')} (${failed.length}):<br>${failed.join('<br>')}</div>`:'');
-  }
+  const report=`<div class="pl-done">✅ ${t('pl_created')}: <b>${done}</b> · ${t('pl_notified')}: <b>${sent}</b></div>`+
+    (failed.length?`<div class="pl-failed">❌ ${t('pl_failed')} (${failed.length}):<br>${failed.join('<br>')}</div>`:'');
+  if(res)res.innerHTML=report;
+  plModal(`<div class="pl-modal-title">${t('pl_publish')}</div>`+report+
+    `<div class="pl-confirm-btns"><button class="slot-btn slot-btn-order" onclick="plModalClose()">OK</button></div>`,true);
   renderPlanner();
   setTimeout(()=>{fetchBotData();},1200);
 }
