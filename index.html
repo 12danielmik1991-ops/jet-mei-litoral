@@ -2,12 +2,18 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0d12" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f0f4f8" media="(prefers-color-scheme: light)">
+<meta name="mobile-web-app-capable" content="yes">
 <title>JET MEI Litoral</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
   :root{--bg:#0a0d12;--surface:#111520;--surface2:#181e2e;--border:#1f2a40;--accent:#00e5ff;--accent2:#ff4757;--accent3:#2ed573;--accent4:#ffa502;--text:#e8edf5;--text-dim:#6b7a99;--slot-full:#0d2e1a;--slot-full-border:#2ed573;--slot-partial:#2a1e08;--slot-partial-border:#ffa502;--slot-empty:#1a0d0d;--slot-empty-border:#ff4757;--slot-none:#0f1219;--radius:6px;--shadow:0 4px 20px rgba(0,0,0,.4)}
   html.light{--bg:#f0f4f8;--surface:#fff;--surface2:#e8edf5;--border:#d0d9e8;--accent:#0077cc;--accent2:#e03030;--accent3:#1a9e50;--accent4:#d47800;--text:#0d1117;--text-dim:#4a5568;--slot-full:#d4f0e0;--slot-full-border:#1a9e50;--slot-partial:#fdefd4;--slot-partial-border:#d47800;--slot-empty:#fdd;--slot-empty-border:#e03030;--slot-none:#e8edf5;--shadow:0 4px 20px rgba(0,0,0,.1)}
+  /* Алиасы для блоков мониторинга/live — исторически писались под другие имена переменных.
+     Без них .mon-*/.live-* рендерились с невалидным background и терялись на фоне страницы. */
+  :root,html.light{--bg2:var(--surface);--bg3:var(--surface2);--muted:var(--text-dim);--accent1:var(--accent)}
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh;transition:background .25s,color .25s}
   #authOverlay{position:fixed;inset:0;background:var(--bg);z-index:9999;display:flex;align-items:center;justify-content:center}
@@ -58,20 +64,48 @@
   .city-chip.active{background:var(--accent);color:#000;border-color:var(--accent)}
   .calendar-wrap{padding:0 24px 40px;overflow-x:auto}
   /* ── SCHEDULE TAB ── */
-  .sch-city{margin-bottom:22px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
-  .sch-city-head{padding:9px 14px;font-weight:800;font-size:13px;background:var(--surface2);display:flex;gap:10px;align-items:center}
-  .sch-city-head .sch-city-stats{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);font-weight:400}
-  .sch-table{width:100%;border-collapse:separate;border-spacing:2px;table-layout:fixed}
+  .sch-table{width:100%;border-collapse:separate;border-spacing:3px;table-layout:fixed}
   .sch-table th{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);padding:6px 4px;text-align:center}
   .sch-table th.sch-we{color:var(--accent4)}
-  .sch-type-cell{font-size:11px;font-weight:700;padding:4px 8px;white-space:nowrap;width:118px}
-  .sch-type-cell .sch-time{display:block;font-family:'Space Mono',monospace;font-size:9px;color:var(--text-dim);font-weight:400}
-  .sch-day-cell{vertical-align:top;padding:3px;min-height:30px}
-  .sch-chip{display:block;border-radius:4px;padding:3px 6px;font-size:10px;font-family:'Space Mono',monospace;margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:default}
-  .sch-chip.sch-open{background:var(--slot-empty);border:1px solid var(--slot-empty-border);color:var(--slot-empty-border)}
-  .sch-chip.sch-declined{background:var(--slot-partial);border:1px solid var(--slot-partial-border);color:var(--slot-partial-border)}
-  .sch-chip.sch-taken{background:var(--slot-full);border:1px solid var(--slot-full-border);color:var(--text)}
-  .sch-chip.sch-confirmed{background:var(--slot-full-border);border:1px solid var(--slot-full-border);color:#000;font-weight:700}
+  .sch-table th.today{color:var(--accent);font-weight:700}
+  .sch-city-col{width:112px;vertical-align:top;padding:6px 8px;background:var(--surface2);border-radius:var(--radius)}
+  .sch-city-col b{font-size:13px;font-family:'Space Mono',monospace;color:var(--accent)}
+  .sch-city-name{display:block;font-size:10px;color:var(--text-dim);margin-top:1px}
+  .sch-city-stats{display:block;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);margin-top:4px}
+  .sch-day-cell{vertical-align:top;padding:3px;min-width:118px;background:var(--surface);border-radius:var(--radius)}
+  .sch-day-cell.today{outline:1px solid var(--accent);outline-offset:-1px}
+  .sch-chip{display:flex;align-items:center;gap:5px;border-radius:5px;padding:4px 6px;font-size:10.5px;
+    font-family:'Space Mono',monospace;margin-bottom:3px;cursor:pointer;border:1px solid transparent;transition:filter .15s}
+  .sch-chip:hover{filter:brightness(1.25)}
+  .sch-chip-txt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sch-chip-act{font-weight:700;flex-shrink:0}
+  /* Состояние выхода на слот: цвет = что реально произошло, а не что заказано */
+  .sch-chip.sch-st-done{background:var(--slot-full);border-color:var(--slot-full-border);color:var(--text)}
+  .sch-chip.sch-st-onshift{background:var(--slot-full-border);border-color:var(--slot-full-border);color:#04120a;font-weight:700}
+  .sch-chip.sch-st-wait{background:var(--slot-partial);border-color:var(--slot-partial-border);color:var(--slot-partial-border)}
+  .sch-chip.sch-st-noshow{background:var(--slot-empty);border-color:var(--slot-empty-border);color:var(--slot-empty-border);font-weight:700}
+  .sch-chip.sch-st-unclosed{background:var(--slot-partial);border-color:var(--slot-full-border);color:var(--text)}
+  .sch-chip.sch-st-nocheck{background:var(--slot-empty);border-color:var(--accent4);color:var(--accent4);font-weight:700}
+  .sch-chip.sch-st-free{background:var(--slot-none);border-color:var(--border);color:var(--text-dim)}
+  .sch-chip.sch-st-cancel{background:transparent;border-color:var(--border);color:var(--text-dim);opacity:.55;text-decoration:line-through}
+  .sch-lg{margin-right:4px}
+  .icon-btn.is-on{background:var(--accent2);color:#fff;border-color:var(--accent2)}
+  .sch-detail{background:var(--surface);border:1px solid var(--accent);border-radius:var(--radius);padding:12px 14px;margin-top:14px}
+  .sch-detail.is-sheet{border:none;padding:0;margin:0;background:transparent}
+  .sch-detail-head{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13px;font-weight:700}
+  .sch-detail-head .sch-mono{font-weight:400}
+  .sch-detail-meta{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);margin-top:4px}
+  .sch-detail-desc{background:var(--surface2);border-radius:5px;padding:8px 10px;margin-top:8px;
+    font-size:11.5px;white-space:pre-wrap;color:var(--text-dim);max-height:150px;overflow:auto}
+  .sch-mono{font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim)}
+  .sch-ptable{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;min-width:520px}
+  .sch-ptable th{text-align:left;padding:6px 8px;font-family:'Space Mono',monospace;font-size:9.5px;
+    color:var(--text-dim);text-transform:uppercase;border-bottom:2px solid var(--border);white-space:nowrap}
+  .sch-ptable td{padding:6px 8px;border-bottom:1px solid var(--border);white-space:nowrap}
+  .sch-ptable td.sch-acts{font-weight:700;color:var(--accent4)}
+  .sch-ptable tr.sch-p-noshow td{background:rgba(255,71,87,.10)}
+  .sch-ptable tr.sch-p-onshift td{background:rgba(46,213,115,.10)}
+  .sch-ptable tr.sch-p-free td{color:var(--text-dim);font-family:'Space Mono',monospace;font-size:11px}
   .sch-empty-note{padding:30px;text-align:center;color:var(--text-dim);font-family:'Space Mono',monospace;font-size:12px}
   /* ── OVERVIEW (Painel Geral) ── */
   .ov-hero{display:flex;justify-content:space-between;align-items:center;gap:14px;padding:16px 24px 8px;flex-wrap:wrap}
@@ -100,6 +134,30 @@
   .af-table th{text-align:left;padding:8px 10px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;border-bottom:2px solid var(--border);white-space:nowrap}
   .af-table td{padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
   .af-table tr:hover td{background:var(--surface2)}
+  /* ── Frota: доступность и статусы ТС ── */
+  .fl-wrap{overflow-x:auto}
+  .fl-table{width:100%;border-collapse:collapse;font-size:12px;min-width:560px}
+  .fl-table th{text-align:left;padding:8px 10px;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;border-bottom:2px solid var(--border);white-space:nowrap}
+  .fl-table td{padding:7px 10px;border-bottom:1px solid var(--border);white-space:nowrap}
+  .fl-table tr:hover td{background:var(--surface2)}
+  .fl-table td.fl-num,.fl-table th.fl-num{text-align:right;font-family:'Space Mono',monospace}
+  .fl-table tr.fl-off td{opacity:.55}       /* город вне % кластера (Santos) */
+  .fl-pct{font-family:'Space Mono',monospace;font-weight:700}
+  .fl-pct.ok{color:var(--accent3)}
+  .fl-pct.warn{color:var(--accent4)}
+  .fl-pct.bad{color:var(--accent2)}
+  .fl-meter{position:relative;height:7px;border-radius:4px;background:var(--surface2);overflow:hidden;min-width:70px;margin-top:4px}
+  .fl-meter i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--accent3)}
+  .fl-meter.warn i{background:var(--accent4)}
+  .fl-meter.bad i{background:var(--accent2)}
+  .fl-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+  .fl-chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);
+    border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700}
+  .fl-chip b{font-family:'Space Mono',monospace;font-size:13px}
+  .fl-chip.is-zero{opacity:.42}
+  .fl-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .fl-note{margin-top:10px;font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace}
+  .fl-stale{color:var(--accent4)}
   .af-bar{height:14px;border-radius:3px;min-width:30px}
   .af-badhi{color:var(--accent2);font-weight:700}
   .af-chip-mei{background:rgba(0,229,255,.15);color:var(--accent);padding:1px 7px;border-radius:8px;font-size:10px;font-weight:700}
@@ -247,89 +305,21 @@
 
 <div class="tabs-bar">
   <div class="tab active" data-tab="overview" onclick="switchTab('overview')"><span>📊</span><span data-i18n="nav_overview">Painel Geral</span></div>
+  <div class="tab" data-tab="fleet" onclick="switchTab('fleet')"><span>🛴</span><span data-i18n="nav_fleet">Frota</span></div>
   <div class="tab" data-tab="slots" onclick="switchTab('slots')"><span>📝</span><span data-i18n="nav_slots">Criar turno</span></div>
   <div class="tab" data-tab="tasks" onclick="switchTab('tasks')"><span>✅</span><span data-i18n="nav_tasks">Tarefas</span></div>
   <div class="tab" data-tab="analytics" onclick="switchTab('analytics')"><span>📈</span><span data-i18n="nav_analytics">Analítica</span></div>
   <div class="tab" data-tab="team" onclick="switchTab('team')"><span>👥</span><span data-i18n="nav_team">Executores</span></div>
   <div class="tab" data-tab="antifraud" onclick="switchTab('antifraud')"><span>🛡</span><span data-i18n="nav_antifraud">Antifraude</span></div>
   <div class="tab" data-tab="schedule" onclick="switchTab('schedule')"><span>📅</span><span data-i18n="nav_schedule">Escalas</span></div>
-  <div class="tab" data-tab="active" onclick="switchTab('active')"><span>🟢</span><span data-i18n="nav_history">Histórico</span></div>
   </div>
 
-<!-- TAB WORKERS -->
-<div class="tab-content" id="tab-active">
-  <!-- Шапка: выбор даты + статус -->
-  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:14px;padding:10px;background:var(--bg2);border:1px solid var(--border);border-radius:10px">
-    <div style="display:flex;align-items:center;gap:6px">
-      <button class="ctrl-btn" onclick="shiftMonDate(-1)" style="padding:6px 10px;font-size:14px">◀</button>
-      <input type="date" id="monDate" class="form-input" style="padding:6px 10px;font-size:14px;width:160px"/>
-      <button class="ctrl-btn" onclick="shiftMonDate(1)" style="padding:6px 10px;font-size:14px">▶</button>
-      <button class="ctrl-btn" onclick="setMonDateToday()" style="padding:6px 10px;font-size:11px;background:var(--accent3);color:#000" data-i18n="mon_today">Сегодня</button>
-    </div>
-    <span id="monDateLabel" style="margin-left:8px;font-weight:600;color:var(--accent)"></span>
-    <span style="flex:1"></span>
-    <span id="monLastUpdate" style="font-size:11px;color:var(--muted)"></span>
-    <button class="ctrl-btn" onclick="fetchBotData()" style="padding:6px 12px;font-size:12px">⟳</button>
-  </div>
-
-  <!-- 5 секций -->
-  <div id="monSlots" class="mon-section">
-    <div class="mon-header" onclick="toggleMonSection('Slots')" style="cursor:pointer">
-      <span class="mon-icon" style="color:var(--accent1)">📋</span>
-      <span class="mon-title" data-i18n="mon_ordered">ЗАКАЗАННЫЕ СЛОТЫ</span>
-      <span class="mon-count" id="monSlotsCount">(0)</span>
-      <span class="mon-meta" id="monSlotsMeta"></span>
-      <span class="mon-toggle">▼</span>
-    </div>
-    <div class="mon-body" id="monSlotsBody" style="display:none"></div>
-  </div>
-
-  <div id="monOnShift" class="mon-section">
-    <div class="mon-header" onclick="toggleMonSection('OnShift')" style="cursor:pointer">
-      <span class="mon-icon" style="color:var(--accent3)">🟢</span>
-      <span class="mon-title" data-i18n="mon_onshift">СЕЙЧАС НА СМЕНЕ</span>
-      <span class="mon-count" id="monOnShiftCount">(0)</span>
-      <span class="mon-meta" id="monOnShiftMeta"></span>
-      <span class="mon-toggle">▼</span>
-    </div>
-    <div class="mon-body" id="monOnShiftBody" style="display:none"></div>
-  </div>
-
-  <div id="monExpected" class="mon-section">
-    <div class="mon-header" onclick="toggleMonSection('Expected')" style="cursor:pointer">
-      <span class="mon-icon" style="color:var(--accent4)">⌛</span>
-      <span class="mon-title" data-i18n="mon_expected">ДОЛЖНЫ ВЫЙТИ</span>
-      <span class="mon-count" id="monExpectedCount">(0)</span>
-      <span class="mon-meta" id="monExpectedMeta"></span>
-      <span class="mon-toggle">▼</span>
-    </div>
-    <div class="mon-body" id="monExpectedBody" style="display:none"></div>
-  </div>
-
-  <div id="monNoShow" class="mon-section">
-    <div class="mon-header" onclick="toggleMonSection('NoShow')" style="cursor:pointer">
-      <span class="mon-icon" style="color:var(--accent2)">❌</span>
-      <span class="mon-title" data-i18n="mon_noshow">НЕ ВЫШЛИ</span>
-      <span class="mon-count" id="monNoShowCount">(0)</span>
-      <span class="mon-meta" id="monNoShowMeta"></span>
-      <span class="mon-toggle">▼</span>
-    </div>
-    <div class="mon-body" id="monNoShowBody" style="display:none"></div>
-  </div>
-
-  <div id="monCompleted" class="mon-section">
-    <div class="mon-header" onclick="toggleMonSection('Completed')" style="cursor:pointer">
-      <span class="mon-icon" style="color:var(--accent1)">✅</span>
-      <span class="mon-title" data-i18n="mon_completed">ЗАВЕРШИЛИ СМЕНУ</span>
-      <span class="mon-count" id="monCompletedCount">(0)</span>
-      <span class="mon-meta" id="monCompletedMeta"></span>
-      <span class="mon-toggle">▼</span>
-    </div>
-    <div class="mon-body" id="monCompletedBody" style="display:none"></div>
-  </div>
+<!-- Строка состояния: источник данных, время синка, возраст выгрузки бота.
+     Стили для неё были, а сама разметка отсутствовала. -->
+<div class="status-bar">
+  <div class="status-dot pulse" id="statusDot"></div>
+  <span id="statusText">—</span>
 </div>
-
-
 
 <!-- TAB SLOTS -->
 <div class="tab-content" id="tab-slots">
@@ -417,6 +407,7 @@
     <div class="card"><div class="card-label" data-i18n="kpi_noshow">❌ Faltas hoje</div><div class="card-val red" id="ovNoShow">—</div><div class="card-sub" data-i18n="sub_noshowsub">não apareceram</div></div>
     <div class="card"><div class="card-label" data-i18n="kpi_acttoday">⚡ Ações hoje</div><div class="card-val orange" id="ovActToday">—</div><div class="card-sub" id="ovActWeek"></div></div>
     <div class="card"><div class="card-label" data-i18n="kpi_schedweek">📅 Escalas na semana</div><div class="card-val cyan" id="ovSchedTaken">—</div><div class="card-sub" id="ovSchedSub"></div></div>
+    <div class="card" style="cursor:pointer" onclick="switchTab('fleet')"><div class="card-label" data-i18n="kpi_fleet">🛴 Frota disponível</div><div class="card-val green" id="ovFleetPct">—</div><div class="card-sub" id="ovFleetSub"></div></div>
   </div>
 
   <div class="ov-grid">
@@ -428,6 +419,41 @@
       <div class="an-title" data-i18n="ov_trend">📈 Ações nos últimos 14 dias</div>
       <div class="an-canvas-wrap" style="height:200px"><canvas id="ovChartTrend"></canvas></div>
     </div>
+  </div>
+</div>
+
+<!-- TAB FLEET (Frota — доступность по городам и статусы ТС; источник maps.jetmd.online/fleet.json) -->
+<div class="tab-content" id="tab-fleet">
+  <div class="ov-hero">
+    <div class="ov-hero-left">
+      <div class="ov-hero-title">🛴 <span data-i18n="fl_title">Frota</span></div>
+      <div class="ov-hero-sub" id="flUpd">—</div>
+    </div>
+    <div class="ov-links">
+      <a class="ov-link ov-link-heat" href="https://maps.jetmd.online" target="_blank" rel="noopener">🔥 <span data-i18n="link_heat">Mapa de calor</span></a>
+      <button class="icon-btn" onclick="loadFleet(true)">⟳ Sync</button>
+    </div>
+  </div>
+
+  <div class="ov-kpis">
+    <div class="card"><div class="card-label" data-i18n="fl_kpi_avail">🛴 Disponibilidade</div><div class="card-val green" id="flAvailPct">—</div><div class="card-sub" id="flAvailSub"></div></div>
+    <div class="card"><div class="card-label" data-i18n="fl_kpi_total">Frota total</div><div class="card-val cyan" id="flTotal">—</div><div class="card-sub" data-i18n="fl_kpi_total_sub">no cluster</div></div>
+    <div class="card"><div class="card-label" data-i18n="fl_kpi_alug">🔵 Alugados agora</div><div class="card-val cyan" id="flAlug">—</div><div class="card-sub" id="flAlugSub"></div></div>
+    <div class="card"><div class="card-label" data-i18n="fl_kpi_manut">🔧 Manutenção</div><div class="card-val orange" id="flManut">—</div><div class="card-sub" data-i18n="fl_kpi_manut_sub">+ reparo</div></div>
+    <div class="card"><div class="card-label" data-i18n="fl_kpi_bat">🪫 Bateria ≤20%</div><div class="card-val orange" id="flBat20">—</div><div class="card-sub" id="flBatSub"></div></div>
+    <div class="card"><div class="card-label" data-i18n="fl_kpi_lost">🚨 Alarme / perdidos</div><div class="card-val red" id="flLost">—</div><div class="card-sub" data-i18n="fl_kpi_lost_sub">alarme + roubo + busca</div></div>
+  </div>
+
+  <div class="an-panel" style="margin:0 24px 14px">
+    <div class="an-title" data-i18n="fl_bycity">🏙 Disponibilidade por cidade</div>
+    <div class="fl-wrap"><table class="fl-table" id="flCityTable"></table></div>
+    <div class="fl-note" data-i18n="fl_note_santos">Santos fica fora do % do cluster (base logística, sem operação de rua).</div>
+  </div>
+
+  <div class="an-panel" style="margin:0 24px 20px">
+    <div class="an-title" data-i18n="fl_bystatus">🛠 Status dos patinetes</div>
+    <div id="flStatusChips" class="fl-chips"></div>
+    <div class="fl-wrap"><table class="fl-table" id="flStatusTable"></table></div>
   </div>
 </div>
 
@@ -510,31 +536,40 @@
 </div>
 
 <!-- TAB SCHEDULE (недельный график смен из бота) -->
+<!-- TAB ESCALAS — все созданные слоты недели: кто взял, кто вышел, сколько действий -->
 <div class="tab-content" id="tab-schedule">
   <div class="summary">
-    <div class="card"><div class="card-label" data-i18n="sch_total">Turnos pedidos</div><div class="card-val cyan" id="schTotal">—</div><div class="card-sub" id="schWeekLabel"></div></div>
+    <div class="card"><div class="card-label" data-i18n="sch_total">Turnos criados</div><div class="card-val cyan" id="schTotal">—</div><div class="card-sub" id="schWeekLabel"></div></div>
     <div class="card"><div class="card-label" data-i18n="sch_taken">Aceitos</div><div class="card-val green" id="schTaken">—</div><div class="card-sub" id="schConfirmed"></div></div>
-    <div class="card"><div class="card-label" data-i18n="sch_open">Livres</div><div class="card-val red" id="schOpen">—</div><div class="card-sub" data-i18n="sch_wait_worker">aguardando MEI</div></div>
-    <div class="card"><div class="card-label" data-i18n="sch_declined">Desistências</div><div class="card-val orange" id="schDeclined">—</div><div class="card-sub" data-i18n="sch_returned">voltaram ao pool</div></div>
+    <div class="card"><div class="card-label" data-i18n="sch_open">Vagas livres</div><div class="card-val red" id="schOpen">—</div><div class="card-sub" data-i18n="sch_wait_worker">aguardando MEI</div></div>
+    <div class="card"><div class="card-label" data-i18n="sch_out">Compareceram</div><div class="card-val green" id="schOut">—</div><div class="card-sub" id="schOutSub"></div></div>
+    <div class="card"><div class="card-label" data-i18n="sch_noshow">Faltaram</div><div class="card-val red" id="schNoShow">—</div><div class="card-sub" data-i18n="sch_noshow_sub">aceitaram e não saíram</div></div>
+    <div class="card"><div class="card-label" data-i18n="sch_acts">Ações na semana</div><div class="card-val orange" id="schActs">—</div><div class="card-sub" id="schActsSub"></div></div>
   </div>
   <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:0 24px 10px">
     <button class="icon-btn" onclick="schShiftWeek(-1)" data-i18n="sch_prevweek">◀ semana ant.</button>
     <span id="schWeekNav" style="font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--accent)"></span>
     <button class="icon-btn" onclick="schShiftWeek(1)" data-i18n="sch_nextweek">próx. semana ▶</button>
+    <button class="icon-btn" onclick="schThisWeek()" data-i18n="sch_thisweek">hoje</button>
     <span style="flex:1"></span>
-    <button class="icon-btn sync-btn" onclick="loadSchedule(true)">⟳ Sync</button>
+    <button class="icon-btn" id="schOnlyBtn" onclick="schToggleOnlyIssues()" data-i18n="sch_only_issues">⚠ só problemas</button>
+    <button class="icon-btn sync-btn" onclick="fetchBotData();loadDailyActions()">⟳ Sync</button>
   </div>
   <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-empty);border:1px solid var(--slot-empty-border)"></div><span data-i18n="lg_free">livre</span></div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-full);border:1px solid var(--slot-full-border)"></div><span data-i18n="lg_taken">pego</span></div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-full-border)"></div><span data-i18n="lg_confirmed">confirmado ✓✓</span></div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--slot-partial);border:1px solid var(--slot-partial-border)"></div><span data-i18n="lg_declined">desistiu (livre de novo)</span></div>
-    <div class="legend-item" style="margin-left:12px"><span data-i18n="lg_windows">🌅 Manhã 06–15 · ☀️ Dia 12–21 · 🌆 Noite 15–00 · 🌙 Madrugada 21–06</span></div>
-    <div class="legend-item"><span data-i18n="lg_roles">🔌 = troca de baterias · 🛴 = movimentação de patinetes · valor na dica</span></div>
+    <div class="legend-item"><span class="sch-lg sch-st-done">✅</span><span data-i18n="lg_done">saiu e encerrou</span></div>
+    <div class="legend-item"><span class="sch-lg sch-st-onshift">🟢</span><span data-i18n="lg_onshift">em turno agora</span></div>
+    <div class="legend-item"><span class="sch-lg sch-st-wait">⌛</span><span data-i18n="lg_wait">aceito, ainda não saiu</span></div>
+    <div class="legend-item"><span class="sch-lg sch-st-unclosed">🟡</span><span data-i18n="lg_unclosed">não encerrou</span></div>
+    <div class="legend-item"><span class="sch-lg sch-st-noshow">❌</span><span data-i18n="lg_noshow">faltou</span></div>
+    <div class="legend-item"><span class="sch-lg sch-st-nocheck">⚡</span><span data-i18n="lg_nocheck">trabalhou sem registrar</span></div>
+    <div class="legend-item"><span class="sch-lg sch-st-free">⬜</span><span data-i18n="lg_free">vaga livre</span></div>
+    <div class="legend-item"><span class="sch-lg sch-st-cancel">🚫</span><span data-i18n="lg_cancel">cancelado</span></div>
+    <div class="legend-item" style="margin-left:12px"><span data-i18n="lg_roles2">🔋 = baterias · 🚛 = logística · ⚡ = ações no dia (planilha CD)</span></div>
   </div>
   <div class="calendar-wrap" id="schGridWrap">
-    <div id="schGrid" style="min-width:760px"></div>
+    <div id="schGrid" style="min-width:900px"></div>
   </div>
+  <div id="schDetail" style="padding:0 24px 24px"></div>
 </div>
 
 <div class="tooltip" id="tooltip"></div>
@@ -542,12 +577,26 @@
 <script>
 // ── i18n ─────────────────────────────────────────────
 const I18N={
-  ru:{tab_workers:'Сотрудники',tab_slots:'Slots',tab_tasks:'Задачи',slots_ordered:'Слотов заказано',slots_filled:'Принято',slots_empty:'Пустых слотов',tasks_done:'Задач выполнено',current_period:'за текущий период',leg_full:'Заполнен',leg_partial:'Частично',leg_empty:'Пустой',leg_none:'Нет слота',all_cities:'🌐 Все',status_sync:'Обновлено',status_msgs:'сообщ.',status_err:'Ошибка',tt_status:'Статус',tt_ordered:'Заказано',tt_filled:'Принято',tt_empty:'Пустых',tt_tasks:'Задач',tt_workers:'Работники',st_full:'Заполнен',st_partial:'Частично',st_empty:'Пустой',pct_of:'% от заказ.',pct_open:'% незакр.',order_shift:'Заказать смену',new_slot:'Новый слот',new_slot_title:'Новый слот смены',lbl_city:'Город',lbl_date:'Дата',lbl_worker:'Сотрудник',lbl_shift:'Тип смены',lbl_qty:'Кол-во',lbl_note:'Примечание',lbl_tipo:'Тип работы',lbl_preco:'Ставка R$/действие',lbl_mode:'Период',mode_day:'Только на этот день',mode_week:'На всю неделю (7 дней)',btn_order:'Создать и разослать',btn_cancel:'Отмена',badge_open:'Открыт',badge_ordered:'Заказан',badge_filled:'Выполнен',total_tasks:'Всего задач',avg_per_day:'Ср. в день',best_worker:'Лучший сотр.',best_city:'Лучший город',working_days:'рабочих дней',tt_tasks_count:'Задач за день',lgt_green:'со слотом · ≥45 действий',lgt_orange:'со слотом · <45 действий',lgt_red:'работал без слота',
-    mon_today:'Сегодня',mon_ordered:'ЗАКАЗАННЫЕ СЛОТЫ',mon_onshift:'СЕЙЧАС НА СМЕНЕ',mon_expected:'ДОЛЖНЫ ВЫЙТИ',mon_noshow:'НЕ ВЫШЛИ',mon_completed:'ЗАВЕРШИЛИ СМЕНУ',
-    mon_empty_slots:'Слотов на эту дату нет',mon_only_today:'только для сегодня',mon_avail_today:'Доступно только для сегодняшней даты',mon_noone_shift:'Никого на смене',mon_all_checked:'Все вышедшие отметились ✓',mon_only_past:'только для прошедших дат',mon_for_past:'Для прошедших дат',mon_all_out:'Все вышли ✓',mon_noone_yet:'Пока никто',mon_upd_ago:'обновлено',mon_min_ago:'мин назад',
+  ru:{act_tip_7d:'За 7 дней',act_tip_month:'За месяц',
+    nav_fleet:'Флот',fl_title:'Флот',kpi_fleet:'🛴 Флот в доступе',
+    fl_kpi_avail:'🛴 Доступность',fl_kpi_total:'Всего ТС',fl_kpi_total_sub:'в кластере',
+    fl_kpi_alug:'🔵 В аренде сейчас',fl_kpi_manut:'🔧 Обслуживание',fl_kpi_manut_sub:'+ ремонт',
+    fl_kpi_bat:'🪫 Заряд ≤20%',fl_kpi_lost:'🚨 Тревога / потери',fl_kpi_lost_sub:'тревога + угон + розыск',
+    fl_bycity:'🏙 Доступность по городам',fl_bystatus:'🛠 Статусы самокатов',
+    fl_th_city:'Город',fl_th_total:'Всего',fl_th_disp:'В доступе',fl_th_alug:'В аренде',
+    fl_th_serv:'Сервис',fl_th_bat:'Заряд ≤20%',fl_th_avail:'Доступность',
+    fl_upd:'Обновлено',fl_min:'мин назад',fl_stale:'данные устарели',fl_err:'Ошибка загрузки',
+    fl_of:'из',fl_of_fleet:'от флота',fl_offcluster:'(вне % кластера)',
+    fl_rented:'в аренде',fl_total_short:'всего',
+    fl_note_santos:'Santos не входит в % кластера (логистическая база, без уличной операции).',
+    m_more:'Ещё',m_nav_geral:'Обзор',m_nav_frota:'Флот',m_nav_escalas:'График',m_nav_tarefas:'Задачи',
+    m_tabs:'Разделы',m_actions:'Действия',m_details:'Детали',m_close:'Закрыть',m_scroll_today:'К сегодня',
+    m_theme_dark:'Тёмная тема',m_theme_light:'Светлая тема',m_lang_switch:'Português',m_logout:'Выйти',m_sync:'Обновить данные',
+    m_all_reg:'Все',m_sch_no_day:'На этот день смен нет',m_sch_free:'Свободно',m_swipe_hint:'таблица прокручивается вбок →',
+    tab_workers:'Сотрудники',tab_slots:'Slots',tab_tasks:'Задачи',slots_ordered:'Слотов заказано',slots_filled:'Принято',slots_empty:'Пустых слотов',tasks_done:'Задач выполнено',current_period:'за текущий период',leg_full:'Заполнен',leg_partial:'Частично',leg_empty:'Пустой',leg_none:'Нет слота',all_cities:'🌐 Все',status_sync:'Обновлено',status_msgs:'сообщ.',status_err:'Ошибка',tt_status:'Статус',tt_ordered:'Заказано',tt_filled:'Принято',tt_empty:'Пустых',tt_tasks:'Задач',tt_workers:'Работники',st_full:'Заполнен',st_partial:'Частично',st_empty:'Пустой',pct_of:'% от заказ.',pct_open:'% незакр.',order_shift:'Заказать смену',new_slot:'Новый слот',new_slot_title:'Новый слот смены',lbl_city:'Город',lbl_date:'Дата',lbl_worker:'Сотрудник',lbl_shift:'Тип смены',lbl_qty:'Кол-во',lbl_note:'Примечание',lbl_tipo:'Тип работы',lbl_preco:'Ставка R$/действие',lbl_mode:'Период',mode_day:'Только на этот день',mode_week:'На всю неделю (7 дней)',btn_order:'Создать и разослать',btn_cancel:'Отмена',badge_open:'Открыт',badge_ordered:'Заказан',badge_filled:'Выполнен',total_tasks:'Всего задач',avg_per_day:'Ср. в день',best_worker:'Лучший сотр.',best_city:'Лучший город',working_days:'рабочих дней',tt_tasks_count:'Задач за день',lgt_green:'со слотом · ≥45 действий',lgt_orange:'со слотом · <45 действий',lgt_red:'работал без слота',
     sb_slots:'сл',sb_workers:'р',sb_min:'мин',sb_upd:'обн',dur_h:'ч',dur_m:'м',sch_load_err:'Не удалось загрузить график',
     lbl_tip:'Тип',lbl_cidade2:'Город',lbl_data2:'Дата',lbl_turno2:'Турно',lbl_aceitou:'Принял',lbl_vagas2:'Вакансии',lbl_criado:'Создан',lbl_criou:'Создал',lbl_aceitos:'Принявшие',
-    nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_team:'Исполнители',nav_antifraud:'Антифрод',nav_schedule:'График',nav_history:'История слотов',
+    nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_team:'Исполнители',nav_antifraud:'Антифрод',nav_schedule:'График',
     af_title:'🛡 Антифрод перемещений',af_score:'Балл всего',af_moves:'Перемещений',af_bad:'Плохих %',af_people:'Человек',af_bycity:'По городам',af_col_city:'Город',af_col_score:'Балл',af_col_moves:'Перем.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Плохих%',af_col_ppl:'Чел.',af_detbtn:'👤 Детализация по людям',af_dethint:'Введите пароль для просмотра ФИО:',af_show:'Показать',af_wrongpass:'Неверный пароль',af_col_fio:'ФИО',af_col_type:'Тип',af_col_pos:'Должность',af_detectors:'Как читать баллы',af_d1:'D1 — забрал с пустого монитора',af_d2:'D2 — привёз на полный монитор',af_d3:'D3 — поставил не на монитор текущего блока',af_d4:'D4 — неправильное перемещение (хотя бы одно из D1/D2/D3)',af_scorehint:'Балл = D1 + D2 + D3. Данные достоверны с 17.07.2026.',af_updated:'обновлено',af_period:'период',af_loading:'Загрузка…',af_lowdata:'мало данных (не оценивается)',af_inc_time:'Время',af_inc_bike:'Самокат',af_inc_kind:'Тип',af_inc_park:'Парковка',af_inc_none:'нет детализации',af_inc_click:'клик по строке — детали по самокатам',af_kind_d1:'забрал с пустого',af_kind_d2:'привёз на полный',af_kind_d3:'не тот монитор',af_kind_d4:'неверное перемещение',
     tm_title:'Все исполнители',tm_search:'Поиск по имени, CNPJ, телефону…',tm_all:'Все города',tm_reg:'В боте',tm_urent:'Только Urent',tm_col_name:'Полное имя',tm_col_cnpj:'CNPJ',tm_col_phone:'Телефон',tm_col_tg:'Telegram',tm_col_city:'Город',tm_col_type:'Тип',tm_col_status:'Статус',tm_col_actions:'Действий/мес',tm_count:'исполнителей',tm_export:'⬇ CSV',tm_notreg:'не в боте',tm_active:'активен',
     ov_title:'Обзор',link_heat:'Тепловая карта',link_analytics:'Аналитика',link_schedule:'График',
@@ -556,15 +605,29 @@ const I18N={
     ov_emturno:'на смене',ov_ok:'ок',ov_acoes:'действий',ov_empty:'Операций сегодня пока нет.',ov_livres:'свободно',ov_total:'всего',ov_last7:'за 7 дней',
     an_total:'Действий за месяц',an_active:'Активных MEI',an_avg:'Ср. на человека',an_low:'Отстающих',an_permonth:'действий/мес',an_withact:'с действиями',an_belownorm:'ниже нормы',
     an_chart_days:'Действия по дням',an_chart_type:'🔌 АКБ vs 🛴 Самокаты',an_chart_city:'По городам',an_chart_dn:'День vs Ночь',an_ranking:'🏆 Рейтинг эффективности',an_threshold:'порог отставания:',an_nodata:'Нет данных за этот месяц.',an_col_mei:'MEI',an_col_city:'Город',an_col_type:'Тип',an_col_actions:'Действий',an_col_progress:'Прогресс',an_day:'☀️ День',an_night:'🌙 Ночь',an_akb:'🔌 АКБ',an_scooter:'🛴 Самокаты',
-    sch_total:'Заказано смен',sch_taken:'Принято',sch_open:'Свободно',sch_declined:'Отказов',sch_confirmed_of:'из них подтвердили:',sch_wait_worker:'ждут исполнителя',sch_returned:'вернулись в пул',sch_week:'неделя',sch_prevweek:'◀ пред. неделя',sch_nextweek:'след. неделя ▶',sch_empty:'На эту неделю смен нет. Создай план в боте: /escala → города → дни → 🚀 Опубликовать.',sch_accepted:'принято',
-    lg_free:'свободна',lg_taken:'принята',lg_confirmed:'подтверждена ✓✓',lg_declined:'отказ (снова свободна)',lg_windows:'🌅 Утро 06–15 · ☀️ День 12–21 · 🌆 Вечер 15–00 · 🌙 Ночь 21–06',lg_roles:'🔌 = замена АКБ · 🛴 = перемещение самокатов · ставка в подсказке',sch_free_chip:'свободна',sch_decl_chip:'отказ',role_bat_full:'замена АКБ',role_scout_full:'перемещение самокатов',sch_tip_confirmed:'Подтверждена',sch_tip_taken:'Принята (ждёт подтверждения)',sch_tip_declined:'Был отказ — снова свободна',sch_tip_free:'Свободная смена',
+    sch_total:'Слотов создано',sch_taken:'Принято',sch_open:'Свободных мест',sch_out:'Вышли',sch_noshow:'Не вышли',sch_acts:'Действий за неделю',sch_noshow_sub:'приняли слот и не вышли',sch_now:'на смене сейчас',sch_cancelled:'отменено',sch_cd_upto:'ЦД до',sch_cd_pending:'данные ЦД ещё не пришли',sch_acts_day:'Действий за день',sch_out_short:'вышли',sch_thisweek:'сегодня',sch_only_issues:'⚠ только проблемы',sch_cancel_chip:'отменён',sch_noone:'Слот никто не взял',sch_detail_title:'Слот',sch_th_accepted:'Принял',sch_th_start:'Начало',sch_th_end:'Конец',sch_st_done:'вышел и закрыл смену',sch_st_onshift:'на смене сейчас',sch_st_wait:'принял, ещё не вышел',sch_st_noshow:'не вышел',sch_st_unclosed:'смену не закрыл',sch_st_nocheck:'работал без отметки в боте',sch_st_cancel:'слот отменён',sch_st_free:'свободное место',sch_declined:'Отказов',sch_confirmed_of:'из них подтвердили:',sch_wait_worker:'ждут исполнителя',sch_returned:'вернулись в пул',sch_week:'неделя',sch_prevweek:'◀ пред. неделя',sch_nextweek:'след. неделя ▶',sch_empty:'На эту неделю слотов нет. Создай их в боте (/slot) или планом /escala.',sch_accepted:'принято',
+    lg_free:'свободное место',lg_done:'вышел и закрыл смену',lg_onshift:'на смене сейчас',lg_wait:'принял, ещё не вышел',lg_noshow:'не вышел',lg_unclosed:'смену не закрыл',lg_nocheck:'работал без отметки',lg_cancel:'отменён',lg_roles2:'🔋 = батареи · 🚛 = логистика · ⚡ = действий за день (лист ЦД)',lg_taken:'принята',lg_confirmed:'подтверждена ✓✓',lg_declined:'отказ (снова свободна)',lg_windows:'🌅 Утро 06–15 · ☀️ День 12–21 · 🌆 Вечер 15–00 · 🌙 Ночь 21–06',lg_roles:'🔌 = замена АКБ · 🛴 = перемещение самокатов · ставка в подсказке',sch_free_chip:'свободно',sch_decl_chip:'отказ',role_bat_full:'замена АКБ',role_scout_full:'перемещение самокатов',sch_tip_confirmed:'Подтверждена',sch_tip_taken:'Принята (ждёт подтверждения)',sch_tip_declined:'Был отказ — снова свободна',sch_tip_free:'Свободная смена',
     months:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],dow:['Вс','Пн','Вт','Ср','Чт','Пт','Сб']},
-  pt:{tab_workers:'Funcionários',tab_slots:'Turnos',tab_tasks:'Tarefas',slots_ordered:'Turnos pedidos',slots_filled:'Aceitos',slots_empty:'Turnos vazios',tasks_done:'Tarefas feitas',current_period:'no período atual',leg_full:'Preenchido',leg_partial:'Parcial',leg_empty:'Vazio',leg_none:'Sem turno',all_cities:'🌐 Todos',status_sync:'Atualizado',status_msgs:'msgs',status_err:'Erro',tt_status:'Status',tt_ordered:'Pedidos',tt_filled:'Aceitos',tt_empty:'Vazios',tt_tasks:'Tarefas',tt_workers:'Trabalhadores',st_full:'Preenchido',st_partial:'Parcial',st_empty:'Vazio',pct_of:'% dos pedidos',pct_open:'% em aberto',order_shift:'Pedir turno',new_slot:'Novo turno',new_slot_title:'Novo turno',lbl_city:'Cidade',lbl_date:'Data',lbl_worker:'Funcionário',lbl_shift:'Tipo de turno',lbl_qty:'Qtd.',lbl_note:'Observação',lbl_tipo:'Tipo de serviço',lbl_preco:'Valor R$/ação',lbl_mode:'Período',mode_day:'Só neste dia',mode_week:'Semana toda (7 dias)',btn_order:'Criar e enviar',btn_cancel:'Cancelar',badge_open:'Aberto',badge_ordered:'Pedido',badge_filled:'Concluído',total_tasks:'Total de tarefas',avg_per_day:'Média/dia',best_worker:'Melhor func.',best_city:'Melhor cidade',working_days:'dias úteis',tt_tasks_count:'Tarefas no dia',lgt_green:'com slot · ≥45 ações',lgt_orange:'com slot · <45 ações',lgt_red:'trabalhou sem slot',
-    mon_today:'Hoje',mon_ordered:'TURNOS PEDIDOS',mon_onshift:'EM TURNO AGORA',mon_expected:'DEVEM COMPARECER',mon_noshow:'FALTARAM',mon_completed:'ENCERRARAM O TURNO',
-    mon_empty_slots:'Nenhum turno nesta data',mon_only_today:'só para hoje',mon_avail_today:'Disponível apenas para a data de hoje',mon_noone_shift:'Ninguém em turno',mon_all_checked:'Todos que saíram registraram ✓',mon_only_past:'só para datas passadas',mon_for_past:'Para datas passadas',mon_all_out:'Todos saíram ✓',mon_noone_yet:'Ninguém ainda',mon_upd_ago:'atualizado há',mon_min_ago:'min',
+  pt:{act_tip_7d:'Em 7 dias',act_tip_month:'No mês',
+    nav_fleet:'Frota',fl_title:'Frota',kpi_fleet:'🛴 Frota disponível',
+    fl_kpi_avail:'🛴 Disponibilidade',fl_kpi_total:'Frota total',fl_kpi_total_sub:'no cluster',
+    fl_kpi_alug:'🔵 Alugados agora',fl_kpi_manut:'🔧 Manutenção',fl_kpi_manut_sub:'+ reparo',
+    fl_kpi_bat:'🪫 Bateria ≤20%',fl_kpi_lost:'🚨 Alarme / perdidos',fl_kpi_lost_sub:'alarme + roubo + busca',
+    fl_bycity:'🏙 Disponibilidade por cidade',fl_bystatus:'🛠 Status dos patinetes',
+    fl_th_city:'Cidade',fl_th_total:'Total',fl_th_disp:'Disponível',fl_th_alug:'Alugado',
+    fl_th_serv:'Serviço',fl_th_bat:'Bateria ≤20%',fl_th_avail:'Disponibilidade',
+    fl_upd:'Atualizado',fl_min:'min atrás',fl_stale:'dados desatualizados',fl_err:'Erro ao carregar',
+    fl_of:'de',fl_of_fleet:'da frota',fl_offcluster:'(fora do % do cluster)',
+    fl_rented:'alugados',fl_total_short:'no total',
+    fl_note_santos:'Santos fica fora do % do cluster (base logística, sem operação de rua).',
+    m_more:'Mais',m_nav_geral:'Painel',m_nav_frota:'Frota',m_nav_escalas:'Escalas',m_nav_tarefas:'Tarefas',
+    m_tabs:'Seções',m_actions:'Ações',m_details:'Detalhes',m_close:'Fechar',m_scroll_today:'Ir para hoje',
+    m_theme_dark:'Tema escuro',m_theme_light:'Tema claro',m_lang_switch:'Русский',m_logout:'Sair',m_sync:'Atualizar dados',
+    m_all_reg:'Todos',m_sch_no_day:'Sem turnos neste dia',m_sch_free:'Livre',m_swipe_hint:'a tabela rola para o lado →',
+    tab_workers:'Funcionários',tab_slots:'Turnos',tab_tasks:'Tarefas',slots_ordered:'Turnos pedidos',slots_filled:'Aceitos',slots_empty:'Turnos vazios',tasks_done:'Tarefas feitas',current_period:'no período atual',leg_full:'Preenchido',leg_partial:'Parcial',leg_empty:'Vazio',leg_none:'Sem turno',all_cities:'🌐 Todos',status_sync:'Atualizado',status_msgs:'msgs',status_err:'Erro',tt_status:'Status',tt_ordered:'Pedidos',tt_filled:'Aceitos',tt_empty:'Vazios',tt_tasks:'Tarefas',tt_workers:'Trabalhadores',st_full:'Preenchido',st_partial:'Parcial',st_empty:'Vazio',pct_of:'% dos pedidos',pct_open:'% em aberto',order_shift:'Pedir turno',new_slot:'Novo turno',new_slot_title:'Novo turno',lbl_city:'Cidade',lbl_date:'Data',lbl_worker:'Funcionário',lbl_shift:'Tipo de turno',lbl_qty:'Qtd.',lbl_note:'Observação',lbl_tipo:'Tipo de serviço',lbl_preco:'Valor R$/ação',lbl_mode:'Período',mode_day:'Só neste dia',mode_week:'Semana toda (7 dias)',btn_order:'Criar e enviar',btn_cancel:'Cancelar',badge_open:'Aberto',badge_ordered:'Pedido',badge_filled:'Concluído',total_tasks:'Total de tarefas',avg_per_day:'Média/dia',best_worker:'Melhor func.',best_city:'Melhor cidade',working_days:'dias úteis',tt_tasks_count:'Tarefas no dia',lgt_green:'com slot · ≥45 ações',lgt_orange:'com slot · <45 ações',lgt_red:'trabalhou sem slot',
     sb_slots:'trn',sb_workers:'p',sb_min:'min',sb_upd:'atu',dur_h:'h',dur_m:'m',sch_load_err:'Não foi possível carregar as escalas',
     lbl_tip:'Tipo',lbl_cidade2:'Cidade',lbl_data2:'Data',lbl_turno2:'Turno',lbl_aceitou:'Aceitou',lbl_vagas2:'Vagas',lbl_criado:'Criado',lbl_criou:'Criou',lbl_aceitos:'Aceitos',
-    nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_team:'Executores',nav_antifraud:'Antifraude',nav_schedule:'Escalas',nav_history:'Histórico',
+    nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_team:'Executores',nav_antifraud:'Antifraude',nav_schedule:'Escalas',
     af_title:'🛡 Antifraude de movimentações',af_score:'Score total',af_moves:'Movimentações',af_bad:'Ruins %',af_people:'Pessoas',af_bycity:'Por cidade',af_col_city:'Cidade',af_col_score:'Score',af_col_moves:'Movs.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Ruins%',af_col_ppl:'Pess.',af_detbtn:'👤 Detalhes por pessoa',af_dethint:'Digite a senha para ver os nomes:',af_show:'Mostrar',af_wrongpass:'Senha incorreta',af_col_fio:'Nome',af_col_type:'Tipo',af_col_pos:'Cargo',af_detectors:'Como ler os scores',af_d1:'D1 — pegou de monitor vazio',af_d2:'D2 — levou para monitor cheio',af_d3:'D3 — deixou fora do monitor do bloco atual',af_d4:'D4 — movimentação incorreta (ao menos um de D1/D2/D3)',af_scorehint:'Score = D1 + D2 + D3. Dados confiáveis desde 17/07/2026.',af_updated:'atualizado',af_period:'período',af_loading:'Carregando…',af_lowdata:'poucos dados (não avaliado)',af_inc_time:'Hora',af_inc_bike:'Patinete',af_inc_kind:'Tipo',af_inc_park:'Parada',af_inc_none:'sem detalhes',af_inc_click:'clique na linha — detalhes por patinete',af_kind_d1:'pegou de vazio',af_kind_d2:'levou para cheio',af_kind_d3:'monitor errado',af_kind_d4:'movimentação incorreta',
     tm_title:'Todos os executores',tm_search:'Buscar por nome, CNPJ, telefone…',tm_all:'Todas as cidades',tm_reg:'No bot',tm_urent:'Só Urent',tm_col_name:'Nome completo',tm_col_cnpj:'CNPJ',tm_col_phone:'Telefone',tm_col_tg:'Telegram',tm_col_city:'Cidade',tm_col_type:'Tipo',tm_col_status:'Status',tm_col_actions:'Ações/mês',tm_count:'executores',tm_export:'⬇ CSV',tm_notreg:'fora do bot',tm_active:'ativo',
     ov_title:'Painel Geral',link_heat:'Mapa de calor',link_analytics:'Analítica',link_schedule:'Escalas',
@@ -573,8 +636,8 @@ const I18N={
     ov_emturno:'em turno',ov_ok:'ok',ov_acoes:'ações',ov_empty:'Sem operação registrada hoje ainda.',ov_livres:'livres',ov_total:'no total',ov_last7:'nos últimos 7 dias',
     an_total:'Ações no mês',an_active:'MEIs ativos',an_avg:'Média por pessoa',an_low:'Abaixo da meta',an_permonth:'ações/mês',an_withact:'com ações',an_belownorm:'abaixo de',
     an_chart_days:'Ações por dia',an_chart_type:'🔌 Baterias vs 🛴 Patinetes',an_chart_city:'Por cidade',an_chart_dn:'Dia vs Noite',an_ranking:'🏆 Ranking de Desempenho',an_threshold:'meta mínima:',an_nodata:'Sem dados neste mês.',an_col_mei:'MEI',an_col_city:'Cidade',an_col_type:'Tipo',an_col_actions:'Ações',an_col_progress:'Progresso',an_day:'☀️ Dia',an_night:'🌙 Noite',an_akb:'🔌 Baterias',an_scooter:'🛴 Patinetes',
-    sch_total:'Turnos pedidos',sch_taken:'Aceitos',sch_open:'Livres',sch_declined:'Desistências',sch_confirmed_of:'confirmados:',sch_wait_worker:'aguardando MEI',sch_returned:'voltaram ao pool',sch_week:'semana',sch_prevweek:'◀ semana ant.',sch_nextweek:'próx. semana ▶',sch_empty:'Nenhum turno nesta semana. Crie o plano no bot: /escala → cidades → dias → 🚀 Publicar.',sch_accepted:'aceitos',
-    lg_free:'livre',lg_taken:'pego',lg_confirmed:'confirmado ✓✓',lg_declined:'desistiu (livre de novo)',lg_windows:'🌅 Manhã 06–15 · ☀️ Dia 12–21 · 🌆 Noite 15–00 · 🌙 Madrugada 21–06',lg_roles:'🔌 = troca de baterias · 🛴 = movimentação de patinetes · valor na dica',sch_free_chip:'livre',sch_decl_chip:'desistiu',role_bat_full:'troca de baterias',role_scout_full:'movimentação de patinetes',sch_tip_confirmed:'Confirmado',sch_tip_taken:'Aceito (aguardando confirmação)',sch_tip_declined:'Houve desistência — livre de novo',sch_tip_free:'Turno livre',
+    sch_total:'Turnos criados',sch_taken:'Aceitos',sch_open:'Vagas livres',sch_out:'Compareceram',sch_noshow:'Faltaram',sch_acts:'Ações na semana',sch_noshow_sub:'aceitaram e não saíram',sch_now:'em turno agora',sch_cancelled:'cancelados',sch_cd_upto:'CD até',sch_cd_pending:'dados do CD ainda não chegaram',sch_acts_day:'Ações no dia',sch_out_short:'saíram',sch_thisweek:'hoje',sch_only_issues:'⚠ só problemas',sch_cancel_chip:'cancelado',sch_noone:'Ninguém aceitou',sch_detail_title:'Turno',sch_th_accepted:'Aceitou',sch_th_start:'Início',sch_th_end:'Fim',sch_st_done:'saiu e encerrou',sch_st_onshift:'em turno agora',sch_st_wait:'aceitou, ainda não saiu',sch_st_noshow:'faltou',sch_st_unclosed:'não encerrou o turno',sch_st_nocheck:'trabalhou sem registrar no bot',sch_st_cancel:'turno cancelado',sch_st_free:'vaga livre',sch_declined:'Desistências',sch_confirmed_of:'confirmados:',sch_wait_worker:'aguardando MEI',sch_returned:'voltaram ao pool',sch_week:'semana',sch_prevweek:'◀ semana ant.',sch_nextweek:'próx. semana ▶',sch_empty:'Nenhum turno nesta semana. Crie no bot (/slot) ou pelo plano /escala.',sch_accepted:'aceitos',
+    lg_free:'vaga livre',lg_done:'saiu e encerrou',lg_onshift:'em turno agora',lg_wait:'aceitou, ainda não saiu',lg_noshow:'faltou',lg_unclosed:'não encerrou',lg_nocheck:'trabalhou sem registrar',lg_cancel:'cancelado',lg_roles2:'🔋 = baterias · 🚛 = logística · ⚡ = ações no dia (planilha CD)',lg_taken:'pego',lg_confirmed:'confirmado ✓✓',lg_declined:'desistiu (livre de novo)',lg_windows:'🌅 Manhã 06–15 · ☀️ Dia 12–21 · 🌆 Noite 15–00 · 🌙 Madrugada 21–06',lg_roles:'🔌 = troca de baterias · 🛴 = movimentação de patinetes · valor na dica',sch_free_chip:'livre',sch_decl_chip:'desistiu',role_bat_full:'troca de baterias',role_scout_full:'movimentação de patinetes',sch_tip_confirmed:'Confirmado',sch_tip_taken:'Aceito (aguardando confirmação)',sch_tip_declined:'Houve desistência — livre de novo',sch_tip_free:'Turno livre',
     months:['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],dow:['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']}
 };
 let lang=localStorage.getItem('jet_lang')||'pt';
@@ -585,14 +648,18 @@ function applyLang(){
   document.querySelectorAll('[data-i18n-ph]').forEach(el=>el.placeholder=t(el.dataset.i18nPh));
   document.getElementById('langBtn').textContent=lang==='ru'?'🌐 PT':'🌐 RU';
   document.documentElement.setAttribute('lang',lang);
-  renderSummary();renderTaskSummary();try{renderSlotsGrid();}catch(e){console.warn('renderSlotsGrid skipped:',e.message);}renderCityFilters();
-  if(document.getElementById('calWorkers').innerHTML)renderWorkers();
-  if(document.getElementById('calTasks').innerHTML)renderTasks();
+  // Каждый рендер — отдельно и под try: часть элементов относится к удалённой вкладке
+  // «Работники» (calWorkers/sumTotal/cityFilter1), и одно исключение здесь раньше
+  // обрывало applyLang целиком — вкладки ниже оставались на старом языке до перезагрузки.
+  [renderSummary,renderTaskSummary,renderSlotsGrid,renderCityFilters].forEach(fn=>{
+    try{if(typeof fn==='function')fn();}catch(e){console.warn('applyLang skipped:',fn.name||'anon',e.message);}
+  });
+  try{if(document.getElementById('calWorkers')?.innerHTML)renderWorkers();}catch(e){}
+  try{if(document.getElementById('calTasks')?.innerHTML)renderTasks();}catch(e){}
   try{if(typeof renderOverview==='function')renderOverview();}catch(e){}
   try{if(typeof renderAnalytics==='function'&&dailyActions.length)renderAnalytics();}catch(e){}
   try{if(typeof renderSchedule==='function')renderSchedule();}catch(e){}
   try{if(typeof renderTeam==='function'&&document.getElementById('tab-team')?.classList.contains('active'))renderTeam();}catch(e){}
-  try{if(typeof renderMonitor==='function')renderMonitor();}catch(e){}
   try{if(typeof renderAntifraud==='function'&&afData)renderAntifraud();}catch(e){}
 }
 function toggleLang(){lang=lang==='ru'?'pt':'ru';localStorage.setItem('jet_lang',lang);applyLang();}
@@ -810,6 +877,7 @@ async function fetchBotData(){
     }
 
     // === Очищаем WORKERS и заполняем из источника ===
+    // (дедуп ниже — dedupeWorkers объявлена вне fetchBotData)
     CITIES.forEach(c=>{WORKERS[c]=[];});
 
     // Маппинг полного названия города → код (для synthetic-воркеров из Urent листа)
@@ -824,6 +892,8 @@ async function fetchBotData(){
       const norm=String(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
       return CITY_NAME_TO_CODE[norm]||null;
     };
+
+    workersRaw=dedupeWorkers(workersRaw);
 
     workersRaw.forEach(w=>{
       // gist формат: {nome, cidade, tg_username, ...}
@@ -927,16 +997,25 @@ async function fetchBotData(){
     const now=new Date();
     const srcLabel=source==="gist"?"🔥 Bot LIVE":"📊 Sheet";
     const ageMin=updatedAt?Math.round((Date.now()-new Date(updatedAt).getTime())/60000):"?";
-    document.getElementById('statusText').textContent=`${srcLabel} · ${now.toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · ${slotsRaw.length}${t('sb_slots')}/${workersRaw.length}${t('sb_workers')} · ${t('sb_upd')} ${ageMin}${t('sb_min')}`;
-    document.getElementById('statusDot').style.background='var(--accent3)';
+    // Обращения через ?. — статус-строка не должна ронять загрузку данных:
+    // раньше исключение здесь выбрасывалось уже после разбора данных и
+    // прерывало функцию до блока перерисовки внизу.
+    const _st=document.getElementById('statusText');
+    if(_st)_st.textContent=`${srcLabel} · ${now.toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · ${slotsRaw.length}${t('sb_slots')}/${workersRaw.length}${t('sb_workers')} · ${t('sb_upd')} ${ageMin}${t('sb_min')}`;
+    const _dot=document.getElementById('statusDot');
+    if(_dot)_dot.style.background='var(--accent3)';
   }catch(err){
     console.error('Fetch error:',err);
-    document.getElementById('statusText').textContent=`${t('status_err')}: ${err.message}`;
-    document.getElementById('statusDot').style.background='var(--accent2)';
+    const _st=document.getElementById('statusText');
+    if(_st)_st.textContent=`${t('status_err')}: ${err.message}`;
+    const _dot=document.getElementById('statusDot');
+    if(_dot)_dot.style.background='var(--accent2)';
   }finally{
     if(btn){btn.classList.remove('loading');btn.textContent='⟳ Sync';}
   }
-  [renderWorkers,renderSummary,renderTasks,renderTaskSummary,()=>{if(typeof renderMonitor==='function')renderMonitor();},()=>{if(typeof renderSlotsGrid==='function')renderSlotsGrid();}].forEach(fn=>{try{fn();}catch(e){console.warn('render skipped:',fn.name||'anon',e.message);}});if(typeof renderMonitor==='function'){try{renderMonitor();}catch(e){console.error('renderMonitor failed',e);}}if(typeof renderLive==='function')renderLive();
+  // Состав исполнителей изменился — пересчитать, кому принадлежат строки ЦД.
+  try{if(typeof resolveActionsOwnership==='function')resolveActionsOwnership();}catch(e){console.warn('resolveActionsOwnership skipped:',e.message);}
+  [renderWorkers,renderSummary,renderTasks,renderTaskSummary,()=>{if(typeof renderSlotsGrid==='function')renderSlotsGrid();},()=>{if(typeof renderSchedule==='function')renderSchedule();}].forEach(fn=>{try{fn();}catch(e){console.warn('render skipped:',fn.name||'anon',e.message);}});
   try{if(typeof renderOverview==='function' && document.getElementById('tab-overview')?.classList.contains('active'))renderOverview();}catch(e){console.warn('renderOverview skipped:',e.message);}
 }
 
@@ -952,16 +1031,11 @@ function switchTab(tab){
   document.getElementById('tab-'+tab).classList.add('active');
   document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
   try{localStorage.setItem('jet_active_tab',tab);}catch(e){} // запомнить вкладку
-  if(tab==='active'&&typeof renderMonitor==='function'){
-    try{
-      if(!window.monSelectedDate){window.monSelectedDate=new Date().toISOString().slice(0,10);}
-      const inp=document.getElementById('monDate');
-      if(inp&&!inp.value)inp.value=window.monSelectedDate;
-      renderMonitor();
-    }catch(e){console.error('switchTab→active renderMonitor failed',e);}
+  if(tab==='slots'&&typeof renderSlotsGrid==='function'){
+    try{renderSlotsGrid();}catch(e){console.error('switchTab→slots failed',e);}
   }
   if(tab==='schedule'&&typeof loadSchedule==='function'){
-    try{schedRaw.length?renderSchedule():loadSchedule();}catch(e){console.error('switchTab→schedule failed',e);}
+    try{renderSchedule();if(!window.allSlots||!window.allSlots.length)fetchBotData();}catch(e){console.error('switchTab→schedule failed',e);}
   }
   if(tab==='analytics'&&typeof renderAnalytics==='function'){
     try{ if(!dailyActions.length){loadDailyActions().then(()=>renderAnalytics());} else renderAnalytics(); }
@@ -971,13 +1045,17 @@ function switchTab(tab){
     try{ if(!dailyActions.length)loadDailyActions().then(()=>renderTeam()); renderTeam(); }
     catch(e){console.error('switchTab→team failed',e);}
   }
+  if(tab==='fleet'&&typeof loadFleet==='function'){
+    // Срез живёт 3 минуты — при каждом заходе тянем заново, иначе показываем протухшее.
+    try{ fleetData?renderFleet():null; loadFleet(); }catch(e){console.error('switchTab→fleet failed',e);}
+  }
   if(tab==='antifraud'&&typeof loadAntifraud==='function'){
     try{ afData?renderAntifraud():loadAntifraud(); }catch(e){console.error('switchTab→antifraud failed',e);}
   }
   if(tab==='overview'&&typeof renderOverview==='function'){
     try{
       if(!dailyActions.length)loadDailyActions().then(()=>renderOverview());
-      if(typeof schedRaw==='undefined'||!schedRaw.length)loadSchedule();
+      if(typeof loadFleet==='function')loadFleet();   // KPI «Frota disponível» на обзоре
       renderOverview();
     }catch(e){console.error('switchTab→overview failed',e);}
   }
@@ -995,7 +1073,7 @@ document.getElementById('nextMonth').addEventListener('click',()=>{
 
 function render(){
   document.getElementById('monthLabel').textContent=`${t('months')[curMonth]} ${curYear}`;
-  renderCityFilters();[renderWorkers,renderSummary,renderTasks,renderTaskSummary,()=>{if(typeof renderMonitor==='function')renderMonitor();},()=>{if(typeof renderSlotsGrid==='function')renderSlotsGrid();}].forEach(fn=>{try{fn();}catch(e){console.warn('render skipped:',fn.name||'anon',e.message);}});if(typeof renderMonitor==='function'){try{renderMonitor();}catch(e){console.error('renderMonitor failed',e);}}if(typeof renderLive==='function')renderLive();try{renderSlotsGrid();}catch(e){console.warn('renderSlotsGrid skipped:',e.message);}
+  renderCityFilters();[renderWorkers,renderSummary,renderTasks,renderTaskSummary,()=>{if(typeof renderSlotsGrid==='function')renderSlotsGrid();},()=>{if(typeof renderSchedule==='function')renderSchedule();}].forEach(fn=>{try{fn();}catch(e){console.warn('render skipped:',fn.name||'anon',e.message);}});try{renderSlotsGrid();}catch(e){console.warn('renderSlotsGrid skipped:',e.message);}
 }
 
 // ── CITY FILTERS ─────────────────────────────────────
@@ -1003,6 +1081,7 @@ function renderCityFilters(){
   ['cityFilter1','cityFilter2'].forEach((id,i)=>{
     const active=i===0?activeCity1:activeCity2;
     const fn=i===0?'setCity1':'setCity2';
+    if(!document.getElementById(id))return; // cityFilter1 остался от удалённой вкладки «Работники»
     document.getElementById(id).innerHTML=['ALL',...CITIES].map(c=>`<div class="city-chip ${active===c?'active':''}" onclick="${fn}('${c}')">${c==='ALL'?t('all_cities'):`${c} · ${CITY_NAMES[c]}`}</div>`).join('');
   });
 }
@@ -1023,6 +1102,7 @@ function buildCalHeader(dim){
 }
 
 function renderWorkers(){
+  if(!document.getElementById('calWorkers'))return; // вкладка «Работники» удалена
   const dim=new Date(curYear,curMonth+1,0).getDate();
   const td=new Date();
   let html=buildCalHeader(dim)+'<tbody>';
@@ -1056,6 +1136,7 @@ function renderWorkers(){
 }
 
 function renderSummary(){
+  if(!document.getElementById('sumTotal'))return; // блок сводки удалённой вкладки «Работники»
   const dim=new Date(curYear,curMonth+1,0).getDate();
   let total=0,filled=0,empty=0,tasks=0;
   const cities=activeCity1==='ALL'?CITIES:[activeCity1];
@@ -1074,6 +1155,10 @@ function renderTasks(){
   let html=buildCalHeader(dim)+'<tbody>';
   const cities=activeCity2==='ALL'?CITIES:[activeCity2];
   const isLight=document.documentElement.classList.contains('light');
+  // Третий рубеж против дублей: одна строка ЦД = одна строка таблицы во всём
+  // календаре. Ловит случай, когда человек числится сразу в двух городах —
+  // тогда его действия иначе показались бы дважды, в разных секциях.
+  const shownCd=new Set();
   cities.forEach(city=>{
     const workers=WORKERS[city]||[];
     // Фильтр: оставляем только тех у кого есть действия в текущем месяце
@@ -1081,9 +1166,12 @@ function renderTasks(){
     const activeWorkers=workers.filter(w=>{
       const rec=(typeof findActionsForMei==='function')?findActionsForMei(w.name):null;
       if(!rec||!rec.daily)return false;
+      const cdKey=rec.employeeid||rec.name;
+      if(shownCd.has(cdKey))return false;
       // Есть ли в этом месяце хотя бы один день с действиями?
       for(const dateStr in rec.daily){
         if(dateStr.startsWith(monthIso) && (rec.daily[dateStr].total||0)>0){
+          shownCd.add(cdKey);
           return true;
         }
       }
@@ -1098,7 +1186,7 @@ function renderTasks(){
       const actType=meiRec?meiRec.action_type:null;
       const act7=actionsLastDays(w.name,7);
       const badgeHTML=meiRec?
-        `<span class="act-badge act-${actType}" title="За 7 дней: ${act7.total} · за месяц: ${act7.totalMonth||0}">${actType} ${act7.total}</span>`:
+        `<span class="act-badge act-${actType}" title="${t('act_tip_7d')}: ${act7.total} · ${t('act_tip_month')}: ${act7.totalMonth||0}" data-tip="${t('act_tip_7d')}: ${act7.total} · ${t('act_tip_month')}: ${act7.totalMonth||0}">${actType} ${act7.total}</span>`:
         '';
 
       html+=`<tr><td class="worker-name-cell col-name"><span style="color:${rc};font-size:8px;font-family:\'Space Mono\',monospace;margin-right:3px">${w.role}</span>${w.name} ${badgeHTML}</td>`;
@@ -1196,6 +1284,51 @@ async function createSlot(){
   }
 }
 
+// Сетка уже созданных слотов. Функция вызывалась из render()/applyLang()/fetchBotData(),
+// но нигде не была объявлена — блок #slotsGrid всегда оставался пустым.
+function renderSlotsGrid(){
+  const grid=document.getElementById('slotsGrid');
+  if(!grid)return;
+  const all=(typeof slotsRaw!=='undefined'&&Array.isArray(slotsRaw))?slotsRaw:(window.allSlots||[]);
+  // Показываем слоты выбранного в шапке месяца, свежие сверху
+  const rows=all.filter(s=>{
+    if(!s||!s.data)return false;
+    const p=String(s.data).slice(0,10).split('-');
+    return p.length===3&&+p[0]===curYear&&(+p[1]-1)===curMonth;
+  }).sort((a,b)=>String(b.data).localeCompare(String(a.data))||(b.id||0)-(a.id||0));
+
+  if(!rows.length){
+    grid.innerHTML=`<div class="sch-empty-note">${lang==='ru'?'Слотов за этот месяц нет':'Sem turnos neste mês'}</div>`;
+    return;
+  }
+  const dm=iso=>`${String(iso).slice(8,10)}.${String(iso).slice(5,7)}`;
+  grid.innerHTML=rows.map(s=>{
+    const total=+s.vagas_total||0, filled=+s.filled_count||0;
+    const open=Math.max(0,(s.vagas_abertas!=null?+s.vagas_abertas:total-filled));
+    const badge=filled>=total&&total>0?['badge-filled',t('badge_filled')]:
+                filled>0?['badge-ordered',t('badge_ordered')]:['badge-open',t('badge_open')];
+    const tipo=s.tipo==='LOGISTICA'||s.tipo==='SCOUT'?'🛴 Scout':'🔌 Charger';
+    let names=[];
+    try{
+      const acc=typeof s.acceptances==='string'?JSON.parse(s.acceptances||'[]'):(s.acceptances||[]);
+      names=(acc||[]).map(a=>a&&a.name).filter(Boolean);
+    }catch(e){}
+    const note=(s.descricao||'').split('\n')[0].slice(0,70);
+    return `<div class="slot-card">
+      <div class="slot-card-header">
+        <span class="slot-card-city">${s.cidade} · ${CITY_NAMES[s.cidade]||s.cidade}</span>
+        <span class="slot-status-badge ${badge[0]}">${badge[1]}</span>
+      </div>
+      <div style="font-size:13px;font-weight:700;margin-bottom:6px">📅 ${dm(s.data)} · ${tipo}${s.turno_code?` · ${s.turno_code}`:''}</div>
+      <div style="font-family:'Space Mono',monospace;font-size:11px;color:var(--text-dim);margin-bottom:6px">
+        ${t('tt_filled')}: <b style="color:var(--accent3)">${filled}</b>/${total} · ${t('tt_empty')}: <b style="color:${open?'var(--accent2)':'var(--text-dim)'}">${open}</b>
+      </div>
+      ${names.length?`<div style="font-size:11px;line-height:1.6">${names.map(n=>`👤 ${n}`).join('<br>')}</div>`:''}
+      ${note?`<div style="font-size:10px;color:var(--text-dim);margin-top:7px;font-family:'Space Mono',monospace">${note}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
 function loadLocalMeis(){
   // Вызывается из fetchBotData — добавляет локальных MEI к загруженным из Sheet
   const stored=JSON.parse(localStorage.getItem('jet_local_meis')||'[]');
@@ -1243,19 +1376,19 @@ function normalizeName(s){
 
 const NAME_STOPWORDS=new Set(['MEI','SILVA','SANTOS','DOS','DAS','DA','DE','OLIVEIRA','SOUZA','SOUSA','LIMA','FERREIRA','ALVES','RODRIGUES','PEREIRA','COSTA','GOMES','RIBEIRO','MARTINS','CARVALHO','JUNIOR','NETO','FILHO']);
 function wordWeight(w){return NAME_STOPWORDS.has(w)?0.3:1.0;}
-function findActionsForMei(meiName){
-  if(!meiName||!dailyActions||dailyActions.length===0)return null;
+// Сырое сопоставление имени исполнителя со строкой листа ЦД.
+// Имена в двух источниках расходятся (порядок слов, отброшенные фамилии),
+// поэтому матч нечёткий — и потому же требует арбитра (см. ниже).
+function _actMatchRaw(meiName){
+  if(!meiName||!dailyActions||dailyActions.length===0)return {rec:null,score:0};
   const target=normalizeName(meiName);
-  if(target.size===0)return null;
-  // Сумма весов target
+  if(target.size===0)return {rec:null,score:0};
   let targetWeight=0; target.forEach(w=>{targetWeight+=wordWeight(w);});
   let best=null,bestScore=0;
   for(const rec of dailyActions){
     const cand=normalizeName(rec.name);
     if(cand.size===0)continue;
-    // Совпадения с учётом весов
-    let commonWeight=0;
-    let commonCount=0;
+    let commonWeight=0,commonCount=0;
     target.forEach(w=>{if(cand.has(w)){commonWeight+=wordWeight(w);commonCount++;}});
     // Минимум 2 общих слова И сумма весов >= 1.3 (либо 2 нормальных, либо 1 нормальное + 1 паразит)
     if(commonCount>=2 && commonWeight>=1.3){
@@ -1264,7 +1397,66 @@ function findActionsForMei(meiName){
       if(score>bestScore&&score>=0.35){bestScore=score;best=rec;}
     }
   }
-  return best;
+  return {rec:best,score:bestScore};
+}
+
+// ── Арбитраж: одна строка ЦД принадлежит ровно одному исполнителю ──────
+// Без него на одну строку ЦД претендуют сразу несколько человек (перевёрнутое
+// имя из выгрузки Urent + однофамильцы), и таблицы показывали их как отдельные
+// строки с одинаковыми числами. Побеждает лучший матч; если имена конкурентов
+// описывают одного человека — записи считаются одной, «лицом» становится
+// зарегистрированный в боте.
+let _actOwn=null;                 // nameKey → строка ЦД (null = запись ушла другому)
+function _actIsSynthetic(w){return !!(w&&(w.not_registered||w.source==='urent_sheet'));}
+
+function resolveActionsOwnership(){
+  if(!Array.isArray(dailyActions)||!dailyActions.length){_actOwn=null;return;}
+  if(typeof CITIES==='undefined'||typeof WORKERS==='undefined')return;
+  const all=[];
+  CITIES.forEach(c=>(WORKERS[c]||[]).forEach(w=>all.push(w)));
+  if(!all.length){_actOwn=null;return;}
+
+  const claims=new Map();          // employeeid|name → [{w,score}]
+  all.forEach(w=>{
+    const m=_actMatchRaw(w.name);
+    if(!m.rec)return;
+    const key=m.rec.employeeid||m.rec.name;
+    if(!claims.has(key))claims.set(key,{rec:m.rec,list:[]});
+    claims.get(key).list.push({w:w,score:m.score});
+  });
+
+  const own=new Map();
+  let dropped=0,fused=0;
+  claims.forEach(({rec,list})=>{
+    // Лучший матч вперёд; при равном счёте — зарегистрированный в боте.
+    list.sort((a,b)=>(b.score-a.score)||((_actIsSynthetic(a.w)?1:0)-(_actIsSynthetic(b.w)?1:0)));
+    let winner=list[0];
+    for(let i=1;i<list.length;i++){
+      const o=list[i];
+      if(_wSamePerson(winner.w.name,o.w.name,winner.w.city,o.w.city)){
+        fused++;
+        // Тот же человек в двух источниках: показываем под именем из бота.
+        if(_actIsSynthetic(winner.w)&&!_actIsSynthetic(o.w))winner={w:o.w,score:winner.score};
+        else own.set(_wNameKey(o.w.name),null);
+      }else{
+        dropped++;                 // однофамилец: своих действий у него нет
+        own.set(_wNameKey(o.w.name),null);
+      }
+    }
+    own.set(_wNameKey(winner.w.name),rec);
+  });
+
+  _actOwn=own;
+  console.info(`[actions] строк ЦД: ${claims.size} · склеено дублей: ${fused} · отцеплено ложных матчей: ${dropped}`);
+  window._actStats={cd:claims.size,fused:fused,dropped:dropped};
+}
+
+function findActionsForMei(meiName){
+  if(_actOwn){
+    const k=_wNameKey(meiName);
+    if(k&&_actOwn.has(k))return _actOwn.get(k);   // включая null — «эта строка ЦД не его»
+  }
+  return _actMatchRaw(meiName).rec;
 }
 
 function actionsLastDays(meiName,n){
@@ -1292,6 +1484,7 @@ async function loadDailyActions(){
     if(!resp.ok)throw new Error("status "+resp.status);
     const json=await resp.json();
     dailyActions=json.mei_actions||[];
+    resolveActionsOwnership();
     let matched=0,total=0;
     for(const c of (typeof CITIES!=='undefined'?CITIES:[])){
       for(const w of (WORKERS[c]||[])){
@@ -1322,11 +1515,24 @@ async function loadDailyActions(){
 window.addEventListener('load',()=>{
   setTimeout(loadDailyActions,2500);
   setInterval(loadDailyActions,5*60*1000);
+  // Флот: сборщик на VPS обновляет срез раз в 3 мин — тянем с тем же шагом.
+  setTimeout(()=>{if(typeof loadFleet==='function')loadFleet();},1800);
+  setInterval(()=>{if(typeof loadFleet==='function')loadFleet();},3*60*1000);
 });
 
-// ── SCHEDULE TAB (недельный график смен из бота) ─────────────────────
-let schedRaw=[];
-let schWeekStart=null; // Date понедельника отображаемой недели
+// ══════════════════════════════════════════════════════════════════════
+//  ESCALAS — все созданные слоты недели: кто взял, кто вышел, что сделал
+//  Источники (Gist, бот обновляет каждые 5 мин):
+//    slots.json  — сам слот (город, дата, тип, вакансии, кто создал)
+//    offers.json — кто принял слот и когда
+//    shifts.json — фактические выходы: начало и конец смены
+//    daily_actions.json — действия из листа ЦД (приходят с задержкой ~сутки)
+//  schedule.json (план /escala) сейчас пуст — вкладка на него больше не опирается.
+// ══════════════════════════════════════════════════════════════════════
+let schedRaw=[];                 // schedule.json — плановые смены /escala (может быть пуст)
+let schWeekStart=null;           // Date понедельника отображаемой недели
+let schOnlyIssues=false;         // фильтр «только проблемы»
+let schOpenSlotId=null;          // раскрытый слот
 
 function schMonday(d){
   const x=new Date(d); const dow=(x.getDay()+6)%7; x.setDate(x.getDate()-dow);
@@ -1334,122 +1540,301 @@ function schMonday(d){
 }
 function schIso(d){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
 function schShiftWeek(dir){
+  if(!schWeekStart)schWeekStart=schMonday(new Date());
   schWeekStart.setDate(schWeekStart.getDate()+dir*7);
+  schOpenSlotId=null;
+  renderSchedule();
+}
+function schThisWeek(){schWeekStart=schMonday(new Date());schOpenSlotId=null;renderSchedule();}
+function schToggleOnlyIssues(){
+  schOnlyIssues=!schOnlyIssues;
   renderSchedule();
 }
 
-const SCH_TYPE_NAMES={ru:{manha:'Утро',dia:'День',noite:'Вечер',madrugada:'Ночь'},
-                      pt:{manha:'Manhã',dia:'Dia',noite:'Noite',madrugada:'Madrugada'}};
-const SCH_TYPES=[
-  {key:'manha',     emoji:'🌅', time:'06:00–15:00'},
-  {key:'dia',       emoji:'☀️', time:'12:00–21:00'},
-  {key:'noite',     emoji:'🌆', time:'15:00–00:00'},
-  {key:'madrugada', emoji:'🌙', time:'21:00–06:00'},
-];
 const SCH_DOW_ALL={ru:['Пн','Вт','Ср','Чт','Пт','Сб','Вс'],
                    pt:['Seg','Ter','Qua','Qui','Sex','Sáb','Dom']};
 function schDow(){return SCH_DOW_ALL[lang]||SCH_DOW_ALL.pt;}
-function schTypeName(k){return (SCH_TYPE_NAMES[lang]||SCH_TYPE_NAMES.pt)[k]||k;}
+function schTipoIcon(tipo){return tipo==='CHARGER'?'🔋':(tipo==='LOGISTICA'?'🚛':'📋');}
+// Слот, созданный из недельного плана /escala, помечается ролью создателя.
+function schOrigin(slot){return slot.created_by_role==='schedule'?'📅':'';}
 
 async function loadSchedule(force){
+  // Основа вкладки — slots.json (грузится в fetchBotData). schedule.json нужен
+  // лишь как источник ставок недельного плана, поэтому его сбой не критичен.
   try{
     const url=`https://gist.githubusercontent.com/12danielmik1991-ops/54c012a98e6d8f34986afca9d76f3539/raw/schedule.json?_=${Date.now()}`;
-    const r=await fetch(url);
-    if(!r.ok)throw new Error('HTTP '+r.status);
-    const data=await r.json();
-    schedRaw=data.schedule||[];
-    console.log(`[schedule] loaded ${schedRaw.length} shifts`);
-    if(!schWeekStart)schWeekStart=schMonday(new Date());
-    renderSchedule();
-    if(typeof renderOverview==='function' &&
-       document.getElementById('tab-overview')?.classList.contains('active'))renderOverview();
-  }catch(e){console.error('loadSchedule failed:',e);
-    const g=document.getElementById('schGrid');
-    if(g&&!schedRaw.length)g.innerHTML=`<div class="sch-empty-note">${t('sch_load_err')}: ${e.message}</div>`;
-  }
+    const r=await fetch(url,{cache:'no-store'});
+    if(r.ok){const data=await r.json();schedRaw=data.schedule||[];}
+  }catch(e){console.warn('loadSchedule (plano) failed:',e.message);}
+  renderSchedule();
 }
 
 function schShortName(full){
   if(!full)return '';
-  const p=full.trim().split(/\s+/);
-  return p.length>1?`${p[0]} ${p[1][0]}.`:p[0];
+  const p=String(full).trim().split(/\s+/);
+  return p.length>1?`${p[0]} ${p[1][0].toUpperCase()}.`:p[0];
+}
+function schParse(iso){
+  if(!iso)return null;
+  const d=new Date(String(iso).replace(' ','T'));
+  return isNaN(d)?null:d;
+}
+function schFmtBRT(iso){
+  const d=schParse(iso);
+  if(!d)return '—';
+  const brt=new Date(d.getTime()-3*3600*1000);
+  return String(brt.getUTCHours()).padStart(2,'0')+':'+String(brt.getUTCMinutes()).padStart(2,'0');
+}
+// Дата смены в BRT (UTC-3): ночной выход в 21:00 остаётся в своём дне.
+function schDateOfShift(sh){
+  if(sh.slot_date)return sh.slot_date;
+  const d=schParse(sh.started_at);
+  if(!d)return null;
+  return new Date(d.getTime()-3*3600*1000).toISOString().slice(0,10);
+}
+
+// Самая свежая дата в листе ЦД: за более поздние дни действий ещё нет,
+// и «0» там был бы враньём — показываем ⏳.
+let _schCdMax=null;
+function schCdMaxDate(){
+  if(_schCdMax!==null)return _schCdMax;
+  let max='';
+  (typeof dailyActions!=='undefined'?dailyActions:[]).forEach(r=>{
+    for(const k in (r.daily||{})){if((r.daily[k].total||0)>0&&k>max)max=k;}
+  });
+  _schCdMax=max;
+  return max;
+}
+function schActionsOf(name,dateIso){
+  const rec=(typeof findActionsForMei==='function')?findActionsForMei(name):null;
+  if(!rec||!rec.daily)return {n:null,type:null,day:0,night:0,pending:dateIso>schCdMaxDate()};
+  const d=rec.daily[dateIso];
+  return {n:d?(d.total||0):0,type:rec.action_type,
+          day:d?(d.day||0):0,night:d?(d.night||0):0,
+          pending:!d&&dateIso>schCdMaxDate()};
+}
+
+// ── Сборка недели: слот + принявшие + факт выхода + действия ───────────
+function schBuildWeek(days){
+  const slots=(window.allSlots||[]).filter(s=>days.indexOf(s.data)>=0);
+  const offers=(typeof liveOffers!=='undefined'&&Array.isArray(liveOffers))?liveOffers:[];
+  const shifts=(typeof liveShifts!=='undefined'&&Array.isArray(liveShifts))?liveShifts:[];
+  const todayIso=schIso(new Date());
+  const same=(a,b)=>!!a&&!!b&&typeof _wSamePerson==='function'&&_wSamePerson(a,b);
+
+  return slots.map(slot=>{
+    const people=[];
+    const hasPerson=(tgId,nome)=>people.some(p=>
+      (tgId&&p.tg_id&&String(p.tg_id)===String(tgId))||same(p.nome,nome));
+
+    // 1) кто принял слот — offers, единственный источник с tg_id и временем
+    offers.forEach(o=>{
+      if(o.slot_id!==slot.id)return;
+      if(hasPerson(o.tg_id,o.nome))return;
+      people.push({tg_id:o.tg_id,nome:o.nome,tg_username:o.tg_username,accepted_at:o.accepted_at});
+    });
+    // 2) резерв: список принявших внутри самого слота (там нет tg_id)
+    let acc=[];
+    try{acc=typeof slot.acceptances==='string'?JSON.parse(slot.acceptances||'[]'):(slot.acceptances||[]);}catch(e){acc=[];}
+    (acc||[]).forEach(a=>{
+      const nm=a.name||a.nome;
+      if(!nm||hasPerson(null,nm))return;
+      people.push({tg_id:null,nome:nm,tg_username:a.tg_username,accepted_at:null});
+    });
+    // 3) вышел на смену, хотя принятия в выгрузке нет
+    shifts.forEach(sh=>{
+      if(sh.slot_id!==slot.id)return;
+      if(hasPerson(sh.tg_id,sh.nome))return;
+      people.push({tg_id:sh.tg_id,nome:sh.nome,tg_username:sh.tg_username,accepted_at:null});
+    });
+
+    people.forEach(p=>{
+      // Смену ищем сначала по самому слоту, затем по человеку и дате —
+      // при старте смены бот не всегда проставляет slot_id.
+      let sh=shifts.find(x=>x.slot_id===slot.id&&((p.tg_id&&String(x.tg_id)===String(p.tg_id))||same(x.nome,p.nome)));
+      if(!sh)sh=shifts.find(x=>schDateOfShift(x)===slot.data&&((p.tg_id&&String(x.tg_id)===String(p.tg_id))||same(x.nome,p.nome)));
+      p.started_at=sh?sh.started_at:null;
+      p.ended_at=sh?sh.ended_at:null;
+      p.acts=schActionsOf(p.nome,slot.data);
+      const startD=schParse(p.started_at);
+      const hrs=startD?(Date.now()-startD.getTime())/3600000:0;
+      if(slot.status==='cancelled')p.state='cancel';
+      else if(p.ended_at)p.state='done';
+      // Смена без закрытия: «на смене» только сегодня и в пределах 12 часов,
+      // иначе это забытый /fim — иначе человек висел бы «в турно» неделями.
+      else if(p.started_at)p.state=(slot.data===todayIso&&hrs<12)?'onshift':'unclosed';
+      else if(slot.data<todayIso)p.state=((p.acts&&p.acts.n)>0)?'nocheck':'noshow';
+      else p.state='wait';
+    });
+
+    const vagas=Math.max(Number(slot.vagas_total||1),people.length);
+    return {slot:slot,people:people,
+            free:slot.status==='cancelled'?0:Math.max(0,vagas-people.length),
+            cancelled:slot.status==='cancelled'};
+  });
+}
+
+const SCH_STATE_ICON={done:'✅',onshift:'🟢',unclosed:'🟡',nocheck:'⚡',wait:'⌛',noshow:'❌',cancel:'🚫'};
+function _schEsc(v){return String(v==null?'':v).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+function schChipHtml(rec,p){
+  const s=rec.slot;
+  const acts=p.acts||{};
+  const actStr=acts.pending?'⏳':(acts.n===null?'':'⚡'+acts.n);
+  const label=`${schTipoIcon(s.tipo)} ${SCH_STATE_ICON[p.state]||''} ${schShortName(p.nome)}`;
+  const tip=[p.nome,(CITY_NAMES[s.cidade]||s.cidade)+' · '+s.data.split('-').reverse().join('.'),
+    t('sch_st_'+p.state),
+    p.started_at?`${t('sch_th_start')} ${schFmtBRT(p.started_at)}`+(p.ended_at?` → ${schFmtBRT(p.ended_at)}`:''):'',
+    acts.pending?t('sch_cd_pending'):(acts.n!==null?`${t('sch_acts_day')}: ${acts.n}`:''),
+    (s.descricao||'').slice(0,90)
+  ].filter(Boolean).join(' · ');
+  return `<div class="sch-chip sch-st-${p.state}" title="${_schEsc(tip)}" onclick="schOpenSlot(${s.id})">`+
+    `<span class="sch-chip-txt">${_schEsc(label)}</span>`+
+    (actStr?`<span class="sch-chip-act">${actStr}</span>`:'')+
+    `</div>`;
 }
 
 function renderSchedule(){
   const grid=document.getElementById('schGrid');
   if(!grid)return;
+  _schCdMax=null;                       // свежесть ЦД пересчитываем на каждый рендер
   if(!schWeekStart)schWeekStart=schMonday(new Date());
   const days=[]; for(let i=0;i<7;i++){const d=new Date(schWeekStart);d.setDate(d.getDate()+i);days.push(schIso(d));}
   const wkEnd=new Date(schWeekStart);wkEnd.setDate(wkEnd.getDate()+6);
   const fmt=d=>`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}`;
-  document.getElementById('schWeekNav').textContent=`${fmt(schWeekStart)} – ${fmt(wkEnd)}`;
-  document.getElementById('schWeekLabel').textContent=`${t('sch_week')} ${fmt(schWeekStart)}`;
+  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+  set('schWeekNav',`${fmt(schWeekStart)} – ${fmt(wkEnd)}`);
+  set('schWeekLabel',`${t('sch_week')} ${fmt(schWeekStart)}`);
+  const onlyBtn=document.getElementById('schOnlyBtn');
+  if(onlyBtn)onlyBtn.classList.toggle('is-on',schOnlyIssues);
 
-  const week=schedRaw.filter(s=>days.includes(s.data));
+  const week=schBuildWeek(days);
 
-  // Сводка
-  const total=week.length;
-  const taken=week.filter(s=>s.status==='taken'||s.status==='confirmed').length;
-  const confirmed=week.filter(s=>s.status==='confirmed').length;
-  const open=week.filter(s=>s.status==='open').length;
-  const declined=week.filter(s=>s.declined).length;
-  document.getElementById('schTotal').textContent=total;
-  document.getElementById('schTaken').textContent=taken;
-  document.getElementById('schConfirmed').textContent=`${t('sch_confirmed_of')} ${confirmed}`;
-  document.getElementById('schOpen').textContent=open;
-  document.getElementById('schDeclined').textContent=declined;
+  // ── Сводка недели
+  const live=week.filter(r=>!r.cancelled);
+  const allPeople=[].concat.apply([],live.map(r=>r.people));
+  const onShiftNow=allPeople.filter(p=>p.state==='onshift');
+  const outPeople=allPeople.filter(p=>p.state==='done'||p.state==='onshift'||p.state==='unclosed'||p.state==='nocheck');
+  const noShow=allPeople.filter(p=>p.state==='noshow');
+  const freeVagas=live.reduce((a,r)=>a+r.free,0);
+  const actsSum=outPeople.reduce((a,p)=>a+((p.acts&&p.acts.n)||0),0);
+  const cancelled=week.length-live.length;
+  set('schTotal',week.length);
+  set('schTaken',allPeople.length);
+  set('schOpen',freeVagas);
+  set('schOut',outPeople.length);
+  set('schNoShow',noShow.length);
+  set('schActs',actsSum);
+  set('schConfirmed',cancelled?`${cancelled} ${t('sch_cancelled')}`:'');
+  set('schOutSub',`${onShiftNow.length} ${t('sch_now')}`);
+  const cdMax=schCdMaxDate();
+  set('schActsSub',cdMax?`${t('sch_cd_upto')} ${cdMax.slice(8,10)}.${cdMax.slice(5,7)}`:'');
 
   if(!week.length){
     grid.innerHTML=`<div class="sch-empty-note">${t('sch_empty')}</div>`;
+    const det=document.getElementById('schDetail');if(det)det.innerHTML='';
     return;
   }
 
-  // Группировка city → type → date → [shifts]
-  const byCity={};
-  week.forEach(s=>{
-    ((byCity[s.cidade]=byCity[s.cidade]||{})[s.shift_type]=byCity[s.cidade][s.shift_type]||{});
-    (byCity[s.cidade][s.shift_type][s.data]=byCity[s.cidade][s.shift_type][s.data]||[]).push(s);
+  // ── Сетка: строка = город, колонка = день недели
+  const todayIso=schIso(new Date());
+  const cities=Object.keys(week.reduce((m,r)=>{m[r.slot.cidade]=1;return m;},{})).sort();
+  let html='<table class="sch-table"><thead><tr><th class="sch-city-col"></th>';
+  days.forEach((iso,i)=>{
+    const cls=(i>=5?'sch-we':'')+(iso===todayIso?' today':'');
+    html+=`<th class="${cls}">${schDow()[i]}<br>${iso.slice(8,10)}.${iso.slice(5,7)}</th>`;
   });
+  html+='</tr></thead><tbody>';
 
-  const today=schIso(new Date());
-  let html='';
-  Object.keys(byCity).sort().forEach(city=>{
-    const cityShifts=week.filter(s=>s.cidade===city);
-    const cTaken=cityShifts.filter(s=>s.status==='taken'||s.status==='confirmed').length;
-    html+=`<div class="sch-city"><div class="sch-city-head">🏙 ${CITY_NAMES[city]||city}`+
-      `<span class="sch-city-stats">${cTaken}/${cityShifts.length} ${t('sch_accepted')}</span></div>`;
-    html+='<table class="sch-table"><thead><tr><th style="width:118px"></th>';
-    days.forEach((iso,i)=>{
-      const cls=(i>=5?'sch-we':'')+(iso===today?' today':'');
-      html+=`<th class="${cls}">${schDow()[i]}<br>${iso.slice(8,10)}.${iso.slice(5,7)}</th>`;
-    });
-    html+='</tr></thead><tbody>';
-    SCH_TYPES.forEach(t=>{
-      const typeDays=byCity[city][t.key];
-      if(!typeDays)return; // тип не заказан в этом городе
-      html+=`<tr><td class="sch-type-cell">${t.emoji} ${schTypeName(t.key)}<span class="sch-time">${t.time}</span></td>`;
-      days.forEach(iso=>{
-        const shifts=(typeDays[iso]||[]);
-        html+='<td class="sch-day-cell">';
-        shifts.forEach(s=>{
-          let cls,label,tip;
-          const L=I18N[lang];
-          const rEmoji=s.role==='SCOUT'?'🛴':'🔌';
-          const rName=s.role==='SCOUT'?L.role_scout_full:L.role_bat_full;
-          const rateStr=s.rate?` · R$${Number(s.rate).toFixed(2).replace('.',',')}/ação`:'';
-          if(s.status==='confirmed'){cls='sch-confirmed';label='✓✓ '+rEmoji+' '+schShortName(s.taken_by_name);tip=L.sch_tip_confirmed+': '+(s.taken_by_name||'');}
-          else if(s.status==='taken'){cls='sch-taken';label='✓ '+rEmoji+' '+schShortName(s.taken_by_name);tip=L.sch_tip_taken+': '+(s.taken_by_name||'');}
-          else if(s.declined){cls='sch-declined';label='↩ '+rEmoji+' '+L.sch_decl_chip;tip=L.sch_tip_declined;}
-          else{cls='sch-open';label=rEmoji+' '+L.sch_free_chip;tip=L.sch_tip_free;}
-          html+=`<div class="sch-chip ${cls}" title="${tip} · ${t.emoji}${t.time} · ${rName}${rateStr}">${label}</div>`;
+  cities.forEach(city=>{
+    const cityRecs=week.filter(r=>r.slot.cidade===city);
+    const cityPeople=[].concat.apply([],cityRecs.filter(r=>!r.cancelled).map(r=>r.people));
+    const cityOut=cityPeople.filter(p=>p.state==='done'||p.state==='onshift'||p.state==='unclosed'||p.state==='nocheck').length;
+    html+=`<tr><td class="sch-city-col"><b>${city}</b><span class="sch-city-name">${CITY_NAMES[city]||''}</span>`+
+      `<span class="sch-city-stats">${cityOut}/${cityPeople.length} ${t('sch_out_short')}</span></td>`;
+    days.forEach(iso=>{
+      const recs=cityRecs.filter(r=>r.slot.data===iso);
+      html+=`<td class="sch-day-cell${iso===todayIso?' today':''}">`;
+      recs.forEach(r=>{
+        r.people.forEach(p=>{
+          if(schOnlyIssues&&p.state!=='noshow'&&p.state!=='unclosed'&&p.state!=='nocheck')return;
+          html+=schChipHtml(r,p);
         });
-        html+='</td>';
+        if(r.free>0&&!r.cancelled&&!schOnlyIssues){
+          html+=`<div class="sch-chip sch-st-free" onclick="schOpenSlot(${r.slot.id})" title="${_schEsc(t('sch_st_free')+' · '+(r.slot.descricao||'').slice(0,120))}">`+
+            `<span class="sch-chip-txt">${schTipoIcon(r.slot.tipo)} ⬜ ${t('sch_free_chip')}${r.free>1?' ×'+r.free:''}</span></div>`;
+        }
+        if(r.cancelled&&!r.people.length&&!schOnlyIssues){
+          html+=`<div class="sch-chip sch-st-cancel" onclick="schOpenSlot(${r.slot.id})">`+
+            `<span class="sch-chip-txt">${schTipoIcon(r.slot.tipo)} 🚫 ${t('sch_cancel_chip')}</span></div>`;
+        }
       });
-      html+='</tr>';
+      html+='</td>';
     });
-    html+='</tbody></table></div>';
+    html+='</tr>';
   });
+  html+='</tbody></table>';
   grid.innerHTML=html;
+
+  schRenderDetail(week);
+}
+
+// ── Детали слота: разворачиваются под сеткой, на телефоне — шторкой ────
+function schOpenSlot(id){
+  schOpenSlotId=(schOpenSlotId===id)?null:id;
+  if(!schWeekStart)schWeekStart=schMonday(new Date());
+  const days=[]; for(let i=0;i<7;i++){const d=new Date(schWeekStart);d.setDate(d.getDate()+i);days.push(schIso(d));}
+  const week=schBuildWeek(days);
+  if(window.innerWidth<=768&&typeof window.mOpenSheet==='function'&&schOpenSlotId){
+    const rec=week.find(r=>r.slot.id===id);
+    if(rec){window.mOpenSheet(t('sch_detail_title'),schDetailHtml(rec,true));return;}
+  }
+  schRenderDetail(week);
+  const det=document.getElementById('schDetail');
+  if(det&&schOpenSlotId)det.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function schDetailHtml(rec,isSheet){
+  const s=rec.slot;
+  const created=schParse(s.created_at);
+  const createdStr=created?new Date(created.getTime()-3*3600*1000).toLocaleString(lang==='ru'?'ru-RU':'pt-BR'):'—';
+  const creator=s.created_by_name||s.created_by_username||s.created_by_role||'—';
+  let rows='';
+  rec.people.forEach(p=>{
+    const acts=p.acts||{};
+    const tg=p.tg_username?`<a href="https://t.me/${p.tg_username}" target="_blank" style="color:var(--accent1);text-decoration:none">@${p.tg_username}</a>`:'';
+    rows+=`<tr class="sch-p-${p.state}">`+
+      `<td>${SCH_STATE_ICON[p.state]||''} <b>${_schEsc(p.nome||'?')}</b> ${tg}</td>`+
+      `<td class="sch-mono">${t('sch_st_'+p.state)}</td>`+
+      `<td class="sch-mono">${p.accepted_at?schFmtBRT(p.accepted_at):'—'}</td>`+
+      `<td class="sch-mono">${p.started_at?schFmtBRT(p.started_at):'—'}</td>`+
+      `<td class="sch-mono">${p.ended_at?schFmtBRT(p.ended_at):(p.started_at?'…':'—')}</td>`+
+      `<td class="sch-mono sch-acts">${acts.pending?'⏳':(acts.n===null?'—':acts.n)}</td>`+
+      `</tr>`;
+  });
+  if(rec.free>0)rows+=`<tr class="sch-p-free"><td colspan="6">⬜ ${t('sch_st_free')} × ${rec.free}</td></tr>`;
+  if(!rows)rows=`<tr><td colspan="6" class="mon-empty">${t('sch_noone')}</td></tr>`;
+
+  return `<div class="sch-detail${isSheet?' is-sheet':''}">
+    <div class="sch-detail-head">
+      <span>${schTipoIcon(s.tipo)} ${schOrigin(s)} <b>${CITY_NAMES[s.cidade]||s.cidade}</b> · ${s.data.split('-').reverse().join('.')}</span>
+      <span class="sch-mono">#${s.id} · ${s.status} · ${t('lbl_vagas2')}: ${rec.people.length}/${Math.max(Number(s.vagas_total||1),rec.people.length)}</span>
+      ${isSheet?'':`<button class="icon-btn" onclick="schOpenSlot(${s.id})">✕</button>`}
+    </div>
+    <div class="sch-detail-meta">${t('lbl_criado')}: ${createdStr} · ${t('lbl_criou')}: ${_schEsc(creator)}</div>
+    ${s.descricao?`<div class="sch-detail-desc">${_schEsc(s.descricao)}</div>`:''}
+    <div class="fl-wrap"><table class="sch-ptable">
+      <thead><tr><th>${t('lbl_worker')}</th><th>${t('tt_status')}</th><th>${t('sch_th_accepted')}</th><th>${t('sch_th_start')}</th><th>${t('sch_th_end')}</th><th>⚡</th></tr></thead>
+      <tbody>${rows}</tbody></table></div>
+  </div>`;
+}
+
+function schRenderDetail(week){
+  const det=document.getElementById('schDetail');
+  if(!det)return;
+  if(!schOpenSlotId){det.innerHTML='';return;}
+  const rec=(week||[]).find(r=>r.slot.id===schOpenSlotId);
+  det.innerHTML=rec?schDetailHtml(rec,false):'';
 }
 
 window.addEventListener('load',()=>{
@@ -1616,13 +2001,17 @@ function renderOverview(){
   document.getElementById('ovActToday').textContent=actToday;
   document.getElementById('ovActWeek').textContent=`${act7} ${t('ov_last7')}`;
 
-  // Эскалы недели (из schedRaw)
+  // Слоты недели: считаем по фактически созданным слотам (slots.json).
+  // Раньше здесь был план /escala — он приходит пустым, и KPI всегда показывал 0.
   const wkStart=schMonday(new Date()),days=[];
   for(let i=0;i<7;i++){const d=new Date(wkStart);d.setDate(d.getDate()+i);days.push(schIso(d));}
-  const wkSched=(typeof schedRaw!=='undefined'?schedRaw:[]).filter(s=>days.includes(s.data));
-  const taken=wkSched.filter(s=>s.status==='taken'||s.status==='confirmed').length;
-  document.getElementById('ovSchedTaken').textContent=taken;
-  document.getElementById('ovSchedSub').textContent=`${wkSched.filter(s=>s.status==='open').length} ${t('ov_livres')} · ${wkSched.length} ${t('ov_total')}`;
+  let wkTaken=0,wkFree=0,wkTotal=0;
+  try{
+    const wkRecs=(typeof schBuildWeek==='function')?schBuildWeek(days):[];
+    wkRecs.forEach(r=>{if(r.cancelled)return;wkTotal++;wkTaken+=r.people.length;wkFree+=r.free;});
+  }catch(e){console.warn('ovSched skipped:',e.message);}
+  document.getElementById('ovSchedTaken').textContent=wkTaken;
+  document.getElementById('ovSchedSub').textContent=`${wkFree} ${t('ov_livres')} · ${wkTotal} ${t('ov_total')}`;
 
   // Операция по городам сегодня
   const grn=anCssVar('--accent3'),red=anCssVar('--accent2'),acc=anCssVar('--accent');
@@ -1661,6 +2050,290 @@ function renderOverview(){
 
 // ── ANTIFRAUD (мост из jet-operation через VPS+Gist, ФИО шифрованы) ──
 let afData=null, afPeople=null, afIncidents={};
+// ══════════════════════════════════════════════════════════════
+//  ДЕДУП ЛЮДЕЙ
+//  Один человек приходит дважды: как зарегистрированный MEI из БД бота
+//  и как synthetic-запись из Urent-листа, где имя капсом и с переставленным
+//  порядком слов («Cinthya Silva Ferraz» ↔ «SILVA CINTHYA FERRAZ»).
+//  Схлопываем по CNPJ → tg_id → множеству слов имени. Побеждает запись из БД,
+//  недостающие поля (cargo, employee_id) добираем из synthetic.
+// ══════════════════════════════════════════════════════════════
+function _wNameKey(s){
+  // NFD + отбрасывание диакритики: «Itanhaém» и «ITANHAEM» должны совпасть
+  const norm=String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toUpperCase().replace(/[^A-Z ]/g,' ').trim();
+  const parts=norm.split(/\s+/).filter(x=>x.length>1);   // предлоги DE/DA/DOS оставляем — они часть имени
+  return parts.length?parts.slice().sort().join(' '):'';
+}
+function _wDigits(s){return String(s||'').replace(/\D/g,'');}
+
+// Служебные токены из выгрузки Urent: в листе имена пишут как «SALLES MEI MAURICIO
+// COALHETA» — «MEI»/«BRSPL» это метки, а не части имени.
+const W_SERVICE_TOKENS=new Set(['MEI','BRSPL','BRSP','RGL','JET','VALET','LTDA','EIRELI']);
+// Частые бразильские фамилии: совпадение только по ним ничего не доказывает.
+const W_WEAK_TOKENS=new Set(['SILVA','SANTOS','DOS','DAS','DA','DE','DO','OLIVEIRA','SOUZA','SOUSA',
+  'LIMA','FERREIRA','ALVES','RODRIGUES','PEREIRA','COSTA','GOMES','RIBEIRO','MARTINS','CARVALHO',
+  'JUNIOR','NETO','FILHO','NASCIMENTO']);
+
+function _wSig(s){
+  // Значимые слова имени: без диакритики, без служебных меток, ≥3 букв.
+  const norm=String(s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+    .toUpperCase().replace(/[^A-Z ]/g,' ');
+  const out=new Set();
+  norm.split(/\s+/).forEach(w=>{if(w.length>=3&&!W_SERVICE_TOKENS.has(w))out.add(w);});
+  return out;
+}
+function _wStrong(set){
+  const out=new Set();
+  set.forEach(w=>{if(!W_WEAK_TOKENS.has(w))out.add(w);});
+  return out;
+}
+function _wSubset(a,b){let ok=true;a.forEach(w=>{if(!b.has(w))ok=false;});return ok;}
+function _wInter(a,b){const out=new Set();a.forEach(w=>{if(b.has(w))out.add(w);});return out;}
+
+// Город приходит и кодом («PG»), и полным именем из Urent-листа («Praia Grande»).
+let _wCityMap=null;
+function _wCityCode(v){
+  if(!v)return '';
+  const raw=String(v).trim();
+  if(typeof CITY_NAMES!=='undefined'&&CITY_NAMES[raw])return raw;      // уже код
+  if(!_wCityMap){
+    _wCityMap={};
+    if(typeof CITY_NAMES!=='undefined')Object.entries(CITY_NAMES).forEach(([code,nm])=>{
+      _wCityMap[String(nm).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim()]=code;
+    });
+  }
+  const key=raw.normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().trim();
+  return _wCityMap[key]||key;   // чужой город (Sao Paulo и пр.) остаётся как есть
+}
+
+// Один ли это человек? Имена в двух источниках расходятся: порядок слов
+// перевёрнут, часть фамилий отброшена, встречаются опечатки (MONTEIO/MONTEIRO).
+function _wSamePerson(nameA,nameB,cityA,cityB){
+  const sa=_wSig(nameA),sb=_wSig(nameB);
+  if(!sa.size||!sb.size)return false;
+  if(sa.size===sb.size&&_wSubset(sa,sb))return true;         // те же слова, другой порядок
+  const small=sa.size<=sb.size?sa:sb, big=sa.size<=sb.size?sb:sa;
+  if(_wSubset(small,big)){
+    const st=_wStrong(small);
+    if(st.size>=2){
+      const ca=_wCityCode(cityA),cb=_wCityCode(cityB);
+      if(ca&&cb&&ca===cb)return true;                        // тот же город — сомнений нет
+      if(st.size>=3||small.size>=4)return true;              // редкое сочетание имён
+    }
+    // Три совпавших слова, хотя бы одно из них — не массовая фамилия:
+    // «SANTOS RODRIGUES LUCAS» и «Lucas dos Santos Rodrigues» — один человек.
+    if(small.size>=3&&st.size>=1)return true;
+  }
+  // Опечатка в фамилии: три совпавших редких слова И расхождение только в
+  // написании («MONTEIO» / «MONTEIRO»). Без проверки написания сюда попадали
+  // разные люди с общим «Paulo Henrique de Jesus».
+  if(_wInter(_wStrong(sa),_wStrong(sb)).size>=3){
+    const extra=[];small.forEach(w=>{if(!big.has(w))extra.push(w);});
+    const bigArr=[];big.forEach(w=>bigArr.push(w));
+    return extra.every(w=>bigArr.some(b=>_wTypo(w,b)));
+  }
+  return false;
+}
+
+// Похожи ли слова с точностью до опечатки (расстояние Левенштейна ≤2)?
+function _wTypo(a,b){
+  if(a===b)return true;
+  if(Math.abs(a.length-b.length)>2||Math.min(a.length,b.length)<5)return false;
+  const m=a.length,n=b.length;
+  let prev=new Array(n+1),cur=new Array(n+1);
+  for(let j=0;j<=n;j++)prev[j]=j;
+  for(let i=1;i<=m;i++){
+    cur[0]=i;
+    for(let j=1;j<=n;j++){
+      cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));
+    }
+    const tmp=prev;prev=cur;cur=tmp;
+  }
+  return prev[n]<=2;
+}
+
+function dedupeWorkers(list){
+  if(!Array.isArray(list)||!list.length)return list||[];
+  const isSynthetic=w=>!!(w.not_registered||w.source==='urent_sheet');
+  // Зарегистрированные идут первыми: при склейке они становятся основой записи.
+  const ordered=list.slice().sort((a,b)=>(isSynthetic(a)?1:0)-(isSynthetic(b)?1:0));
+
+  const byCnpj=new Map(),byTg=new Map(),byPhone=new Map();
+  const out=[];
+  let merged=0;
+
+  const absorb=(hit,w)=>{
+    // Основа — уже принятая запись (зарегистрированная); дополняем пустые поля.
+    ['cnpj','telefone','phone','tg_username','tipo','cargo','status','employee_id'].forEach(f=>{
+      if((hit[f]===undefined||hit[f]===null||hit[f]==='')&&w[f])hit[f]=w[f];
+    });
+    if(!hit.tg_id&&w.tg_id)hit.tg_id=w.tg_id;
+    if(isSynthetic(w)&&!isSynthetic(hit)){
+      hit.also_urent=true;               // есть и в выгрузке Urent — полезно видеть в Executores
+      const wn=w.nome||w.name;
+      if(wn&&wn!==(hit.nome||hit.name))hit.urent_name=wn;
+    }
+  };
+
+  ordered.forEach(w=>{
+    const cnpj=_wDigits(w.cnpj);
+    const tg=w.tg_id?String(w.tg_id):'';
+    const phone=_wDigits(w.telefone||w.phone).slice(-8);
+
+    // Жёсткие идентификаторы — сначала: CNPJ, telegram, телефон.
+    let hit=(cnpj&&byCnpj.get(cnpj))||(tg&&byTg.get(tg))||(phone.length===8&&byPhone.get(phone))||null;
+    // Затем сравнение имён с учётом города.
+    if(!hit){
+      for(const r of out){
+        if(_wSamePerson(r.nome||r.name,w.nome||w.name,r.cidade||r.city,w.cidade||w.city)){hit=r;break;}
+      }
+    }
+
+    if(hit){
+      merged++;
+      absorb(hit,w);
+      // Ключи склеенной записи регистрируем, чтобы третий дубль тоже нашёлся
+      if(cnpj&&!byCnpj.has(cnpj))byCnpj.set(cnpj,hit);
+      if(tg&&!byTg.has(tg))byTg.set(tg,hit);
+      if(phone.length===8&&!byPhone.has(phone))byPhone.set(phone,hit);
+      return;
+    }
+
+    const rec=Object.assign({},w);
+    out.push(rec);
+    if(cnpj)byCnpj.set(cnpj,rec);
+    if(tg)byTg.set(tg,rec);
+    if(phone.length===8&&!byPhone.has(phone))byPhone.set(phone,rec);
+  });
+
+  if(merged)console.info(`[dedupe] схлопнуто дублей: ${merged} (было ${list.length}, стало ${out.length})`);
+  window._dedupStats={before:list.length,after:out.length,merged:merged};
+  return out;
+}
+
+// ══════════════════════════════════════════════════════════════
+//  FROTA — доступность по городам и статусы ТС
+//  Источник: /root/fleet.py на VPS-1 (крон 3 мин, Urent admin API) → maps.jetmd.online/fleet.json.
+//  Напрямую в API из браузера ходить нельзя: Cloudflare отдаёт 403, CORP закрыт.
+// ══════════════════════════════════════════════════════════════
+const FLEET_URL='https://maps.jetmd.online/fleet.json';
+// Слаг сборщика → наш код города. Santos в CITIES нет — показываем отдельной строкой.
+const FLEET_SLUG2CODE={praia_grande:'PG',guaruja:'GR',caraguatatuba:'KG',ilhabela:'IB',
+  ubatuba:'UB',mongagua:'MN',bertioga:'BR',itanhaem:'IT',peruibe:'PE'};
+// Цвет статуса: зелёный — рабочие, оранжевый — сервис, красный — потери.
+const FLEET_STATUS_COLOR={disponivel:'var(--accent3)',alugado:'var(--accent)',
+  manutencao:'var(--accent4)',reparo:'var(--accent4)',carregando:'var(--accent4)',
+  movimentacao:'var(--accent)',conservacao:'var(--text-dim)',
+  alarme:'var(--accent2)',roubado:'var(--accent2)',procurado:'var(--accent2)',irrecuperavel:'var(--accent2)'};
+let fleetData=null;
+
+async function loadFleet(force){
+  try{
+    const r=await fetch(FLEET_URL+'?_='+Date.now(),{cache:'no-store'});
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    fleetData=await r.json();
+    renderFleet();
+  }catch(e){
+    console.error('loadFleet failed',e);
+    const el=document.getElementById('flCityTable');
+    if(el)el.innerHTML=`<tr><td class="mon-empty">${t('fl_err')}: ${e.message}</td></tr>`;
+  }
+}
+
+function flPctClass(p){return p>=90?'ok':(p>=80?'warn':'bad');}
+
+function renderFleet(){
+  const d=fleetData;
+  if(!d||!d.cluster)return;
+  const c=d.cluster,st=c.statuses||{};
+
+  // Возраст среза: крон раз в 3 мин, всё старше 15 — повод усомниться в свежести.
+  const upd=document.getElementById('flUpd');
+  if(upd){
+    const ageMin=d.upd?Math.round((Date.now()-new Date(d.upd).getTime())/60000):null;
+    const stale=ageMin!==null&&ageMin>15;
+    upd.innerHTML=`${t('fl_upd')} ${d.upd_brt||'—'} BRT`+
+      (ageMin!==null?` · <span class="${stale?'fl-stale':''}">${ageMin} ${t('fl_min')}</span>`:'')+
+      (stale?` ⚠️ ${t('fl_stale')}`:'');
+  }
+
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=v;};
+  const pctCls=flPctClass(c.avail_pct);
+  const pctEl=document.getElementById('flAvailPct');
+  if(pctEl){pctEl.textContent=(c.avail_pct||0).toFixed(1)+'%';pctEl.className='card-val fl-pct '+pctCls;}
+  set('flAvailSub',`${c.avail||0} ${t('fl_of')} ${c.total||0}`);
+  set('flTotal',c.total||0);
+  set('flAlug',st.alugado||0);
+  set('flAlugSub',c.total?((st.alugado||0)/c.total*100).toFixed(1)+'% '+t('fl_of_fleet'):'');
+  set('flManut',(st.manutencao||0)+(st.reparo||0));
+  const bat=c.bat||{};
+  set('flBat20',bat.lt20||0);
+  set('flBatSub',`≤5%: ${bat.lt5||0} · ≤1%: ${bat.lt1||0}`);
+  set('flLost',(st.alarme||0)+(st.roubado||0)+(st.procurado||0));
+
+  // ── Таблица по городам ──
+  const rows=Object.entries(d.cities||{}).map(([slug,x])=>({slug,code:FLEET_SLUG2CODE[slug]||null,...x}))
+    .sort((a,b)=>{
+      if(a.in_cluster_pct!==b.in_cluster_pct)return a.in_cluster_pct?-1:1; // Santos вниз
+      return b.total-a.total;
+    });
+  let html=`<tr><th>${t('fl_th_city')}</th><th class="fl-num">${t('fl_th_total')}</th>`+
+    `<th class="fl-num">${t('fl_th_disp')}</th><th class="fl-num">${t('fl_th_alug')}</th>`+
+    `<th class="fl-num">${t('fl_th_serv')}</th><th class="fl-num">${t('fl_th_bat')}</th>`+
+    `<th style="min-width:110px">${t('fl_th_avail')}</th></tr>`;
+  rows.forEach(x=>{
+    const s=x.statuses||{},b=x.bat||{};
+    const serv=(s.manutencao||0)+(s.reparo||0)+(s.carregando||0);
+    const cls=flPctClass(x.avail_pct);
+    const name=x.code&&CITY_NAMES[x.code]?CITY_NAMES[x.code]:x.name;
+    html+=`<tr class="${x.in_cluster_pct?'':'fl-off'}">`+
+      `<td><b>${name}</b>${x.in_cluster_pct?'':` <span style="font-size:9px;opacity:.7">${t('fl_offcluster')}</span>`}</td>`+
+      `<td class="fl-num">${x.total}</td>`+
+      `<td class="fl-num" style="color:var(--accent3)">${x.disp}</td>`+
+      `<td class="fl-num" style="color:var(--accent)">${x.alug}</td>`+
+      `<td class="fl-num" style="color:var(--accent4)">${serv||'—'}</td>`+
+      `<td class="fl-num">${b.lt20||0}</td>`+
+      `<td><span class="fl-pct ${cls}">${(x.avail_pct||0).toFixed(1)}%</span>`+
+        `<div class="fl-meter ${cls}"><i style="width:${Math.min(100,x.avail_pct||0)}%"></i></div></td>`+
+    `</tr>`;
+  });
+  const tbl=document.getElementById('flCityTable');
+  if(tbl)tbl.innerHTML=html;
+
+  // ── Статусы: чипы по кластеру + разбивка по городам ──
+  const order=d.status_order||Object.keys(st);
+  const labels=d.labels||{};
+  const chips=order.map(k=>{
+    const n=st[k]||0;
+    return `<div class="fl-chip ${n?'':'is-zero'}"><span class="fl-dot" style="background:${FLEET_STATUS_COLOR[k]||'var(--text-dim)'}"></span>`+
+      `${labels[k]||k} <b>${n}</b></div>`;
+  }).join('');
+  const chipsEl=document.getElementById('flStatusChips');
+  if(chipsEl)chipsEl.innerHTML=chips;
+
+  // В разбивке по городам держим только непустые статусы — иначе половина таблицы нули.
+  const shown=order.filter(k=>(st[k]||0)>0);
+  let sh=`<tr><th>${t('fl_th_city')}</th>`+shown.map(k=>`<th class="fl-num">${labels[k]||k}</th>`).join('')+`</tr>`;
+  rows.forEach(x=>{
+    const s=x.statuses||{};
+    const name=x.code&&CITY_NAMES[x.code]?CITY_NAMES[x.code]:x.name;
+    sh+=`<tr class="${x.in_cluster_pct?'':'fl-off'}"><td><b>${name}</b></td>`+
+      shown.map(k=>`<td class="fl-num" ${s[k]?`style="color:${FLEET_STATUS_COLOR[k]||'inherit'}"`:'style="opacity:.35"'}>${s[k]||0}</td>`).join('')+`</tr>`;
+  });
+  const stbl=document.getElementById('flStatusTable');
+  if(stbl)stbl.innerHTML=sh;
+
+  // KPI доступности на Painel Geral
+  const ovp=document.getElementById('ovFleetPct');
+  if(ovp){
+    ovp.textContent=(c.avail_pct||0).toFixed(1)+'%';
+    ovp.className='card-val fl-pct '+pctCls;
+    const sub=document.getElementById('ovFleetSub');
+    if(sub)sub.textContent=`${st.alugado||0} ${t('fl_rented')} · ${c.total||0} ${t('fl_total_short')}`;
+  }
+}
+
 async function loadAntifraud(force){
   try{
     const url=`https://gist.githubusercontent.com/12danielmik1991-ops/e018dab17e69e1dea5e5e8aa0b48f6fb/raw/antifraud.json?_=${Date.now()}`;
@@ -1830,7 +2503,8 @@ function renderTeam(){
   const q=(document.getElementById('tmSearch').value||'').toLowerCase().trim();
   const fCity=document.getElementById('tmCity').value||'ALL';
   const fReg=document.getElementById('tmReg').value||'all';
-  document.getElementById('tmReg').options[0].textContent='👥 '+t('tm_all');
+  // Фильтр по регистрации, а не по городам — раньше здесь стояло «Все города»
+  document.getElementById('tmReg').options[0].textContent='👥 '+t('m_all_reg');
 
   let rows=tmCollect();
   if(fCity!=='ALL')rows=rows.filter(r=>r.city===fCity);
@@ -1856,14 +2530,15 @@ function renderTeam(){
     const tgCell=r.tg?`<a class="tm-tg" href="https://t.me/${r.tg}" target="_blank" rel="noopener">@${r.tg}</a>`:
       (r.tg_id?`<span class="tm-mono">id ${r.tg_id}</span>`:'—');
     const statusChip=r.notReg?`<span class="tm-chip tm-chip-urent">${t('tm_notreg')}</span>`:'';
+    // data-th — подписи для карточного режима на телефоне (см. мобильный слой внизу файла)
     html+=`<tr>
-      <td class="tm-name">${r.name} ${statusChip}</td>
-      <td class="tm-mono">${r.cnpj||'—'}</td>
-      <td class="tm-mono">${r.phone||'—'}</td>
-      <td>${tgCell}</td>
-      <td>${r.city} · ${r.cityName}</td>
-      <td>${typeChip}</td>
-      <td class="tm-mono" style="font-weight:700;color:var(--text)">${r.actions||0}</td>
+      <td class="tm-name" data-th="${t('tm_col_name')}">${r.name} ${statusChip}</td>
+      <td class="tm-mono" data-th="${t('tm_col_cnpj')}">${r.cnpj||'—'}</td>
+      <td class="tm-mono" data-th="${t('tm_col_phone')}">${r.phone||'—'}</td>
+      <td data-th="${t('tm_col_tg')}">${tgCell}</td>
+      <td data-th="${t('tm_col_city')}">${r.city} · ${r.cityName}</td>
+      <td data-th="${t('tm_col_type')}">${typeChip}</td>
+      <td class="tm-mono" data-th="${t('tm_col_actions')}" style="font-weight:700;color:var(--text)">${r.actions||0}</td>
     </tr>`;
   });
   html+='</tbody>';
@@ -1902,10 +2577,12 @@ function exportRankingCsv(){
 
 
 <style>
-/* Sticky header для вкладки Задачи */
-#tab-tasks .cal-table thead,
-#tab-tasks .cal-table thead tr,
-#tab-tasks .cal-table thead th{
+/* Sticky header для вкладки Задачи.
+   Классы были .cal-table/.cal-wrap, а в разметке — .calendar-table/.calendar-wrap,
+   поэтому шапка с числами месяца никогда не прилипала. */
+#tab-tasks .calendar-table thead,
+#tab-tasks .calendar-table thead tr,
+#tab-tasks .calendar-table thead th{
   position:sticky;
   top:0;
   z-index:50;
@@ -1915,11 +2592,14 @@ function exportRankingCsv(){
 #tab-tasks{
   overflow:visible;
 }
-#tab-tasks .cal-wrap{
+#tab-tasks .calendar-wrap{
   max-height:calc(100vh - 200px);
   overflow:auto;
 }
-html.light #tab-tasks .cal-table thead th{
+/* Угловая ячейка липнет и влево, и вверх — ей нужен слой выше остальных,
+   иначе при горизонтальном скролле числа месяца наезжают на неё. */
+#tab-tasks .calendar-table thead th.th-empty{z-index:60}
+html.light #tab-tasks .calendar-table thead th{
   background:var(--bg);
   box-shadow:0 2px 4px rgba(0,0,0,.08);
 }
@@ -2082,18 +2762,6 @@ function getTurnoForMei(tgUsername,meiName,dateIso){
 
 
 <style>
-.mon-section{background:var(--bg2);border:1px solid var(--border);border-radius:10px;margin-bottom:8px;overflow:hidden;transition:all .2s}
-.mon-section.mon-clickable{cursor:pointer}
-.mon-section.mon-clickable:hover{border-color:var(--accent1)}
-.mon-header{display:flex;align-items:center;gap:10px;padding:12px 14px;user-select:none}
-.mon-icon{font-size:16px}
-.mon-title{font-weight:700;font-size:13px;letter-spacing:.5px}
-.mon-count{color:var(--muted);font-weight:600;font-size:12px}
-.mon-meta{flex:1;color:var(--muted);font-size:11px;opacity:.85}
-.mon-toggle{color:var(--muted);font-size:10px;transition:transform .2s}
-.mon-section.expanded .mon-toggle{transform:rotate(180deg)}
-.mon-body{padding:0 14px 14px;border-top:1px solid var(--border)}
-.mon-item{padding:8px 10px;margin-top:6px;border-radius:6px;background:var(--bg3);border-left:3px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px}
 .mon-item-name{font-weight:600}
 .mon-item-meta{font-size:11px;color:var(--muted)}
 .mon-item-time{font-family:'Space Mono',monospace;font-size:12px;color:var(--accent3);font-weight:700}
@@ -2104,304 +2772,11 @@ function getTurnoForMei(tgUsername,meiName,dateIso){
 .mon-expected{border-left-color:var(--accent4);background:rgba(245,166,35,.08)}
 .mon-completed{border-left-color:var(--accent1);background:rgba(43,170,255,.06)}
 .mon-empty{color:var(--muted);padding:8px;text-align:center;font-size:13px;opacity:.7}
-.mon-by-city{margin-top:8px;display:flex;gap:6px;flex-wrap:wrap}
-.mon-by-city-chip{background:var(--bg3);padding:3px 8px;border-radius:4px;font-size:11px;color:var(--accent1);font-family:'Space Mono',monospace}
 </style>
 
 
 
-<script>
-// === МОНИТОР СЛОТОВ ===
-window.monSelectedDate=new Date().toISOString().slice(0,10);
-window.monExpanded={Slots:false,OnShift:false,Expected:false,NoShow:false,Completed:false};
 
-function setMonDateToday(){
-  const today=new Date();
-  window.monSelectedDate=today.toISOString().slice(0,10);
-  document.getElementById('monDate').value=window.monSelectedDate;
-  renderMonitor();
-}
-
-function shiftMonDate(delta){
-  const d=new Date(window.monSelectedDate);
-  d.setDate(d.getDate()+delta);
-  window.monSelectedDate=d.toISOString().slice(0,10);
-  document.getElementById('monDate').value=window.monSelectedDate;
-  renderMonitor();
-}
-
-function toggleMonSection(name){
-  window.monExpanded[name]=!window.monExpanded[name];
-  const body=document.getElementById('mon'+name+'Body');
-  const section=document.getElementById('mon'+name);
-  if(window.monExpanded[name]){
-    body.style.display='block';
-    section.classList.add('expanded');
-  } else {
-    body.style.display='none';
-    section.classList.remove('expanded');
-  }
-}
-
-function _fmtBRT(iso){
-  if(!iso)return '—';
-  const d=new Date(iso);
-  const brt=new Date(d.getTime()-3*3600*1000);
-  return brt.toUTCString().slice(17,22);
-}
-
-function _cityCount(arr,keyFn){
-  const map={};
-  arr.forEach(x=>{
-    const c=keyFn(x)||'?';
-    map[c]=(map[c]||0)+1;
-  });
-  return map;
-}
-
-function _cityChips(arr,keyFn){
-  const m=_cityCount(arr,keyFn);
-  if(Object.keys(m).length===0)return '';
-  return '<div class="mon-by-city">'+Object.entries(m).sort((a,b)=>b[1]-a[1]).map(([c,n])=>
-    `<span class="mon-by-city-chip">${c}: ${n}</span>`
-  ).join('')+'</div>';
-}
-
-function _turnoBadge(turnoCode){
-  if(!turnoCode||!TURNO_LABELS[turnoCode])return '';
-  return `<span class="mon-turno-chip">${turnoCode}</span>`;
-}
-
-function _detectTurnoByHour(iso){
-  if(!iso)return null;
-  const d=new Date(iso);
-  const brt=new Date(d.getTime()-3*3600*1000);
-  const h=brt.getUTCHours();
-  if(h>=7&&h<15)return 'T1';
-  if(h>=15&&h<23)return 'T2';
-  return 'T0';
-}
-
-function renderMonitor(){
-  if(typeof liveShifts==='undefined')window.liveShifts=[];
-  if(typeof liveOffers==='undefined')window.liveOffers=[];
-  // Авто-переключение на вчера если на сегодня данных нет (один раз)
-  if(typeof _autoSwitchToYesterdayIfEmpty==='function'){
-    if(_autoSwitchToYesterdayIfEmpty()){
-      // дата сменилась — продолжаем рендер с новой датой
-    }
-  }
-  if(typeof liveTurnos==='undefined')window.liveTurnos=[];
-
-  const dateIso=window.monSelectedDate||new Date().toISOString().slice(0,10);
-  const dateLabel=new Date(dateIso+'T12:00:00').toLocaleDateString(lang==='ru'?'ru-RU':'pt-BR',{weekday:'long',day:'numeric',month:'long'});
-  const lblEl=document.getElementById('monDateLabel');
-  if(lblEl)lblEl.textContent=dateLabel;
-
-  const todayIso=new Date().toISOString().slice(0,10);
-  const isToday=dateIso===todayIso;
-  const isPast=dateIso<todayIso;
-
-  // ВСЕ слоты на дату (из slots — там полная инфо)
-  // typeof slotsRaw bypass: используем напрямую загруженные данные из Gist
-  // Берём слоты из window.allSlots если есть, иначе фильтруем offers
-  let daySlotsAll=[];
-  if(window.allSlots&&Array.isArray(window.allSlots)){
-    daySlotsAll=window.allSlots.filter(s=>s.data===dateIso);
-  }
-  const offersForDay=liveOffers.filter(o=>o.slot_date===dateIso);
-
-  // === Карточка слота (заказ) ===
-  function renderOfferCard(o,kind){
-    if(typeof _enrichOfferWithCreator==='function')o=_enrichOfferWithCreator(o);
-    const tg=o.tg_username?`<a href="https://t.me/${o.tg_username}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent1);text-decoration:none">@${o.tg_username}</a>`:'';
-    const typeIcon=o.slot_tipo==='CHARGER'?'🔋':(o.slot_tipo==='LOGISTICA'?'🚛':'📋');
-    const cidade=o.cidade||'?';
-    const desc=o.slot_descricao||'';
-    const turnoBadge=o.turno_code&&TURNO_LABELS[o.turno_code]?`<span class="mon-turno-chip">${o.turno_code}</span>`:'';
-    const cardId='card_'+(o.slot_id||Math.random().toString(36).slice(2));
-    // Подтянуть полный slot из slots.json
-    let slotFull=null;
-    if(window.allSlots){
-      slotFull=window.allSlots.find(s=>s.id===o.slot_id);
-    }
-    const vagas=slotFull?`${slotFull.filled_count||0}/${slotFull.vagas_total||1}`:'';
-    const created=slotFull?slotFull.created_at:null;
-    let acceptances=[];
-    if(slotFull&&slotFull.acceptances){
-      try{
-        acceptances=typeof slotFull.acceptances==='string'?JSON.parse(slotFull.acceptances):slotFull.acceptances;
-      }catch(e){acceptances=[];}
-    }
-
-    const headerHtml=`<div class="mon-card-head" onclick="toggleMonCard('${cardId}',event)">
-      <div style="flex:1;min-width:200px">
-        <div class="mon-item-name">${typeIcon} ${o.nome||'?'} <span class="mon-city-chip">${cidade}</span> ${turnoBadge}${vagas?' <span style="opacity:.7;font-size:11px">'+vagas+'</span>':''}</div>
-        <div class="mon-item-meta">${tg}${desc?' · '+desc.slice(0,60).replace(/\n/g,' ')+(desc.length>60?'…':''):''}</div>
-      </div>
-      <div class="mon-item-time">${_fmtBRT(o.accepted_at)}</div>
-      <span class="mon-card-toggle">▾</span>
-    </div>`;
-
-    // Подробности (раскрытие)
-    const bodyHtml=`<div class="mon-card-body" id="${cardId}_body" style="display:none">
-      <div class="mon-card-grid">
-        <div><b>${t('lbl_tip')}:</b> ${typeIcon} ${o.slot_tipo||'—'}</div>
-        <div><b>${t('lbl_cidade2')}:</b> ${cidade}</div>
-        <div><b>${t('lbl_data2')}:</b> ${o.slot_date}</div>
-        <div><b>${t('lbl_turno2')}:</b> ${o.turno_code||'—'}</div>
-        <div><b>${t('lbl_aceitou')}:</b> ${_fmtBRT(o.accepted_at)} BRT</div>
-        ${vagas?`<div><b>${t('lbl_vagas2')}:</b> ${vagas}</div>`:''}
-        ${created?`<div><b>${t('lbl_criado')}:</b> ${new Date(new Date(created).getTime()-3*3600*1000).toLocaleString(lang==='ru'?'ru-RU':'pt-BR')}</div>`:''}
-        ${(o.slot_created_by_name||o.slot_created_by_username)?`<div style="grid-column:1/-1"><b>${t('lbl_criou')}:</b> ${o.slot_created_by_name||'?'} ${o.slot_created_by_username?'<a href="https://t.me/'+o.slot_created_by_username+'" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent1);text-decoration:none">@'+o.slot_created_by_username+'</a>':''}</div>`:''}
-        <div style="grid-column:1/-1"><b>MEI:</b> ${o.nome||'?'} ${tg}</div>
-        ${desc?`<div style="grid-column:1/-1;background:var(--bg);padding:8px;border-radius:4px;font-size:11px;white-space:pre-wrap;color:var(--muted);margin-top:4px">${desc}</div>`:''}
-        ${acceptances.length>1?`<div style="grid-column:1/-1"><b>${t('lbl_aceitos')} (${acceptances.length}):</b> ${acceptances.map(a=>a.name||a.tg_username).join(', ')}</div>`:''}
-      </div>
-    </div>`;
-
-    return `<div class="mon-card mon-${kind}">${headerHtml}${bodyHtml}</div>`;
-  }
-
-  function renderShiftCard(s,kind){
-    // Подтягиваем создателя из allSlots
-    if(s.slot_id&&window.allSlots){
-      const slot=window.allSlots.find(x=>x.id===s.slot_id);
-      if(slot){
-        s.slot_created_by_name=slot.created_by_name;
-        s.slot_created_by_username=slot.created_by_username;
-      }
-    }
-    const tg=s.tg_username?`<a href="https://t.me/${s.tg_username}" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent1);text-decoration:none">@${s.tg_username}</a>`:'';
-    const cidade=s.cidade||'?';
-    const typeIcon=s.slot_tipo==='CHARGER'?'🔋':(s.slot_tipo==='LOGISTICA'?'🚛':'📋');
-    const turnoCode=_detectTurnoByHour(s.started_at);
-    const turnoBadge=turnoCode&&TURNO_LABELS[turnoCode]?`<span class="mon-turno-chip">${turnoCode}</span>`:'';
-    const cardId='shift_'+(s.event_id||Math.random().toString(36).slice(2));
-    const desc=s.slot_descricao||'';
-
-    let timeBlock='';
-    if(kind==='onshift'){
-      const h=(Date.now()-new Date(s.started_at).getTime())/3600000;
-      const hh=Math.floor(h),mm=Math.floor((h-hh)*60);
-      timeBlock=`<div class="mon-item-time" style="color:var(--accent3)">${hh}${t('dur_h')}${String(mm).padStart(2,'0')}${t('dur_m')}</div>`;
-    } else if(kind==='completed'){
-      const dur=s.started_at&&s.ended_at?((new Date(s.ended_at)-new Date(s.started_at))/3600000).toFixed(1):'?';
-      timeBlock=`<div class="mon-item-time">${dur}ч</div>`;
-    }
-
-    return `<div class="mon-card mon-${kind}">
-      <div class="mon-card-head" onclick="toggleMonCard('${cardId}',event)">
-        <div style="flex:1;min-width:200px">
-          <div class="mon-item-name">${typeIcon} ${s.nome||'?'} <span class="mon-city-chip">${cidade}</span> ${turnoBadge}</div>
-          <div class="mon-item-meta">${tg} · ${kind==='completed'?_fmtBRT(s.started_at)+'–'+_fmtBRT(s.ended_at):'с '+_fmtBRT(s.started_at)} BRT</div>
-        </div>
-        ${timeBlock}
-        <span class="mon-card-toggle">▾</span>
-      </div>
-      <div class="mon-card-body" id="${cardId}_body" style="display:none">
-        <div class="mon-card-grid">
-          <div><b>${t('lbl_tip')}:</b> ${typeIcon} ${s.slot_tipo||'—'}</div>
-          <div><b>${t('lbl_cidade2')}:</b> ${cidade}</div>
-          <div><b>${t('lbl_turno2')}:</b> ${turnoCode||'—'}</div>
-          <div><b>${lang==='ru'?'Начало:':'Início:'}</b> ${_fmtBRT(s.started_at)} BRT</div>
-          ${s.ended_at?`<div><b>${lang==='ru'?'Конец:':'Fim:'}</b> ${_fmtBRT(s.ended_at)} BRT</div>`:`<div style="color:var(--accent3)"><b>${lang==='ru'?'Статус:':'Status:'}</b> 🟢 на смене</div>`}
-          ${(s.slot_created_by_name||s.slot_created_by_username)?`<div style="grid-column:1/-1"><b>${lang==='ru'?'Слот создал:':'Slot criado por:'}</b> ${s.slot_created_by_name||'?'} ${s.slot_created_by_username?'<a href="https://t.me/'+s.slot_created_by_username+'" target="_blank" onclick="event.stopPropagation()" style="color:var(--accent1);text-decoration:none">@'+s.slot_created_by_username+'</a>':''}</div>`:''}
-          <div style="grid-column:1/-1"><b>MEI:</b> ${s.nome||'?'} ${tg}</div>
-          ${desc?`<div style="grid-column:1/-1;background:var(--bg);padding:8px;border-radius:4px;font-size:11px;white-space:pre-wrap;color:var(--muted);margin-top:4px">${desc}</div>`:''}
-        </div>
-      </div>
-    </div>`;
-  }
-
-  // === 1. Заказанные слоты ===
-  document.getElementById('monSlotsCount').textContent=`(${offersForDay.length})`;
-  document.getElementById('monSlotsMeta').innerHTML=_cityChips(offersForDay,o=>o.cidade);
-  document.getElementById('monSlotsBody').innerHTML=offersForDay.length===0?
-    `<div class="mon-empty">${t('mon_empty_slots')}</div>`:
-    offersForDay.sort((a,b)=>(a.cidade||'').localeCompare(b.cidade||'')||new Date(b.accepted_at)-new Date(a.accepted_at))
-      .map(o=>renderOfferCard(o,'slot')).join('');
-
-  // === 2. Сейчас на смене (только для today) ===
-  const nowUtc=new Date();
-  let onShift=[];
-  if(isToday){
-    onShift=liveShifts.filter(s=>{
-      if(!s.started_at||s.ended_at)return false;
-      const h=(nowUtc-new Date(s.started_at))/3600000;
-      return h<10;  // >10ч = забытая смена, не показываем
-    });
-  }
-  document.getElementById('monOnShiftCount').textContent=`(${onShift.length})`;
-  document.getElementById('monOnShiftMeta').innerHTML=isToday?_cityChips(onShift,s=>s.cidade):`<span style="opacity:.5">${t('mon_only_today')}</span>`;
-  document.getElementById('monOnShiftBody').innerHTML=!isToday?
-    `<div class="mon-empty">${t('mon_avail_today')}</div>`:
-    (onShift.length===0?`<div class="mon-empty">${t('mon_noone_shift')}</div>`:
-    onShift.sort((a,b)=>new Date(b.started_at)-new Date(a.started_at)).map(s=>renderShiftCard(s,'onshift')).join(''));
-
-  // === 3. Должны выйти ===
-  const startedTgIds=new Set();
-  liveShifts.forEach(s=>{
-    if(s.started_at){
-      const sBrt=new Date(new Date(s.started_at).getTime()-3*3600*1000);
-      if(sBrt.toISOString().slice(0,10)===dateIso)startedTgIds.add(s.tg_id);
-    }
-  });
-  const expected=offersForDay.filter(o=>!startedTgIds.has(o.tg_id));
-  document.getElementById('monExpectedCount').textContent=`(${expected.length})`;
-  document.getElementById('monExpectedMeta').innerHTML=_cityChips(expected,o=>o.cidade);
-  document.getElementById('monExpectedBody').innerHTML=expected.length===0?
-    `<div class="mon-empty">${t('mon_all_checked')}</div>`:
-    expected.sort((a,b)=>new Date(a.accepted_at)-new Date(b.accepted_at)).map(o=>renderOfferCard(o,'expected')).join('');
-
-  // === 4. Не вышли (только прошлое) ===
-  let noShow=[];
-  if(isPast){
-    noShow=offersForDay.filter(o=>!startedTgIds.has(o.tg_id));
-  }
-  document.getElementById('monNoShowCount').textContent=`(${noShow.length})`;
-  document.getElementById('monNoShowMeta').innerHTML=isPast?_cityChips(noShow,o=>o.cidade):`<span style="opacity:.5">${t('mon_only_past')}</span>`;
-  document.getElementById('monNoShowBody').innerHTML=!isPast?
-    `<div class="mon-empty">${t('mon_for_past')}</div>`:
-    (noShow.length===0?`<div class="mon-empty">${t('mon_all_out')}</div>`:
-    noShow.map(o=>renderOfferCard(o,'noshow')).join(''));
-
-  // === 5. Завершили смену ===
-  const completed=liveShifts.filter(s=>{
-    if(!s.ended_at)return false;
-    const endBrt=new Date(new Date(s.ended_at).getTime()-3*3600*1000);
-    return endBrt.toISOString().slice(0,10)===dateIso;
-  });
-  document.getElementById('monCompletedCount').textContent=`(${completed.length})`;
-  document.getElementById('monCompletedMeta').innerHTML=_cityChips(completed,s=>s.cidade);
-  document.getElementById('monCompletedBody').innerHTML=completed.length===0?
-    `<div class="mon-empty">${t('mon_noone_yet')}</div>`:
-    completed.sort((a,b)=>new Date(b.ended_at)-new Date(a.ended_at)).map(s=>renderShiftCard(s,'completed')).join('');
-
-  // last update
-  if(typeof updatedAtGlobal!=='undefined'&&updatedAtGlobal){
-    const min=Math.round((Date.now()-new Date(updatedAtGlobal).getTime())/60000);
-    const upd=document.getElementById('monLastUpdate');
-    if(upd)upd.textContent=`${t('mon_upd_ago')} ${min}${t('mon_min_ago')}`;
-  }
-}
-
-// Toggle карточки слота
-function toggleMonCard(cardId,ev){
-  // Не давать всплыть наверх — иначе закроется родительская секция
-  if(ev){ev.stopPropagation();}
-  else if(window.event){window.event.stopPropagation();}
-  const body=document.getElementById(cardId+'_body');
-  if(!body)return;
-  const isOpen=body.style.display!=='none';
-  body.style.display=isOpen?'none':'block';
-  const toggle=body.previousElementSibling.querySelector('.mon-card-toggle');
-  if(toggle)toggle.style.transform=isOpen?'rotate(0deg)':'rotate(180deg)';
-}
-
-window.renderLive=renderMonitor;
-
-</script>
 
 
 
@@ -2486,58 +2861,466 @@ setTimeout(function(){
 </script>
 
 
-<script>
-// Auto-switch на вчера если на сегодня в мониторе ничего нет
-window._monAutoYesterdayApplied=window._monAutoYesterdayApplied||false;
 
-function _autoSwitchToYesterdayIfEmpty(){
-  if(window._monAutoYesterdayApplied)return false;
-  if(typeof liveOffers==='undefined'||typeof liveShifts==='undefined')return false;
-  if(!Array.isArray(liveOffers)||!Array.isArray(liveShifts))return false;
-  const todayIso=new Date().toISOString().slice(0,10);
-  if(window.monSelectedDate!==todayIso)return false;
-  const offersToday=liveOffers.filter(o=>o.slot_date===todayIso).length;
-  let shiftsToday=0;
-  liveShifts.forEach(s=>{
-    if(s.started_at){
-      const sBrt=new Date(new Date(s.started_at).getTime()-3*3600*1000);
-      if(sBrt.toISOString().slice(0,10)===todayIso)shiftsToday++;
+
+
+
+
+
+<!-- ═══════════════════════════════════════════════════════════════════
+     МОБИЛЬНЫЙ СЛОЙ (≤768px). Всё изолировано в @media и в проверках
+     isMobile() — десктопная верстка и логика не затрагиваются.
+     ═══════════════════════════════════════════════════════════════════ -->
+<style>
+@media(max-width:768px){
+  /* ── Каркас ────────────────────────────────────────────────── */
+  body{padding-bottom:calc(62px + env(safe-area-inset-bottom))}
+  header{padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top));gap:6px;flex-wrap:nowrap}
+  .logo-icon{width:28px;height:28px;font-size:14px}
+  .logo-text{font-size:13px;white-space:nowrap}
+  .logo-sub{display:none}
+  .header-right{gap:5px;flex-wrap:nowrap}
+  /* Язык, тема и выход переезжают в шторку «Ещё» — в шапке остаются месяц и Sync */
+  #langBtn,#themeBtn,.logout-btn{display:none}
+  .month-nav{padding:4px 6px;gap:2px}
+  .month-nav span{min-width:82px;font-size:10px}
+  .month-nav button{padding:6px 8px;font-size:15px}
+  .icon-btn{min-height:38px;padding:7px 11px}
+  .tabs-bar{display:none}           /* заменена нижней навигацией */
+  .status-bar{padding:6px 12px}
+
+  /* Горизонтальные отступы 24px → 12px по всем секциям */
+  .summary,.legend,.city-filter,.calendar-wrap,.ov-hero,.ov-kpis,.ov-grid,
+  .an-grid,.tm-toolbar,.tm-wrap,.af-detectors,.slots-wrap,#tab-schedule>div[style*="padding:0 24px"]{
+    padding-left:12px;padding-right:12px
+  }
+  .an-panel{padding:12px}
+
+  /* ── Тач-таргеты и формы ───────────────────────────────────── */
+  .city-chip{padding:7px 12px;font-size:11px}
+  .tab{padding:10px 12px}
+  /* 16px — иначе iOS Safari зумит страницу при фокусе в поле */
+  .slot-input,.slot-select,.tm-input,.tm-select,.auth-input,input[type="date"],input[type="number"],input[type="text"],select{font-size:16px!important}
+  .form-grid{grid-template-columns:1fr}
+  .slot-btn,.add-slot-btn{min-height:44px}
+  .slots-grid{grid-template-columns:1fr}
+  .auth-box{width:calc(100% - 32px);padding:34px 22px}
+
+  /* ── Сводки и KPI ──────────────────────────────────────────── */
+  .summary{grid-template-columns:repeat(2,1fr);gap:8px;padding-top:10px}
+  .card{padding:11px 12px}
+  .card-val{font-size:23px}
+  .ov-kpis{grid-template-columns:repeat(2,1fr);gap:8px}
+  .ov-hero{padding:12px 12px 6px}
+  .ov-hero-title{font-size:17px}
+  .ov-links{width:100%;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px;-webkit-overflow-scrolling:touch}
+  .ov-links::-webkit-scrollbar{display:none}
+  .ov-link{white-space:nowrap;min-height:40px}
+  .an-canvas-wrap{height:200px}
+
+  /* ── Календарь «Задачи»: узкая колонка имени, читаемые ячейки ── */
+  /* table-layout:fixed игнорируется при width:auto — колонка имён разрасталась
+     до ~340px и вытесняла дни за экран. Явная ширина включает фиксированный layout. */
+  #tab-tasks .calendar-table{width:1px}
+  .col-name{width:120px;min-width:120px;max-width:120px}
+  .worker-name-cell{font-size:10px;padding:3px 6px}
+  .slot-cell,.task-cell{width:32px;height:32px;font-size:10px}
+  .th-day{min-width:32px;width:32px}
+  .calendar-wrap{-webkit-overflow-scrolling:touch}
+  /* Таблица прокручивается в собственном окне: только так шапка с числами
+     остаётся приклеенной (sticky работает относительно скроллящегося предка). */
+  #tab-tasks .calendar-wrap{max-height:70vh}
+  /* На тач-экране hover-зум ячейки только мешает попаданию */
+  .slot-cell:hover,.task-cell:hover{transform:none}
+  .tooltip{display:none!important}   /* заменён bottom-sheet'ом */
+
+  /* ── Executores: таблица → карточки ────────────────────────── */
+  .tm-wrap{overflow-x:visible}
+  .tm-table{min-width:0;font-size:13px}
+  .tm-table thead{display:none}
+  .tm-table,.tm-table tbody,.tm-table tr,.tm-table td{display:block;width:100%}
+  .tm-table tr{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    margin-bottom:8px;padding:10px 12px;box-shadow:var(--shadow)}
+  .tm-table tr:hover td{background:transparent}
+  .tm-table td{border:none;padding:3px 0;white-space:normal;display:flex;
+    justify-content:space-between;align-items:center;gap:12px}
+  .tm-table td::before{content:attr(data-th);color:var(--text-dim);font-size:9px;
+    text-transform:uppercase;letter-spacing:.4px;font-family:'Space Mono',monospace;flex-shrink:0}
+  .tm-table td.tm-name{display:block;font-size:15px;padding:0 0 7px;margin-bottom:5px;
+    border-bottom:1px solid var(--border)}
+  .tm-table td.tm-name::before{display:none}
+  .tm-toolbar{gap:6px}
+  .tm-input{min-width:100%;order:-1}
+
+  /* ── Frota: панели без боковых полей, таблицы прокручиваются ── */
+  #tab-fleet .an-panel{margin-left:12px!important;margin-right:12px!important;padding:12px}
+  .fl-table{font-size:11px;min-width:520px}
+  .fl-table th,.fl-table td{padding:6px 7px}
+  .fl-table th:first-child,.fl-table td:first-child{position:sticky;left:0;background:var(--bg);z-index:2}
+  .fl-table tr:hover td:first-child{background:var(--surface2)}
+  .fl-chip{font-size:10px;padding:5px 8px}
+
+  /* ── Antifraude: компактная таблица, липкая первая колонка ─── */
+  .af-table{min-width:0;font-size:11px;width:100%}
+  .af-table th,.af-table td{padding:6px 5px}
+  .af-table th:first-child,.af-table td:first-child{position:sticky;left:0;background:var(--bg);z-index:2}
+  .af-table tr:hover td:first-child{background:var(--surface2)}
+  /* Прячем детализацию d1/d2/d3 и полосу-индикатор — счёт, ходы и bad% остаются */
+  #afCities .af-table th:nth-child(n+4):nth-child(-n+6),
+  #afCities .af-table td:nth-child(n+4):nth-child(-n+6),
+  #afCities .af-table th:last-child,#afCities .af-table td:last-child{display:none}
+  #afPeopleBox .af-table thead th:last-child,
+  #afPeopleBox .af-table tr:not(.af-inc-row) td:last-child{display:none}
+  .af-inc-tbl{font-size:10px}
+  .af-det-grid{grid-template-columns:1fr}
+
+  /* ── Escalas: недельная таблица заменяется списком по дням ─── */
+  #schGrid{min-width:0!important}
+  .sch-day-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;
+    margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow)}
+  .sch-day-head{display:flex;align-items:center;gap:8px;padding:9px 12px;background:var(--surface2);
+    font-weight:800;font-size:13px}
+  .sch-day-head.is-today{border-left:3px solid var(--accent);color:var(--accent)}
+  .sch-day-head .sch-day-cnt{margin-left:auto;font-family:'Space Mono',monospace;font-size:10px;
+    color:var(--text-dim);font-weight:400}
+  .sch-day-city{padding:7px 12px 3px;font-size:10px;font-weight:800;color:var(--accent);
+    text-transform:uppercase;font-family:'Space Mono',monospace}
+  .sch-row{display:flex;align-items:center;gap:9px;margin:0 12px 6px;padding:8px 10px;
+    border-radius:8px;font-size:12px;border-left:3px solid var(--border)}
+  .sch-row.sch-st-done{background:var(--slot-full);border-left-color:var(--slot-full-border)}
+  .sch-row.sch-st-onshift{background:var(--slot-full);border-left-color:var(--slot-full-border);font-weight:700}
+  .sch-row.sch-st-wait{background:var(--slot-partial);border-left-color:var(--slot-partial-border)}
+  .sch-row.sch-st-noshow{background:var(--slot-empty);border-left-color:var(--slot-empty-border)}
+  .sch-row.sch-st-unclosed{background:var(--slot-partial);border-left-color:var(--slot-full-border)}
+  .sch-row.sch-st-nocheck{background:var(--slot-empty);border-left-color:var(--accent4)}
+  .sch-row.sch-st-free{background:var(--slot-none);border-left-color:var(--border)}
+  .sch-row.sch-st-cancel{background:transparent;border-left-color:var(--border);opacity:.55}
+  .sch-row-main{flex:1;min-width:0}
+  .sch-row-name{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sch-row-meta{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);margin-top:2px}
+  .sch-row-rate{font-family:'Space Mono',monospace;font-size:11px;font-weight:700;
+    color:var(--accent);white-space:nowrap}
+  .sch-row-emoji{font-size:15px;flex-shrink:0}
+  /* Пояснения про окна смен и роли занимали пол-экрана — они уже видны
+     в самих карточках смен, оставляем только цветовые метки статусов. */
+  #tab-schedule .legend .legend-item:nth-child(n+5){display:none}
+  #tab-schedule .icon-btn{padding:8px 10px;font-size:10px}
+  #tab-schedule>div[style*="padding:0 24px"]{gap:6px;flex-wrap:nowrap}
+
+  /* ── Нижняя навигация ──────────────────────────────────────── */
+  .mnav{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:400;
+    background:var(--surface);border-top:1px solid var(--border);
+    padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -3px 16px rgba(0,0,0,.35)}
+  .mnav-btn{flex:1;background:none;border:none;color:var(--text-dim);cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+    padding:8px 2px 7px;font-family:'Syne',sans-serif;font-size:9.5px;font-weight:700;
+    min-height:56px;transition:color .15s;-webkit-tap-highlight-color:transparent}
+  .mnav-btn span.mnav-ico{font-size:19px;line-height:1}
+  .mnav-btn.active{color:var(--accent)}
+  .mnav-btn.active .mnav-ico{filter:drop-shadow(0 0 7px var(--accent))}
+}
+@media(min-width:769px){.mnav{display:none}}
+
+/* ── Bottom-sheet (шторка). Общий для «Ещё» и для подсказок ──── */
+.msheet-back{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:900;opacity:0;
+  transition:opacity .18s;pointer-events:none}
+.msheet-back.open{opacity:1;pointer-events:auto}
+.msheet{position:fixed;left:0;right:0;bottom:0;z-index:901;background:var(--surface);
+  border-top:1px solid var(--border);border-radius:16px 16px 0 0;
+  padding:8px 16px calc(18px + env(safe-area-inset-bottom));
+  transform:translateY(102%);transition:transform .22s cubic-bezier(.2,.8,.3,1);
+  max-height:82vh;overflow-y:auto;box-shadow:0 -6px 26px rgba(0,0,0,.45)}
+.msheet.open{transform:translateY(0)}
+.msheet-grip{width:38px;height:4px;border-radius:2px;background:var(--border);margin:2px auto 12px}
+.msheet-title{font-size:11px;font-family:'Space Mono',monospace;color:var(--text-dim);
+  text-transform:uppercase;letter-spacing:.6px;margin-bottom:10px}
+.msheet-item{display:flex;align-items:center;gap:11px;padding:13px 10px;border-radius:9px;
+  font-size:14px;font-weight:700;cursor:pointer;color:var(--text);
+  -webkit-tap-highlight-color:transparent}
+.msheet-item:active{background:var(--surface2)}
+.msheet-item.active{color:var(--accent);background:var(--surface2)}
+.msheet-item .msheet-ico{font-size:17px;width:24px;text-align:center;flex-shrink:0}
+.msheet-sep{height:1px;background:var(--border);margin:9px 0}
+.msheet-close{width:100%;margin-top:12px;padding:13px;border:1px solid var(--border);
+  background:var(--surface2);color:var(--text);border-radius:9px;font-size:13px;font-weight:700;
+  font-family:'Syne',sans-serif;cursor:pointer}
+.msheet-body-txt{font-size:13.5px;line-height:1.65}
+</style>
+
+<script>
+/* Мобильный слой: нижняя навигация, шторка, тап-подсказки,
+   список смен по дням и автоскролл календаря к сегодняшнему дню. */
+(function(){
+  const MQ=window.matchMedia('(max-width:768px)');
+  const isMobile=()=>MQ.matches;
+  const T=k=>{try{return t(k);}catch(e){return k;}};
+
+  // ── Bottom-sheet ────────────────────────────────────────────
+  let back,sheetEl,sheetTitle,sheetBody;
+  function buildSheet(){
+    if(sheetEl)return;
+    back=document.createElement('div');back.className='msheet-back';
+    back.addEventListener('click',closeSheet);
+    sheetEl=document.createElement('div');sheetEl.className='msheet';
+    sheetEl.innerHTML='<div class="msheet-grip"></div><div class="msheet-title"></div><div class="msheet-content"></div>';
+    document.body.appendChild(back);document.body.appendChild(sheetEl);
+    sheetTitle=sheetEl.querySelector('.msheet-title');
+    sheetBody=sheetEl.querySelector('.msheet-content');
+  }
+  function openSheet(title,html,withClose){
+    buildSheet();
+    sheetTitle.textContent=title||'';
+    sheetBody.innerHTML=html+(withClose===false?'':
+      `<button class="msheet-close">${T('m_close')}</button>`);
+    const btn=sheetBody.querySelector('.msheet-close');
+    if(btn)btn.addEventListener('click',closeSheet);
+    requestAnimationFrame(()=>{back.classList.add('open');sheetEl.classList.add('open');});
+  }
+  function closeSheet(){
+    if(!sheetEl)return;
+    back.classList.remove('open');sheetEl.classList.remove('open');
+  }
+  window.mCloseSheet=closeSheet;
+  window.mOpenSheet=openSheet;
+
+  // ── Нижняя навигация ────────────────────────────────────────
+  const NAV=[
+    {tab:'overview',ico:'📊',key:'m_nav_geral'},
+    {tab:'schedule',ico:'📅',key:'m_nav_escalas'},
+    {tab:'tasks',   ico:'✅',key:'m_nav_tarefas'},
+    {tab:'fleet',   ico:'🛴',key:'m_nav_frota'}
+  ];
+  const MORE=[
+    {tab:'slots',    ico:'📝',key:'nav_slots'},
+    {tab:'analytics',ico:'📈',key:'nav_analytics'},
+    {tab:'team',     ico:'👥',key:'nav_team'},
+    {tab:'antifraud',ico:'🛡',key:'nav_antifraud'}
+  ];
+  let nav;
+  function buildNav(){
+    if(nav)return;
+    nav=document.createElement('nav');nav.className='mnav';
+    NAV.forEach(n=>{
+      const b=document.createElement('button');
+      b.className='mnav-btn';b.dataset.mtab=n.tab;
+      b.innerHTML=`<span class="mnav-ico">${n.ico}</span><span class="mnav-lbl"></span>`;
+      b.addEventListener('click',()=>{switchTab(n.tab);});
+      nav.appendChild(b);
+    });
+    const more=document.createElement('button');
+    more.className='mnav-btn';more.dataset.mmore='1';
+    more.innerHTML='<span class="mnav-ico">☰</span><span class="mnav-lbl"></span>';
+    more.addEventListener('click',openMore);
+    nav.appendChild(more);
+    document.body.appendChild(nav);
+    navLabels();
+  }
+  function navLabels(){
+    if(!nav)return;
+    NAV.forEach(n=>{
+      const b=nav.querySelector(`[data-mtab="${n.tab}"] .mnav-lbl`);
+      if(b)b.textContent=T(n.key);
+    });
+    const m=nav.querySelector('[data-mmore] .mnav-lbl');
+    if(m)m.textContent=T('m_more');
+  }
+  function navSync(tab){
+    if(!nav)return;
+    tab=tab||(document.querySelector('.tab.active')||{dataset:{}}).dataset.tab;
+    nav.querySelectorAll('.mnav-btn').forEach(b=>b.classList.remove('active'));
+    const b=nav.querySelector(`[data-mtab="${tab}"]`);
+    if(b)b.classList.add('active');
+    else{const m=nav.querySelector('[data-mmore]');if(m&&tab)m.classList.add('active');}
+  }
+
+  function openMore(){
+    const cur=(document.querySelector('.tab.active')||{dataset:{}}).dataset.tab;
+    let html=`<div class="msheet-title" style="margin-top:0">${T('m_tabs')}</div>`;
+    MORE.forEach(n=>{
+      html+=`<div class="msheet-item ${cur===n.tab?'active':''}" data-go="${n.tab}">
+        <span class="msheet-ico">${n.ico}</span>${T(n.key)}</div>`;
+    });
+    const dark=!document.documentElement.classList.contains('light');
+    html+=`<div class="msheet-sep"></div><div class="msheet-title">${T('m_actions')}</div>`+
+      `<div class="msheet-item" data-act="sync"><span class="msheet-ico">⟳</span>${T('m_sync')}</div>`+
+      `<div class="msheet-item" data-act="theme"><span class="msheet-ico">${dark?'☀️':'🌙'}</span>${dark?T('m_theme_light'):T('m_theme_dark')}</div>`+
+      `<div class="msheet-item" data-act="lang"><span class="msheet-ico">🌐</span>${T('m_lang_switch')}</div>`+
+      `<div class="msheet-item" data-act="logout" style="color:var(--accent2)"><span class="msheet-ico">✕</span>${T('m_logout')}</div>`;
+    openSheet('',html);
+    sheetBody.querySelectorAll('[data-go]').forEach(el=>{
+      el.addEventListener('click',()=>{switchTab(el.dataset.go);closeSheet();});
+    });
+    sheetBody.querySelectorAll('[data-act]').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const a=el.dataset.act;
+        try{
+          if(a==='sync')syncData();
+          else if(a==='theme')toggleTheme();
+          else if(a==='lang'){toggleLang();navLabels();}
+          else if(a==='logout'){logout();return;}
+        }catch(e){console.warn('mobile action failed',a,e);}
+        closeSheet();
+      });
+    });
+  }
+
+  // Подсветка активной вкладки в нижней панели
+  const origSwitchTab=window.switchTab;
+  window.switchTab=function(tab){
+    origSwitchTab.apply(this,arguments);
+    navSync(tab);
+    closeSheet();
+    if(tab==='tasks')setTimeout(scrollCalToToday,60);
+  };
+
+  // ── Тап вместо hover: подсказки ячеек и чипов ───────────────
+  document.addEventListener('click',function(e){
+    if(!isMobile()||!e.target.closest)return;
+    if(e.target.closest('.msheet'))return;      // клики внутри самой шторки
+    const cell=e.target.closest('.task-cell');
+    if(cell&&typeof showTaskTT==='function'){
+      try{
+        showTaskTT(e,cell);
+        const tt=document.getElementById('taskTooltip');
+        if(tt){
+          const html=tt.innerHTML;
+          tt.style.display='none';
+          openSheet(T('m_details'),`<div class="msheet-body-txt">${html}</div>`);
+        }
+      }catch(err){console.warn('mobile tooltip failed',err);}
+      return;
     }
-  });
-  if(offersToday===0&&shiftsToday===0){
-    const y=new Date();y.setDate(y.getDate()-1);
-    const ydayIso=y.toISOString().slice(0,10);
-    window.monSelectedDate=ydayIso;
-    window._monAutoYesterdayApplied=true;
-    const inp=document.getElementById('monDate');
-    if(inp)inp.value=ydayIso;
-    console.log('[monitor] auto-switched to yesterday',ydayIso,'(no data for today)');
-    return true;
-  }
-  return false;
-}
+    const tip=e.target.closest('[data-tip]');
+    if(tip){
+      openSheet(T('m_details'),`<div class="msheet-body-txt">${tip.getAttribute('data-tip')}</div>`);
+    }
+  },false);
 
-// Если пользователь сам поменял дату — больше не авто-переключаемся
-document.addEventListener('change',function(e){
-  if(e.target&&e.target.id==='monDate'){
-    window._monAutoYesterdayApplied=true;
-  }
-},true);
-</script>
+  // ── Escalas: список по дням вместо недельной таблицы ────────
+  function schMobileRender(){
+    const grid=document.getElementById('schGrid');
+    if(!grid||typeof schBuildWeek!=='function')return;
+    if(typeof schWeekStart==='undefined'||!schWeekStart)return;
+    const days=[];
+    for(let i=0;i<7;i++){const d=new Date(schWeekStart);d.setDate(d.getDate()+i);days.push(schIso(d));}
+    const week=schBuildWeek(days);
+    if(!week.length)return;   // пустую неделю оригинальный рендер уже показал
 
-
-<script>
-// Подтягиваем создателя слота из window.allSlots по slot_id если в offer нет
-function _enrichOfferWithCreator(o){
-  if(o.slot_created_by_name||o.slot_created_by_username)return o;
-  if(!window.allSlots||!Array.isArray(window.allSlots))return o;
-  const slot=window.allSlots.find(s=>s.id===o.slot_id);
-  if(slot){
-    if(slot.created_by_name)o.slot_created_by_name=slot.created_by_name;
-    if(slot.created_by_username)o.slot_created_by_username=slot.created_by_username;
+    const today=schIso(new Date());
+    const ICO=(typeof SCH_STATE_ICON!=='undefined')?SCH_STATE_ICON:{};
+    let html='';
+    days.forEach((iso,di)=>{
+      const dayRecs=week.filter(r=>r.slot.data===iso);
+      const people=[].concat.apply([],dayRecs.filter(r=>!r.cancelled).map(r=>r.people));
+      const out=people.filter(p=>p.state==='done'||p.state==='onshift').length;
+      html+=`<div class="sch-day-card"><div class="sch-day-head${iso===today?' is-today':''}">`+
+        `<span>${schDow()[di]} ${iso.slice(8,10)}.${iso.slice(5,7)}</span>`+
+        `<span class="sch-day-cnt">${out}/${people.length} ${T('sch_out_short')}</span></div>`;
+      if(!dayRecs.length){
+        html+=`<div style="padding:7px 12px 9px;font-size:11px;opacity:.5;font-family:'Space Mono',monospace">${T('m_sch_no_day')}</div>`;
+      }else{
+        const byCity={};
+        dayRecs.forEach(r=>{(byCity[r.slot.cidade]=byCity[r.slot.cidade]||[]).push(r);});
+        Object.keys(byCity).sort().forEach(city=>{
+          html+=`<div class="sch-day-city">${CITY_NAMES[city]||city}</div>`;
+          byCity[city].forEach(r=>{
+            r.people.forEach(p=>{
+              if(schOnlyIssues&&p.state!=='noshow'&&p.state!=='unclosed'&&p.state!=='nocheck')return;
+              const acts=p.acts||{};
+              const actStr=acts.pending?'⏳':(acts.n===null?'':'⚡'+acts.n);
+              const time=p.started_at?(schFmtBRT(p.started_at)+(p.ended_at?'–'+schFmtBRT(p.ended_at):'…')):'—';
+              html+=`<div class="sch-row sch-st-${p.state}" onclick="schOpenSlot(${r.slot.id})">`+
+                `<span class="sch-row-emoji">${schTipoIcon(r.slot.tipo)}${ICO[p.state]||''}</span>`+
+                `<span class="sch-row-main"><span class="sch-row-name">${p.nome||'?'}</span>`+
+                `<span class="sch-row-meta">${T('sch_st_'+p.state)} · ${time}</span></span>`+
+                (actStr?`<span class="sch-row-rate">${actStr}</span>`:'')+
+              `</div>`;
+            });
+            if(r.free>0&&!r.cancelled&&!schOnlyIssues){
+              html+=`<div class="sch-row sch-st-free" onclick="schOpenSlot(${r.slot.id})">`+
+                `<span class="sch-row-emoji">${schTipoIcon(r.slot.tipo)}⬜</span>`+
+                `<span class="sch-row-main"><span class="sch-row-name">${T('sch_free_chip')}${r.free>1?' ×'+r.free:''}</span>`+
+                `<span class="sch-row-meta">${T('sch_st_free')}</span></span></div>`;
+            }
+            if(r.cancelled&&!r.people.length&&!schOnlyIssues){
+              html+=`<div class="sch-row sch-st-cancel" onclick="schOpenSlot(${r.slot.id})">`+
+                `<span class="sch-row-emoji">${schTipoIcon(r.slot.tipo)}🚫</span>`+
+                `<span class="sch-row-main"><span class="sch-row-name">${T('sch_cancel_chip')}</span></span></div>`;
+            }
+          });
+        });
+      }
+      html+='</div>';
+    });
+    grid.innerHTML=html;
   }
-  return o;
-}
+  if(typeof window.renderSchedule==='function'){
+    const origRenderSchedule=window.renderSchedule;
+    window.renderSchedule=function(){
+      origRenderSchedule.apply(this,arguments);
+      if(isMobile())schMobileRender();
+    };
+  }
+
+  // ── Календарь «Задачи»: подвести к сегодняшнему дню ─────────
+  // Раньше свежие дни оставались за правым краем и их приходилось искать скроллом.
+  function scrollCalToToday(){
+    const wrap=document.querySelector('#tab-tasks .calendar-wrap');
+    if(!wrap)return;
+    const th=wrap.querySelector('.th-day.today');
+    if(!th)return;
+    const nameW=(wrap.querySelector('.col-name')||{offsetWidth:120}).offsetWidth;
+    const target=th.offsetLeft-wrap.clientWidth+th.offsetWidth+16;
+    wrap.scrollLeft=Math.max(0,Math.min(target,wrap.scrollWidth));
+    if(wrap.scrollLeft>0&&th.offsetLeft-wrap.scrollLeft<nameW){
+      wrap.scrollLeft=Math.max(0,th.offsetLeft-nameW-8);
+    }
+  }
+  window.mScrollCalToToday=scrollCalToToday;
+  if(typeof window.renderTasks==='function'){
+    const origRenderTasks=window.renderTasks;
+    let firstTasksRender=true;
+    window.renderTasks=function(){
+      origRenderTasks.apply(this,arguments);
+      if(firstTasksRender){firstTasksRender=false;setTimeout(scrollCalToToday,80);}
+    };
+  }
+
+  // ── Инициализация ───────────────────────────────────────────
+  function navVisible(show){
+    if(nav)nav.style.display=show?'':'none';
+  }
+  function authGate(){
+    const ov=document.getElementById('authOverlay');
+    const authed=!ov||ov.style.display==='none';
+    navVisible(authed);
+    return authed;
+  }
+  function init(){
+    buildNav();
+    authGate();
+    navSync();
+    const ov=document.getElementById('authOverlay');
+    if(ov&&window.MutationObserver){
+      new MutationObserver(authGate).observe(ov,{attributes:true,attributeFilter:['style']});
+    }
+    // Смена языка должна обновлять подписи нижней панели
+    if(typeof window.applyLang==='function'){
+      const origApplyLang=window.applyLang;
+      window.applyLang=function(){origApplyLang.apply(this,arguments);navLabels();};
+    }
+    // Поворот экрана / переход через границу 768px — перерисовать адаптивные части
+    MQ.addEventListener?MQ.addEventListener('change',onBreakpoint):MQ.addListener(onBreakpoint);
+  }
+  function onBreakpoint(){
+    navSync();
+    try{if(typeof renderSchedule==='function')renderSchedule();}catch(e){}
+    try{if(typeof renderTeam==='function'&&document.getElementById('tab-team').classList.contains('active'))renderTeam();}catch(e){}
+    setTimeout(scrollCalToToday,80);
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);
+  else init();
+})();
 </script>
 
 </body>
