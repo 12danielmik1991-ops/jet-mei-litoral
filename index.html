@@ -89,6 +89,7 @@
   .sch-chip.sch-st-free{background:var(--slot-none);border-color:var(--border);color:var(--text-dim)}
   .sch-chip.sch-st-cancel{background:transparent;border-color:var(--border);color:var(--text-dim);opacity:.55;text-decoration:line-through}
   .sch-lg{margin-right:4px}
+  .sch-table tr.sch-row-empty .sch-city-col{opacity:.5}
   .icon-btn.is-on{background:var(--accent2);color:#fff;border-color:var(--accent2)}
   .sch-detail{background:var(--surface);border:1px solid var(--accent);border-radius:var(--radius);padding:12px 14px;margin-top:14px}
   .sch-detail.is-sheet{border:none;padding:0;margin:0;background:transparent}
@@ -605,7 +606,7 @@ const I18N={
     ov_emturno:'на смене',ov_ok:'ок',ov_acoes:'действий',ov_empty:'Операций сегодня пока нет.',ov_livres:'свободно',ov_total:'всего',ov_last7:'за 7 дней',
     an_total:'Действий за месяц',an_active:'Активных MEI',an_avg:'Ср. на человека',an_low:'Отстающих',an_permonth:'действий/мес',an_withact:'с действиями',an_belownorm:'ниже нормы',
     an_chart_days:'Действия по дням',an_chart_type:'🔌 АКБ vs 🛴 Самокаты',an_chart_city:'По городам',an_chart_dn:'День vs Ночь',an_ranking:'🏆 Рейтинг эффективности',an_threshold:'порог отставания:',an_nodata:'Нет данных за этот месяц.',an_col_mei:'MEI',an_col_city:'Город',an_col_type:'Тип',an_col_actions:'Действий',an_col_progress:'Прогресс',an_day:'☀️ День',an_night:'🌙 Ночь',an_akb:'🔌 АКБ',an_scooter:'🛴 Самокаты',
-    sch_total:'Слотов создано',sch_taken:'Принято',sch_open:'Свободных мест',sch_out:'Вышли',sch_noshow:'Не вышли',sch_acts:'Действий за неделю',sch_noshow_sub:'приняли слот и не вышли',sch_now:'на смене сейчас',sch_cancelled:'отменено',sch_cd_upto:'ЦД до',sch_cd_pending:'данные ЦД ещё не пришли',sch_acts_day:'Действий за день',sch_out_short:'вышли',sch_thisweek:'сегодня',sch_only_issues:'⚠ только проблемы',sch_cancel_chip:'отменён',sch_noone:'Слот никто не взял',sch_detail_title:'Слот',sch_th_accepted:'Принял',sch_th_start:'Начало',sch_th_end:'Конец',sch_st_done:'вышел и закрыл смену',sch_st_onshift:'на смене сейчас',sch_st_wait:'принял, ещё не вышел',sch_st_noshow:'не вышел',sch_st_unclosed:'смену не закрыл',sch_st_nocheck:'работал без отметки в боте',sch_st_cancel:'слот отменён',sch_st_free:'свободное место',sch_declined:'Отказов',sch_confirmed_of:'из них подтвердили:',sch_wait_worker:'ждут исполнителя',sch_returned:'вернулись в пул',sch_week:'неделя',sch_prevweek:'◀ пред. неделя',sch_nextweek:'след. неделя ▶',sch_empty:'На эту неделю слотов нет. Создай их в боте (/slot) или планом /escala.',sch_accepted:'принято',
+    sch_total:'Слотов создано',sch_taken:'Принято',sch_open:'Свободных мест',sch_out:'Вышли',sch_noshow:'Не вышли',sch_acts:'Действий за неделю',sch_noshow_sub:'приняли слот и не вышли',sch_now:'на смене сейчас',sch_cancelled:'отменено',sch_cd_upto:'ЦД до',sch_cd_pending:'данные ЦД ещё не пришли',sch_acts_day:'Действий за день',sch_out_short:'вышли',sch_city_none:'нет слотов',sch_thisweek:'сегодня',sch_only_issues:'⚠ только проблемы',sch_cancel_chip:'отменён',sch_noone:'Слот никто не взял',sch_detail_title:'Слот',sch_th_accepted:'Принял',sch_th_start:'Начало',sch_th_end:'Конец',sch_st_done:'вышел и закрыл смену',sch_st_onshift:'на смене сейчас',sch_st_wait:'принял, ещё не вышел',sch_st_noshow:'не вышел',sch_st_unclosed:'смену не закрыл',sch_st_nocheck:'работал без отметки в боте',sch_st_cancel:'слот отменён',sch_st_free:'свободное место',sch_declined:'Отказов',sch_confirmed_of:'из них подтвердили:',sch_wait_worker:'ждут исполнителя',sch_returned:'вернулись в пул',sch_week:'неделя',sch_prevweek:'◀ пред. неделя',sch_nextweek:'след. неделя ▶',sch_empty:'На эту неделю слотов нет. Создай их в боте (/slot) или планом /escala.',sch_accepted:'принято',
     lg_free:'свободное место',lg_done:'вышел и закрыл смену',lg_onshift:'на смене сейчас',lg_wait:'принял, ещё не вышел',lg_noshow:'не вышел',lg_unclosed:'смену не закрыл',lg_nocheck:'работал без отметки',lg_cancel:'отменён',lg_roles2:'🔋 = батареи · 🚛 = логистика · ⚡ = действий за день (лист ЦД)',lg_taken:'принята',lg_confirmed:'подтверждена ✓✓',lg_declined:'отказ (снова свободна)',lg_windows:'🌅 Утро 06–15 · ☀️ День 12–21 · 🌆 Вечер 15–00 · 🌙 Ночь 21–06',lg_roles:'🔌 = замена АКБ · 🛴 = перемещение самокатов · ставка в подсказке',sch_free_chip:'свободно',sch_decl_chip:'отказ',role_bat_full:'замена АКБ',role_scout_full:'перемещение самокатов',sch_tip_confirmed:'Подтверждена',sch_tip_taken:'Принята (ждёт подтверждения)',sch_tip_declined:'Был отказ — снова свободна',sch_tip_free:'Свободная смена',
     months:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],dow:['Вс','Пн','Вт','Ср','Чт','Пт','Сб']},
   pt:{act_tip_7d:'Em 7 dias',act_tip_month:'No mês',
@@ -636,7 +637,7 @@ const I18N={
     ov_emturno:'em turno',ov_ok:'ok',ov_acoes:'ações',ov_empty:'Sem operação registrada hoje ainda.',ov_livres:'livres',ov_total:'no total',ov_last7:'nos últimos 7 dias',
     an_total:'Ações no mês',an_active:'MEIs ativos',an_avg:'Média por pessoa',an_low:'Abaixo da meta',an_permonth:'ações/mês',an_withact:'com ações',an_belownorm:'abaixo de',
     an_chart_days:'Ações por dia',an_chart_type:'🔌 Baterias vs 🛴 Patinetes',an_chart_city:'Por cidade',an_chart_dn:'Dia vs Noite',an_ranking:'🏆 Ranking de Desempenho',an_threshold:'meta mínima:',an_nodata:'Sem dados neste mês.',an_col_mei:'MEI',an_col_city:'Cidade',an_col_type:'Tipo',an_col_actions:'Ações',an_col_progress:'Progresso',an_day:'☀️ Dia',an_night:'🌙 Noite',an_akb:'🔌 Baterias',an_scooter:'🛴 Patinetes',
-    sch_total:'Turnos criados',sch_taken:'Aceitos',sch_open:'Vagas livres',sch_out:'Compareceram',sch_noshow:'Faltaram',sch_acts:'Ações na semana',sch_noshow_sub:'aceitaram e não saíram',sch_now:'em turno agora',sch_cancelled:'cancelados',sch_cd_upto:'CD até',sch_cd_pending:'dados do CD ainda não chegaram',sch_acts_day:'Ações no dia',sch_out_short:'saíram',sch_thisweek:'hoje',sch_only_issues:'⚠ só problemas',sch_cancel_chip:'cancelado',sch_noone:'Ninguém aceitou',sch_detail_title:'Turno',sch_th_accepted:'Aceitou',sch_th_start:'Início',sch_th_end:'Fim',sch_st_done:'saiu e encerrou',sch_st_onshift:'em turno agora',sch_st_wait:'aceitou, ainda não saiu',sch_st_noshow:'faltou',sch_st_unclosed:'não encerrou o turno',sch_st_nocheck:'trabalhou sem registrar no bot',sch_st_cancel:'turno cancelado',sch_st_free:'vaga livre',sch_declined:'Desistências',sch_confirmed_of:'confirmados:',sch_wait_worker:'aguardando MEI',sch_returned:'voltaram ao pool',sch_week:'semana',sch_prevweek:'◀ semana ant.',sch_nextweek:'próx. semana ▶',sch_empty:'Nenhum turno nesta semana. Crie no bot (/slot) ou pelo plano /escala.',sch_accepted:'aceitos',
+    sch_total:'Turnos criados',sch_taken:'Aceitos',sch_open:'Vagas livres',sch_out:'Compareceram',sch_noshow:'Faltaram',sch_acts:'Ações na semana',sch_noshow_sub:'aceitaram e não saíram',sch_now:'em turno agora',sch_cancelled:'cancelados',sch_cd_upto:'CD até',sch_cd_pending:'dados do CD ainda não chegaram',sch_acts_day:'Ações no dia',sch_out_short:'saíram',sch_city_none:'sem turnos',sch_thisweek:'hoje',sch_only_issues:'⚠ só problemas',sch_cancel_chip:'cancelado',sch_noone:'Ninguém aceitou',sch_detail_title:'Turno',sch_th_accepted:'Aceitou',sch_th_start:'Início',sch_th_end:'Fim',sch_st_done:'saiu e encerrou',sch_st_onshift:'em turno agora',sch_st_wait:'aceitou, ainda não saiu',sch_st_noshow:'faltou',sch_st_unclosed:'não encerrou o turno',sch_st_nocheck:'trabalhou sem registrar no bot',sch_st_cancel:'turno cancelado',sch_st_free:'vaga livre',sch_declined:'Desistências',sch_confirmed_of:'confirmados:',sch_wait_worker:'aguardando MEI',sch_returned:'voltaram ao pool',sch_week:'semana',sch_prevweek:'◀ semana ant.',sch_nextweek:'próx. semana ▶',sch_empty:'Nenhum turno nesta semana. Crie no bot (/slot) ou pelo plano /escala.',sch_accepted:'aceitos',
     lg_free:'vaga livre',lg_done:'saiu e encerrou',lg_onshift:'em turno agora',lg_wait:'aceitou, ainda não saiu',lg_noshow:'faltou',lg_unclosed:'não encerrou',lg_nocheck:'trabalhou sem registrar',lg_cancel:'cancelado',lg_roles2:'🔋 = baterias · 🚛 = logística · ⚡ = ações no dia (planilha CD)',lg_taken:'pego',lg_confirmed:'confirmado ✓✓',lg_declined:'desistiu (livre de novo)',lg_windows:'🌅 Manhã 06–15 · ☀️ Dia 12–21 · 🌆 Noite 15–00 · 🌙 Madrugada 21–06',lg_roles:'🔌 = troca de baterias · 🛴 = movimentação de patinetes · valor na dica',sch_free_chip:'livre',sch_decl_chip:'desistiu',role_bat_full:'troca de baterias',role_scout_full:'movimentação de patinetes',sch_tip_confirmed:'Confirmado',sch_tip_taken:'Aceito (aguardando confirmação)',sch_tip_declined:'Houve desistência — livre de novo',sch_tip_free:'Turno livre',
     months:['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],dow:['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']}
 };
@@ -704,6 +705,10 @@ function ourCity(v){
 // Город записи ЦД: приоритет city_home (где прописан MEI), затем current/cidade.
 // MEI считается нашим, если ЛИБО дом, ЛИБО место работы — один из 9 городов.
 function recCity(rec){
+  if(window._actCityMap){
+    const c=window._actCityMap.get(rec.employeeid||rec.name);
+    if(c)return c;                 // человек есть в боте — верим боту
+  }
   return ourCity(rec.city_home)||ourCity(rec.city_current)||ourCity(rec.cidade);
 }
 const WORKERS={
@@ -1407,25 +1412,36 @@ function _actMatchRaw(meiName){
 // описывают одного человека — записи считаются одной, «лицом» становится
 // зарегистрированный в боте.
 let _actOwn=null;                 // nameKey → строка ЦД (null = запись ушла другому)
-function _actIsSynthetic(w){return !!(w&&(w.not_registered||w.source==='urent_sheet'));}
+// window._actCityMap: employeeid строки ЦД → город исполнителя по данным бота.
+// Через window, а не let: recCity объявлена в другом блоке скрипта.
+function _actIsSynthetic(w){return !!(w&&(w.not_registered||w.notRegistered||w.source==='urent_sheet'));}
 
 function resolveActionsOwnership(){
   if(!Array.isArray(dailyActions)||!dailyActions.length){_actOwn=null;return;}
   if(typeof CITIES==='undefined'||typeof WORKERS==='undefined')return;
   const all=[];
-  CITIES.forEach(c=>(WORKERS[c]||[]).forEach(w=>all.push(w)));
+  CITIES.forEach(c=>(WORKERS[c]||[]).forEach(w=>all.push({w:w,city:c})));
   if(!all.length){_actOwn=null;return;}
 
-  const claims=new Map();          // employeeid|name → [{w,score}]
-  all.forEach(w=>{
-    const m=_actMatchRaw(w.name);
+  // У исполнителей из выгрузки Urent идентификатор вида «db_urent_<employeeid>» —
+  // такую строку ЦД находим точно, без сравнения имён.
+  const byEid=new Map();
+  dailyActions.forEach(r=>{if(r.employeeid)byEid.set(String(r.employeeid),r);});
+  const eidOf=w=>{const m=String(w.id||'').match(/urent_([A-Za-z0-9]+)$/);return m?m[1]:null;};
+
+  const claims=new Map();          // employeeid|name → [{w,city,score}]
+  all.forEach(x=>{
+    const eid=eidOf(x.w);
+    const exact=eid?byEid.get(eid):null;
+    const m=exact?{rec:exact,score:1}:_actMatchRaw(x.w.name);
     if(!m.rec)return;
     const key=m.rec.employeeid||m.rec.name;
     if(!claims.has(key))claims.set(key,{rec:m.rec,list:[]});
-    claims.get(key).list.push({w:w,score:m.score});
+    claims.get(key).list.push({w:x.w,city:x.city,score:m.score});
   });
 
   const own=new Map();
+  const city=new Map();
   let dropped=0,fused=0;
   claims.forEach(({rec,list})=>{
     // Лучший матч вперёд; при равном счёте — зарегистрированный в боте.
@@ -1433,10 +1449,10 @@ function resolveActionsOwnership(){
     let winner=list[0];
     for(let i=1;i<list.length;i++){
       const o=list[i];
-      if(_wSamePerson(winner.w.name,o.w.name,winner.w.city,o.w.city)){
+      if(_wSamePerson(winner.w.name,o.w.name,winner.city,o.city)){
         fused++;
         // Тот же человек в двух источниках: показываем под именем из бота.
-        if(_actIsSynthetic(winner.w)&&!_actIsSynthetic(o.w))winner={w:o.w,score:winner.score};
+        if(_actIsSynthetic(winner.w)&&!_actIsSynthetic(o.w))winner={w:o.w,city:o.city,score:winner.score};
         else own.set(_wNameKey(o.w.name),null);
       }else{
         dropped++;                 // однофамилец: своих действий у него нет
@@ -1444,9 +1460,14 @@ function resolveActionsOwnership(){
       }
     }
     own.set(_wNameKey(winner.w.name),rec);
+    // Город берём из бота: в выгрузке Urent у части MEI стоит город
+    // регистрации («Sao Paulo»), из-за чего их действия выпадали из
+    // аналитики и разбивки по городам.
+    if(winner.city)city.set(rec.employeeid||rec.name,winner.city);
   });
 
   _actOwn=own;
+  window._actCityMap=city;
   console.info(`[actions] строк ЦД: ${claims.size} · склеено дублей: ${fused} · отцеплено ложных матчей: ${dropped}`);
   window._actStats={cd:claims.size,fused:fused,dropped:dropped};
 }
@@ -1756,7 +1777,13 @@ function renderSchedule(){
 
   // ── Сетка: строка = город, колонка = день недели
   const todayIso=schIso(new Date());
-  const cities=Object.keys(week.reduce((m,r)=>{m[r.slot.cidade]=1;return m;},{})).sort();
+  // Показываем все города кластера, даже без слотов на этой неделе: пустая
+  // строка — это сигнал «здесь ничего не заказано», а не отсутствие города.
+  const withSlots=week.reduce((m,r)=>{m[r.slot.cidade]=1;return m;},{});
+  const cities=(typeof CITIES!=='undefined'?CITIES.slice():[])
+    .filter(c=>true)
+    .concat(Object.keys(withSlots).filter(c=>(typeof CITIES==='undefined')||CITIES.indexOf(c)<0))
+    .sort();
   let html='<table class="sch-table"><thead><tr><th class="sch-city-col"></th>';
   days.forEach((iso,i)=>{
     const cls=(i>=5?'sch-we':'')+(iso===todayIso?' today':'');
@@ -1768,8 +1795,9 @@ function renderSchedule(){
     const cityRecs=week.filter(r=>r.slot.cidade===city);
     const cityPeople=[].concat.apply([],cityRecs.filter(r=>!r.cancelled).map(r=>r.people));
     const cityOut=cityPeople.filter(p=>p.state==='done'||p.state==='onshift'||p.state==='unclosed'||p.state==='nocheck').length;
-    html+=`<tr><td class="sch-city-col"><b>${city}</b><span class="sch-city-name">${CITY_NAMES[city]||''}</span>`+
-      `<span class="sch-city-stats">${cityOut}/${cityPeople.length} ${t('sch_out_short')}</span></td>`;
+    const cityEmpty=cityRecs.length===0;
+    html+=`<tr${cityEmpty?' class="sch-row-empty"':''}><td class="sch-city-col"><b>${city}</b><span class="sch-city-name">${CITY_NAMES[city]||''}</span>`+
+      `<span class="sch-city-stats">${cityEmpty?t('sch_city_none'):cityOut+'/'+cityPeople.length+' '+t('sch_out_short')}</span></td>`;
     days.forEach(iso=>{
       const recs=cityRecs.filter(r=>r.slot.data===iso);
       html+=`<td class="sch-day-cell${iso===todayIso?' today':''}">`;
@@ -1985,7 +2013,7 @@ function renderOverview(){
   // MEI ativos (реальные, не synthetic urent)
   let active=0;
   (typeof CITIES!=='undefined'?CITIES:[]).forEach(c=>{
-    (WORKERS[c]||[]).forEach(w=>{if(!w.not_registered)active++;});
+    (WORKERS[c]||[]).forEach(w=>{if(!(w.not_registered||w.notRegistered))active++;});
   });
   document.getElementById('ovActive').textContent=active;
 
@@ -2690,7 +2718,10 @@ function showTaskTT(e,cell){
   }
 
   // Блок: статус слота
-  const fmt=iso=>{if(!iso)return '?';const x=new Date(iso);return new Date(x.getTime()-3*3600*1000).toUTCString().slice(17,22);};
+  const fmt=iso=>{if(!iso)return '?';const x=(typeof schParse==='function')?schParse(iso):new Date(iso);
+    if(!x||isNaN(x.getTime()))return '?';
+    const b=new Date(x.getTime()-3*3600*1000);
+    return String(b.getUTCHours()).padStart(2,'0')+':'+String(b.getUTCMinutes()).padStart(2,'0');};
   let slotBlock='';
   if(info.hasSlot){
     slotBlock=`<div style="background:rgba(46,213,115,.12);padding:5px 8px;border-radius:4px;margin-top:6px;font-size:11px;color:var(--accent3)">${lang==='ru'?'✅ Слот принят':'✅ Slot aceito'} ${fmt(info.slotCreatedAt)} BRT</div>`;
@@ -2790,7 +2821,10 @@ function getTurnoForMei(tgUsername,meiName,dateIso){
   if(!result.turno&&typeof liveShifts!=='undefined'&&Array.isArray(liveShifts)){
     for(const s of liveShifts){
       if(!s.started_at)continue;
-      const startUtc=new Date(s.started_at);
+      // Через schParse: строка «...+00» из БД стандартным Date не разбирается,
+      // а Chrome мог счесть её локальным временем и сдвинуть день смены.
+      const startUtc=(typeof schParse==='function')?schParse(s.started_at):new Date(s.started_at);
+      if(!startUtc||isNaN(startUtc.getTime()))continue;
       const startBrt=new Date(startUtc.getTime()-3*3600*1000);
       const shiftDate=startBrt.toISOString().slice(0,10);
       if(shiftDate!==dateIso)continue;
