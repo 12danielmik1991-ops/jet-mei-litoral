@@ -56,6 +56,8 @@
   .card-val{font-size:28px;font-weight:800;line-height:1}
   .card-val.green{color:var(--accent3)}.card-val.cyan{color:var(--accent)}.card-val.red{color:var(--accent2)}.card-val.orange{color:var(--accent4)}
   .card-sub{font-size:10px;color:var(--text-dim);margin-top:3px;font-family:'Space Mono',monospace}
+  .legend-tasks{padding:0 24px 10px}
+  .swipe-hint{display:none}
   .legend{display:flex;gap:14px;padding:0 24px 12px;font-size:10px;font-family:'Space Mono',monospace;color:var(--text-dim);align-items:center;flex-wrap:wrap}
   .legend-item{display:flex;align-items:center;gap:4px}
   .legend-dot{width:10px;height:10px;border-radius:2px}
@@ -378,11 +380,12 @@
     <div class="card"><div class="card-label" data-i18n="best_city">Лучший город</div><div class="card-val orange" id="tskBestCity" style="font-size:16px;padding-top:4px">—</div><div class="card-sub" id="tskBestCityVal"></div></div>
   </div>
   <div class="city-filter" id="cityFilter2"></div>
-  <div class="legend" style="padding:0 24px 10px">
+  <div class="legend legend-tasks">
     <div class="legend-item"><div class="legend-dot" style="background:rgba(46,213,115,.5);border:1px solid rgba(46,213,115,.9)"></div><span data-i18n="lgt_green">со слотом · ≥45 действий</span></div>
     <div class="legend-item"><div class="legend-dot" style="background:rgba(255,165,2,.5);border:1px solid rgba(255,165,2,.9)"></div><span data-i18n="lgt_orange">со слотом · &lt;45 действий</span></div>
     <div class="legend-item"><div class="legend-dot" style="background:rgba(255,71,87,.5);border:1px solid rgba(255,71,87,.9)"></div><span data-i18n="lgt_red">работал без слота</span></div>
   </div>
+  <div class="swipe-hint" data-i18n="m_swipe_hint">таблица прокручивается вбок →</div>
   <div class="calendar-wrap"><table class="calendar-table" id="calTasks"></table></div>
 </div>
 
@@ -2999,18 +3002,29 @@ setTimeout(function(){
   .ov-link{white-space:nowrap;min-height:40px}
   .an-canvas-wrap{height:200px}
 
-  /* ── Календарь «Задачи»: узкая колонка имени, читаемые ячейки ── */
+  /* ── Календарь «Задачи» ─────────────────────────────────────── */
   /* table-layout:fixed игнорируется при width:auto — колонка имён разрасталась
      до ~340px и вытесняла дни за экран. Явная ширина включает фиксированный layout. */
-  #tab-tasks .calendar-table{width:1px}
-  .col-name{width:120px;min-width:120px;max-width:120px}
-  .worker-name-cell{font-size:10px;padding:3px 6px}
-  .slot-cell,.task-cell{width:32px;height:32px;font-size:10px}
-  .th-day{min-width:32px;width:32px}
+  #tab-tasks .calendar-table{width:1px;border-spacing:1px}
+  .col-name{width:108px;min-width:108px;max-width:108px}
+  .worker-name-cell{font-size:9.5px;padding:3px 5px;
+    box-shadow:2px 0 5px rgba(0,0,0,.35)}          /* отделяем имя от уезжающих дней */
+  html.light .worker-name-cell{box-shadow:2px 0 5px rgba(0,0,0,.10)}
+  /* В 108px помещается только имя: бейдж действий и метка роли обрезались
+     многоточием и не читались — их место отдано имени, цифры видны в ячейках. */
+  .worker-name-cell .act-badge{display:none}
+  .worker-name-cell>span:first-child{display:none}
+  .slot-cell,.task-cell{width:31px;height:31px;font-size:10px}
+  .th-day{min-width:31px;width:31px;font-size:9.5px}
+  .city-label{font-size:10px;padding:4px 8px}
   .calendar-wrap{-webkit-overflow-scrolling:touch}
   /* Таблица прокручивается в собственном окне: только так шапка с числами
-     остаётся приклеенной (sticky работает относительно скроллящегося предка). */
-  #tab-tasks .calendar-wrap{max-height:70vh}
+     остаётся приклеенной (sticky работает относительно скроллящегося предка).
+     Высота — с оглядкой на шапку экрана и нижнюю навигацию. */
+  #tab-tasks .calendar-wrap{max-height:calc(100vh - 250px);min-height:240px}
+  #tab-tasks .legend-tasks{padding:0 12px 8px;gap:8px;font-size:10px}
+  #tab-tasks .swipe-hint{display:block;padding:0 12px 6px;font-size:10px;
+    color:var(--text-dim);font-family:'Space Mono',monospace;opacity:.75}
   /* На тач-экране hover-зум ячейки только мешает попаданию */
   .slot-cell:hover,.task-cell:hover{transform:none}
   .tooltip{display:none!important}   /* заменён bottom-sheet'ом */
