@@ -90,6 +90,60 @@
   .sch-chip.sch-st-nocheck{background:var(--slot-empty);border-color:var(--accent4);color:var(--accent4);font-weight:700}
   .sch-chip.sch-st-free{background:var(--slot-none);border-color:var(--border);color:var(--text-dim)}
   .sch-chip.sch-st-cancel{background:transparent;border-color:var(--border);color:var(--text-dim);opacity:.55;text-decoration:line-through}
+  /* ── Планировщик недели ── */
+  .pl-wrap{padding:0 24px 8px}
+  .pl-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+  .pl-city{max-width:230px}
+  .pl-week{display:flex;gap:8px;align-items:center;font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--accent)}
+  .pl-brush{display:flex;gap:12px;align-items:flex-end;flex-wrap:wrap;background:var(--surface);
+    border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;margin-bottom:12px}
+  .pl-brush-lbl{font-size:11px;color:var(--text-dim);align-self:center;font-weight:700}
+  .pl-field{display:flex;flex-direction:column;gap:3px;font-size:10px;color:var(--text-dim)}
+  .pl-field .slot-input{width:110px}
+  .pl-seg{display:flex;gap:0;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .pl-seg-btn{background:var(--surface2);color:var(--text-dim);border:none;padding:9px 12px;
+    font-size:11px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer}
+  .pl-seg-btn.is-on{background:var(--accent);color:#04121a}
+  .pl-presets{display:flex;gap:5px;flex-wrap:wrap}
+  .pl-preset{background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);
+    border-radius:5px;padding:7px 9px;font-size:11px;font-family:'Space Mono',monospace;cursor:pointer}
+  .pl-preset.is-on{background:var(--accent4);border-color:var(--accent4);color:#150c00;font-weight:700}
+  .pl-gridwrap{overflow-x:auto}
+  .pl-table{border-collapse:separate;border-spacing:3px;table-layout:fixed;min-width:720px;width:100%}
+  .pl-table th{padding:0}
+  .pl-shift-col{width:132px;vertical-align:middle}
+  .pl-daybtn,.pl-rowbtn{width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);
+    border-radius:var(--radius);padding:6px 4px;font-size:10.5px;font-family:'Space Mono',monospace;cursor:pointer}
+  .pl-rowbtn{text-align:left;padding:7px 9px;font-family:'Syne',sans-serif;font-size:11.5px;font-weight:700}
+  .pl-rowbtn .pl-time{display:block;font-family:'Space Mono',monospace;font-size:9px;color:var(--text-dim);font-weight:400}
+  .pl-daybtn:hover,.pl-rowbtn:hover{border-color:var(--accent);color:var(--accent)}
+  .pl-table th.today .pl-daybtn{border-color:var(--accent);color:var(--accent)}
+  .pl-table th.pl-we .pl-daybtn{color:var(--accent4)}
+  .pl-cell{position:relative;vertical-align:top}
+  .pl-cell.pl-past{opacity:.4}
+  .pl-box[disabled]{cursor:not-allowed}
+  .pl-box[disabled]:hover{border-color:var(--border);color:var(--text-dim)}
+  .pl-box{width:100%;min-height:46px;background:var(--slot-none);border:1px dashed var(--border);
+    border-radius:var(--radius);color:var(--text-dim);cursor:pointer;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:2px;font-family:'Space Mono',monospace;font-size:11px;transition:all .12s}
+  .pl-box:hover{border-color:var(--accent);color:var(--accent)}
+  .pl-box.is-set{background:var(--slot-full);border:1px solid var(--slot-full-border);color:var(--text)}
+  .pl-box-top{font-weight:700}
+  .pl-box-price{font-size:10px;color:var(--accent4);font-weight:700}
+  .pl-box-plus{font-size:17px;opacity:.5}
+  .pl-had{position:absolute;top:2px;right:4px;font-size:9px;color:var(--accent3);font-family:'Space Mono',monospace}
+  .pl-foot{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-top:12px}
+  .pl-sum{font-size:12px;font-family:'Space Mono',monospace;color:var(--text-dim)}
+  .pl-sum b{color:var(--accent);font-size:14px}
+  .pl-note{flex:1;min-width:220px}
+  .pl-confirm{margin-top:10px;background:var(--surface);border:1px solid var(--accent4);
+    border-radius:var(--radius);padding:12px 14px}
+  .pl-confirm-txt{font-size:12.5px;margin-bottom:10px}
+  .pl-confirm-btns{display:flex;gap:8px;flex-wrap:wrap}
+  .pl-result{margin-top:10px;font-size:12px;font-family:'Space Mono',monospace}
+  .pl-progress{color:var(--text-dim)}
+  .pl-done{color:var(--accent3)}
+  .pl-failed{color:var(--accent2);margin-top:6px;line-height:1.6}
   .sch-lg{margin-right:4px}
   .sch-table tr.sch-row-empty .sch-city-col{opacity:.5}
   .icon-btn.is-on{background:var(--accent2);color:#fff;border-color:var(--accent2)}
@@ -328,9 +382,50 @@
 <div class="tab-content" id="tab-slots">
   <div class="slots-wrap">
     <div class="slots-header">
-      <div class="slots-title" data-i18n="order_shift">Заказать смену</div>
-      <button class="add-slot-btn" onclick="toggleNewSlotForm()">+ <span data-i18n="new_slot">Новый слот</span></button>
+      <div class="slots-title" data-i18n="pl_title">Planejar a semana</div>
     </div>
+  <div class="pl-wrap">
+    <!-- Шапка: город и неделя -->
+    <div class="pl-bar">
+      <select class="slot-select pl-city" id="plCity" onchange="plSetCity(this.value)"><option value="">—</option></select>
+      <div class="pl-week">
+        <button class="icon-btn" onclick="plShiftWeek(-1)">◀</button>
+        <span id="plWeekLabel"></span>
+        <button class="icon-btn" onclick="plShiftWeek(1)">▶</button>
+        <button class="icon-btn" onclick="plThisWeek()" data-i18n="sch_thisweek">hoje</button>
+      </div>
+      <span style="flex:1"></span>
+      <button class="add-slot-btn" onclick="toggleNewSlotForm()">+ <span data-i18n="new_slot">Novo slot</span></button>
+    </div>
+
+    <!-- Кисть: чем заполняем ячейки -->
+    <div class="pl-brush">
+      <span class="pl-brush-lbl" data-i18n="pl_brush">Preenchimento:</span>
+      <div class="pl-seg" id="plTipo">
+        <button class="pl-seg-btn is-on" data-v="CHARGER" onclick="plSetTipo('CHARGER')">🔌 <span data-i18n="pl_charger">Baterias</span></button>
+        <button class="pl-seg-btn" data-v="SCOUT" onclick="plSetTipo('SCOUT')">🛴 <span data-i18n="pl_scout">Patinetes</span></button>
+      </div>
+      <label class="pl-field"><span data-i18n="pl_qty">Vagas</span>
+        <input class="slot-input" type="number" id="plQty" min="1" max="20" value="1" onchange="plSetQty(this.value)"></label>
+      <label class="pl-field"><span data-i18n="pl_price">R$/ação</span>
+        <input class="slot-input" type="number" id="plPreco" step="0.25" min="0" placeholder="2,50" onchange="plSetPreco(this.value)"></label>
+      <div class="pl-presets" id="plPresets"></div>
+    </div>
+
+    <!-- Сетка недели: строки — смены, колонки — дни -->
+    <div class="pl-gridwrap"><div id="plGrid"></div></div>
+
+    <!-- Итог и публикация -->
+    <div class="pl-foot">
+      <div class="pl-sum" id="plSummary"></div>
+      <input class="slot-input pl-note" type="text" id="plNote" data-i18n-ph="pl_note_ph" placeholder="Observação para todos os turnos (opcional)">
+      <button class="slot-btn" style="background:var(--surface2);color:var(--text)" onclick="plClear()" data-i18n="pl_clear">Limpar</button>
+      <button class="slot-btn slot-btn-order" id="plPublishBtn" onclick="plAskPublish()" data-i18n="pl_publish">🚀 Publicar</button>
+    </div>
+    <div id="plConfirm" class="pl-confirm" style="display:none"></div>
+    <div id="plResult" class="pl-result"></div>
+  </div>
+
     <div class="new-slot-form" id="newSlotForm" style="display:none">
       <div style="font-size:13px;font-weight:800;margin-bottom:14px;color:var(--accent)" data-i18n="new_slot_title">Новый слот смены</div>
       <div class="form-grid">
@@ -599,6 +694,15 @@ const I18N={
     m_all_reg:'Все',m_sch_no_day:'На этот день смен нет',m_sch_free:'Свободно',m_swipe_hint:'таблица прокручивается вбок →',
     tab_workers:'Сотрудники',tab_slots:'Slots',tab_tasks:'Задачи',slots_ordered:'Слотов заказано',slots_filled:'Принято',slots_empty:'Пустых слотов',tasks_done:'Задач выполнено',current_period:'за текущий период',leg_full:'Заполнен',leg_partial:'Частично',leg_empty:'Пустой',leg_none:'Нет слота',all_cities:'🌐 Все',status_sync:'Обновлено',status_msgs:'сообщ.',status_err:'Ошибка',tt_status:'Статус',tt_ordered:'Заказано',tt_filled:'Принято',tt_empty:'Пустых',tt_tasks:'Задач',tt_workers:'Работники',st_full:'Заполнен',st_partial:'Частично',st_empty:'Пустой',pct_of:'% от заказ.',pct_open:'% незакр.',order_shift:'Заказать смену',new_slot:'Новый слот',new_slot_title:'Новый слот смены',lbl_city:'Город',lbl_date:'Дата',lbl_worker:'Сотрудник',lbl_shift:'Тип смены',lbl_qty:'Кол-во',lbl_note:'Примечание',lbl_tipo:'Тип работы',lbl_preco:'Ставка R$/действие',lbl_mode:'Период',mode_day:'Только на этот день',mode_week:'На всю неделю (7 дней)',btn_order:'Создать и разослать',btn_cancel:'Отмена',badge_open:'Открыт',badge_ordered:'Заказан',badge_filled:'Выполнен',total_tasks:'Всего задач',avg_per_day:'Ср. в день',best_worker:'Лучший сотр.',best_city:'Лучший город',working_days:'рабочих дней',tt_tasks_count:'Задач за день',lgt_green:'со слотом · ≥45 действий',lgt_orange:'со слотом · <45 действий',lgt_red:'работал без слота',
     sb_slots:'сл',sb_workers:'р',sb_min:'мин',sb_upd:'обн',dur_h:'ч',dur_m:'м',sch_load_err:'Не удалось загрузить график',
+    pl_title:'Планирование недели',pl_brush:'Чем заполняем:',pl_charger:'Батареи',pl_scout:'Самокаты',
+    pl_qty:'Мест',pl_price:'R$/действие',pl_pick_city:'Выбери город — откроется неделя по сменам.',
+    pl_fill_day:'Заполнить весь день',pl_fill_row:'Заполнить всю неделю по этой смене',
+    pl_already:'уже создано слотов на эту смену',pl_note_ph:'Примечание ко всем слотам (необязательно)',
+    pl_clear:'Очистить',pl_publish:'🚀 Опубликовать',pl_sum_slots:'слот(ов)',pl_sum_vagas:'мест',
+    pl_sum_empty:'Натыкай нужные дни и смены — потом «Опубликовать».',
+    pl_confirm:'Создать {n} слот(ов) на {v} мест в городе {c}? Исполнителям уйдут уведомления.',
+    pl_confirm_yes:'Да, публиковать',pl_sending:'Отправляю',pl_created:'Создано слотов',
+    pl_notified:'уведомлено MEI',pl_failed:'Не удалось',
     lbl_tip:'Тип',lbl_cidade2:'Город',lbl_data2:'Дата',lbl_turno2:'Турно',lbl_aceitou:'Принял',lbl_vagas2:'Вакансии',lbl_criado:'Создан',lbl_criou:'Создал',lbl_aceitos:'Принявшие',
     nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_team:'Исполнители',nav_antifraud:'Антифрод',nav_schedule:'График',
     af_title:'🛡 Антифрод перемещений',af_score:'Балл всего',af_moves:'Перемещений',af_bad:'Плохих %',af_people:'Человек',af_bycity:'По городам',af_col_city:'Город',af_col_score:'Балл',af_col_moves:'Перем.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Плохих%',af_col_ppl:'Чел.',af_detbtn:'👤 Детализация по людям',af_dethint:'Введите пароль для просмотра ФИО:',af_show:'Показать',af_wrongpass:'Неверный пароль',af_col_fio:'ФИО',af_col_type:'Тип',af_col_pos:'Должность',af_detectors:'Как читать баллы',af_d1:'D1 — забрал с пустого монитора',af_d2:'D2 — привёз на полный монитор',af_d3:'D3 — поставил не на монитор текущего блока',af_d4:'D4 — неправильное перемещение (хотя бы одно из D1/D2/D3)',af_scorehint:'Балл = D1 + D2 + D3. Данные достоверны с 17.07.2026.',af_updated:'обновлено',af_period:'период',af_loading:'Загрузка…',af_lowdata:'мало данных (не оценивается)',af_inc_time:'Время',af_inc_bike:'Самокат',af_inc_kind:'Тип',af_inc_park:'Парковка',af_inc_none:'нет детализации',af_inc_click:'клик по строке — детали по самокатам',af_kind_d1:'забрал с пустого',af_kind_d2:'привёз на полный',af_kind_d3:'не тот монитор',af_kind_d4:'неверное перемещение',
@@ -630,6 +734,15 @@ const I18N={
     m_all_reg:'Todos',m_sch_no_day:'Sem turnos neste dia',m_sch_free:'Livre',m_swipe_hint:'a tabela rola para o lado →',
     tab_workers:'Funcionários',tab_slots:'Turnos',tab_tasks:'Tarefas',slots_ordered:'Turnos pedidos',slots_filled:'Aceitos',slots_empty:'Turnos vazios',tasks_done:'Tarefas feitas',current_period:'no período atual',leg_full:'Preenchido',leg_partial:'Parcial',leg_empty:'Vazio',leg_none:'Sem turno',all_cities:'🌐 Todos',status_sync:'Atualizado',status_msgs:'msgs',status_err:'Erro',tt_status:'Status',tt_ordered:'Pedidos',tt_filled:'Aceitos',tt_empty:'Vazios',tt_tasks:'Tarefas',tt_workers:'Trabalhadores',st_full:'Preenchido',st_partial:'Parcial',st_empty:'Vazio',pct_of:'% dos pedidos',pct_open:'% em aberto',order_shift:'Pedir turno',new_slot:'Novo turno',new_slot_title:'Novo turno',lbl_city:'Cidade',lbl_date:'Data',lbl_worker:'Funcionário',lbl_shift:'Tipo de turno',lbl_qty:'Qtd.',lbl_note:'Observação',lbl_tipo:'Tipo de serviço',lbl_preco:'Valor R$/ação',lbl_mode:'Período',mode_day:'Só neste dia',mode_week:'Semana toda (7 dias)',btn_order:'Criar e enviar',btn_cancel:'Cancelar',badge_open:'Aberto',badge_ordered:'Pedido',badge_filled:'Concluído',total_tasks:'Total de tarefas',avg_per_day:'Média/dia',best_worker:'Melhor func.',best_city:'Melhor cidade',working_days:'dias úteis',tt_tasks_count:'Tarefas no dia',lgt_green:'com slot · ≥45 ações',lgt_orange:'com slot · <45 ações',lgt_red:'trabalhou sem slot',
     sb_slots:'trn',sb_workers:'p',sb_min:'min',sb_upd:'atu',dur_h:'h',dur_m:'m',sch_load_err:'Não foi possível carregar as escalas',
+    pl_title:'Planejar a semana',pl_brush:'Preenchimento:',pl_charger:'Baterias',pl_scout:'Patinetes',
+    pl_qty:'Vagas',pl_price:'R$/ação',pl_pick_city:'Escolha a cidade — a semana abre por turnos.',
+    pl_fill_day:'Preencher o dia todo',pl_fill_row:'Preencher a semana toda neste turno',
+    pl_already:'turnos já criados neste horário',pl_note_ph:'Observação para todos os turnos (opcional)',
+    pl_clear:'Limpar',pl_publish:'🚀 Publicar',pl_sum_slots:'turno(s)',pl_sum_vagas:'vagas',
+    pl_sum_empty:'Marque os dias e turnos necessários e clique em «Publicar».',
+    pl_confirm:'Criar {n} turno(s) com {v} vagas em {c}? Os MEIs receberão aviso.',
+    pl_confirm_yes:'Sim, publicar',pl_sending:'Enviando',pl_created:'Turnos criados',
+    pl_notified:'MEIs avisados',pl_failed:'Falhas',
     lbl_tip:'Tipo',lbl_cidade2:'Cidade',lbl_data2:'Data',lbl_turno2:'Turno',lbl_aceitou:'Aceitou',lbl_vagas2:'Vagas',lbl_criado:'Criado',lbl_criou:'Criou',lbl_aceitos:'Aceitos',
     nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_team:'Executores',nav_antifraud:'Antifraude',nav_schedule:'Escalas',
     af_title:'🛡 Antifraude de movimentações',af_score:'Score total',af_moves:'Movimentações',af_bad:'Ruins %',af_people:'Pessoas',af_bycity:'Por cidade',af_col_city:'Cidade',af_col_score:'Score',af_col_moves:'Movs.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Ruins%',af_col_ppl:'Pess.',af_detbtn:'👤 Detalhes por pessoa',af_dethint:'Digite a senha para ver os nomes:',af_show:'Mostrar',af_wrongpass:'Senha incorreta',af_col_fio:'Nome',af_col_type:'Tipo',af_col_pos:'Cargo',af_detectors:'Como ler os scores',af_d1:'D1 — pegou de monitor vazio',af_d2:'D2 — levou para monitor cheio',af_d3:'D3 — deixou fora do monitor do bloco atual',af_d4:'D4 — movimentação incorreta (ao menos um de D1/D2/D3)',af_scorehint:'Score = D1 + D2 + D3. Dados confiáveis desde 17/07/2026.',af_updated:'atualizado',af_period:'período',af_loading:'Carregando…',af_lowdata:'poucos dados (não avaliado)',af_inc_time:'Hora',af_inc_bike:'Patinete',af_inc_kind:'Tipo',af_inc_park:'Parada',af_inc_none:'sem detalhes',af_inc_click:'clique na linha — detalhes por patinete',af_kind_d1:'pegou de vazio',af_kind_d2:'levou para cheio',af_kind_d3:'monitor errado',af_kind_d4:'movimentação incorreta',
@@ -655,7 +768,8 @@ function applyLang(){
   // Каждый рендер — отдельно и под try: часть элементов относится к удалённой вкладке
   // «Работники» (calWorkers/sumTotal/cityFilter1), и одно исключение здесь раньше
   // обрывало applyLang целиком — вкладки ниже оставались на старом языке до перезагрузки.
-  [renderSummary,renderTaskSummary,renderSlotsGrid,renderCityFilters].forEach(fn=>{
+  [renderSummary,renderTaskSummary,renderSlotsGrid,renderCityFilters,
+   (typeof renderPlanner==='function'?renderPlanner:function(){})].forEach(fn=>{
     try{if(typeof fn==='function')fn();}catch(e){console.warn('applyLang skipped:',fn.name||'anon',e.message);}
   });
   try{if(document.getElementById('calWorkers')?.innerHTML)renderWorkers();}catch(e){}
@@ -1023,7 +1137,7 @@ async function fetchBotData(){
   }
   // Состав исполнителей изменился — пересчитать, кому принадлежат строки ЦД.
   try{if(typeof resolveActionsOwnership==='function')resolveActionsOwnership();}catch(e){console.warn('resolveActionsOwnership skipped:',e.message);}
-  [renderWorkers,renderSummary,renderTasks,renderTaskSummary,()=>{if(typeof renderSlotsGrid==='function')renderSlotsGrid();},()=>{if(typeof renderSchedule==='function')renderSchedule();}].forEach(fn=>{try{fn();}catch(e){console.warn('render skipped:',fn.name||'anon',e.message);}});
+  [renderWorkers,renderSummary,renderTasks,renderTaskSummary,()=>{if(typeof renderSlotsGrid==='function')renderSlotsGrid();},()=>{if(typeof renderPlanner==='function')renderPlanner();},()=>{if(typeof renderSchedule==='function')renderSchedule();}].forEach(fn=>{try{fn();}catch(e){console.warn('render skipped:',fn.name||'anon',e.message);}});
   try{if(typeof renderOverview==='function' && document.getElementById('tab-overview')?.classList.contains('active'))renderOverview();}catch(e){console.warn('renderOverview skipped:',e.message);}
 }
 
@@ -1039,8 +1153,9 @@ function switchTab(tab){
   document.getElementById('tab-'+tab).classList.add('active');
   document.querySelector(`.tab[data-tab="${tab}"]`).classList.add('active');
   try{localStorage.setItem('jet_active_tab',tab);}catch(e){} // запомнить вкладку
-  if(tab==='slots'&&typeof renderSlotsGrid==='function'){
-    try{renderSlotsGrid();}catch(e){console.error('switchTab→slots failed',e);}
+  if(tab==='slots'){
+    try{if(typeof renderSlotsGrid==='function')renderSlotsGrid();
+        if(typeof renderPlanner==='function')renderPlanner();}catch(e){console.error('switchTab→slots failed',e);}
   }
   if(tab==='schedule'&&typeof loadSchedule==='function'){
     try{renderSchedule();if(!window.allSlots||!window.allSlots.length)fetchBotData();}catch(e){console.error('switchTab→schedule failed',e);}
@@ -1081,7 +1196,7 @@ document.getElementById('nextMonth').addEventListener('click',()=>{
 
 function render(){
   document.getElementById('monthLabel').textContent=`${t('months')[curMonth]} ${curYear}`;
-  renderCityFilters();[renderWorkers,renderSummary,renderTasks,renderTaskSummary,()=>{if(typeof renderSlotsGrid==='function')renderSlotsGrid();},()=>{if(typeof renderSchedule==='function')renderSchedule();}].forEach(fn=>{try{fn();}catch(e){console.warn('render skipped:',fn.name||'anon',e.message);}});try{renderSlotsGrid();}catch(e){console.warn('renderSlotsGrid skipped:',e.message);}
+  renderCityFilters();[renderWorkers,renderSummary,renderTasks,renderTaskSummary,()=>{if(typeof renderSlotsGrid==='function')renderSlotsGrid();},()=>{if(typeof renderPlanner==='function')renderPlanner();},()=>{if(typeof renderSchedule==='function')renderSchedule();}].forEach(fn=>{try{fn();}catch(e){console.warn('render skipped:',fn.name||'anon',e.message);}});try{renderSlotsGrid();}catch(e){console.warn('renderSlotsGrid skipped:',e.message);}
 }
 
 // ── CITY FILTERS ─────────────────────────────────────
@@ -1264,6 +1379,250 @@ function toggleNewSlotForm(){
     document.getElementById('nsDate').value=new Date().toISOString().split('T')[0];
   }
 }
+// ══════════════════════════════════════════════════════════════════════
+//  ПЛАНИРОВЩИК НЕДЕЛИ — сетка «день × смена»: тыкаешь ячейки, потом
+//  публикуешь всё разом. Каждая ячейка уходит отдельным POST /api/slot,
+//  как и одиночная форма ниже.
+// ══════════════════════════════════════════════════════════════════════
+const PL_SHIFTS=[
+  {key:'manha',     emoji:'🌅', time:'06:00–15:00'},
+  {key:'dia',       emoji:'☀️', time:'12:00–21:00'},
+  {key:'noite',     emoji:'🌆', time:'15:00–00:00'},
+  {key:'madrugada', emoji:'🌙', time:'21:00–06:00'},
+];
+const PL_PRESETS=[1,1.5,2,2.5,3];
+const PL_SHIFT_NAMES={ru:{manha:'Утро',dia:'День',noite:'Вечер',madrugada:'Ночь'},
+                      pt:{manha:'Manhã',dia:'Dia',noite:'Noite',madrugada:'Madrugada'}};
+function plShiftName(k){return (PL_SHIFT_NAMES[lang]||PL_SHIFT_NAMES.pt)[k]||k;}
+
+let plCity=(function(){try{return localStorage.getItem('jet_plan_city')||'';}catch(e){return '';}})();
+let plWeekStart=null;
+let plCells={};                       // "iso|shift" → {qty,preco,tipo}
+let plBrush={tipo:'CHARGER',qty:1,preco:''};
+let plBusy=false;
+
+function plDraftKey(){return `jet_plan_${plCity}_${plWeekStart?schIso(plWeekStart):''}`;}
+function plSaveDraft(){
+  try{localStorage.setItem(plDraftKey(),JSON.stringify({cells:plCells,brush:plBrush,
+    note:(document.getElementById('plNote')||{}).value||''}));}catch(e){}
+}
+function plLoadDraft(){
+  plCells={};
+  try{
+    const raw=localStorage.getItem(plDraftKey());
+    if(raw){
+      const d=JSON.parse(raw);
+      plCells=d.cells||{};
+      if(d.brush)plBrush=Object.assign(plBrush,d.brush);
+      const n=document.getElementById('plNote');
+      if(n&&d.note)n.value=d.note;
+    }
+  }catch(e){}
+}
+
+function plSetCity(v){plCity=v;try{localStorage.setItem('jet_plan_city',v);}catch(e){}plLoadDraft();renderPlanner();}
+function plShiftWeek(dir){
+  if(!plWeekStart)plWeekStart=schMonday(new Date());
+  plWeekStart.setDate(plWeekStart.getDate()+dir*7);
+  plLoadDraft();renderPlanner();
+}
+function plThisWeek(){plWeekStart=schMonday(new Date());plLoadDraft();renderPlanner();}
+function plSetTipo(v){plBrush.tipo=v;plSaveDraft();renderPlanner();}
+function plSetQty(v){plBrush.qty=Math.max(1,parseInt(v||'1',10));plSaveDraft();}
+function plSetPreco(v){plBrush.preco=v===''?'':String(v).replace(',','.');plSaveDraft();renderPlanner();}
+
+// Клик по ячейке: пустую заполняем кистью, заполненную — очищаем.
+function plToggle(iso,shift){
+  if(iso<schIso(new Date()))return;   // прошедший день заказать нельзя
+  const k=iso+'|'+shift;
+  if(plCells[k])delete plCells[k];
+  else plCells[k]={qty:plBrush.qty,preco:plBrush.preco,tipo:plBrush.tipo};
+  plSaveDraft();renderPlanner();
+}
+// Заполнить/очистить всю строку смены или весь день.
+function plFillRow(shift){
+  const days=plDays().filter(d=>d>=schIso(new Date()));
+  if(!days.length)return;
+  const all=days.every(d=>plCells[d+'|'+shift]);
+  days.forEach(d=>{
+    const k=d+'|'+shift;
+    if(all)delete plCells[k];
+    else plCells[k]={qty:plBrush.qty,preco:plBrush.preco,tipo:plBrush.tipo};
+  });
+  plSaveDraft();renderPlanner();
+}
+function plFillDay(iso){
+  if(iso<schIso(new Date()))return;
+  const all=PL_SHIFTS.every(s=>plCells[iso+'|'+s.key]);
+  PL_SHIFTS.forEach(s=>{
+    const k=iso+'|'+s.key;
+    if(all)delete plCells[k];
+    else plCells[k]={qty:plBrush.qty,preco:plBrush.preco,tipo:plBrush.tipo};
+  });
+  plSaveDraft();renderPlanner();
+}
+function plClear(){
+  plCells={};plSaveDraft();
+  const c=document.getElementById('plConfirm');if(c)c.style.display='none';
+  const r=document.getElementById('plResult');if(r)r.innerHTML='';
+  renderPlanner();
+}
+function plDays(){
+  if(!plWeekStart)plWeekStart=schMonday(new Date());
+  const out=[];for(let i=0;i<7;i++){const d=new Date(plWeekStart);d.setDate(d.getDate()+i);out.push(schIso(d));}
+  return out;
+}
+function plFmtMoney(v){
+  if(v===''||v===null||v===undefined)return '';
+  const n=Number(v);
+  return isNaN(n)?'':('R$'+n.toFixed(2).replace('.',','));
+}
+// Сколько слотов на этот день и смену уже создано (окно смены пишется в описание).
+function plExisting(iso,shift){
+  const all=(window.allSlots||[]);
+  return all.filter(s=>s.data===iso&&s.cidade===plCity&&s.status!=='cancelled'&&
+    String(s.descricao||'').toLowerCase().indexOf(shift)>=0).length;
+}
+
+function renderPlanner(){
+  const grid=document.getElementById('plGrid');
+  if(!grid)return;
+  if(!plWeekStart)plWeekStart=schMonday(new Date());
+
+  // селект городов заполняем один раз
+  const sel=document.getElementById('plCity');
+  if(sel&&!sel.dataset.filled&&typeof CITIES!=='undefined'){
+    sel.innerHTML='<option value="">—</option>'+
+      CITIES.map(c=>`<option value="${c}">${c} · ${CITY_NAMES[c]||c}</option>`).join('');
+    sel.dataset.filled='1';
+    if(plCity)sel.value=plCity;
+  }
+  // кисть
+  document.querySelectorAll('#plTipo .pl-seg-btn').forEach(b=>
+    b.classList.toggle('is-on',b.dataset.v===plBrush.tipo));
+  const q=document.getElementById('plQty');if(q&&document.activeElement!==q)q.value=plBrush.qty;
+  const pr=document.getElementById('plPreco');if(pr&&document.activeElement!==pr)pr.value=plBrush.preco;
+  const pres=document.getElementById('plPresets');
+  if(pres)pres.innerHTML=PL_PRESETS.map(v=>
+    `<button class="pl-preset${String(plBrush.preco)===String(v)?' is-on':''}" onclick="plSetPreco('${v}')">${plFmtMoney(v)}</button>`).join('');
+
+  const days=plDays();
+  const wkEnd=new Date(plWeekStart);wkEnd.setDate(wkEnd.getDate()+6);
+  const fmt=d=>`${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}`;
+  const lbl=document.getElementById('plWeekLabel');
+  if(lbl)lbl.textContent=`${fmt(plWeekStart)} – ${fmt(wkEnd)}`;
+
+  if(!plCity){
+    grid.innerHTML=`<div class="sch-empty-note">${t('pl_pick_city')}</div>`;
+    const s=document.getElementById('plSummary');if(s)s.textContent='';
+    return;
+  }
+
+  const today=schIso(new Date());
+  let html='<table class="pl-table"><thead><tr><th class="pl-shift-col"></th>';
+  days.forEach((iso,i)=>{
+    const cls=(i>=5?'pl-we':'')+(iso===today?' today':'');
+    html+=`<th class="${cls}"><button class="pl-daybtn" onclick="plFillDay('${iso}')" title="${t('pl_fill_day')}">`+
+      `${schDow()[i]}<br>${iso.slice(8,10)}.${iso.slice(5,7)}</button></th>`;
+  });
+  html+='</tr></thead><tbody>';
+
+  PL_SHIFTS.forEach(sh=>{
+    html+=`<tr><td class="pl-shift-col"><button class="pl-rowbtn" onclick="plFillRow('${sh.key}')" title="${t('pl_fill_row')}">`+
+      `${sh.emoji} ${plShiftName(sh.key)}<span class="pl-time">${sh.time}</span></button></td>`;
+    days.forEach(iso=>{
+      const k=iso+'|'+sh.key;
+      const c=plCells[k];
+      const had=plExisting(iso,sh.key);
+      const past=iso<today;
+      html+=`<td class="pl-cell${past?' pl-past':''}">`+
+        `<button class="pl-box${c?' is-set':''}"${past?' disabled':''} onclick="plToggle('${iso}','${sh.key}')">`+
+        (c?`<span class="pl-box-top">${c.tipo==='SCOUT'?'🛴':'🔌'} ×${c.qty}</span>`+
+            `<span class="pl-box-price">${plFmtMoney(c.preco)||'—'}</span>`
+          :`<span class="pl-box-plus">+</span>`)+
+        `</button>`+
+        (had?`<span class="pl-had" title="${t('pl_already')}">✓${had}</span>`:'')+
+        `</td>`;
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  grid.innerHTML=html;
+
+  // сводка
+  const keys=Object.keys(plCells);
+  const slots=keys.length;
+  const vagas=keys.reduce((a,k)=>a+(plCells[k].qty||1),0);
+  const precos=[...new Set(keys.map(k=>plCells[k].preco).filter(v=>v!==''&&v!==null&&v!==undefined))];
+  const sum=document.getElementById('plSummary');
+  if(sum){
+    sum.innerHTML=slots
+      ?`<b>${slots}</b> ${t('pl_sum_slots')} · <b>${vagas}</b> ${t('pl_sum_vagas')}`+
+       (precos.length?` · ${precos.sort((a,b)=>a-b).map(plFmtMoney).join(' / ')}`:'')
+      :`<span style="opacity:.6">${t('pl_sum_empty')}</span>`;
+  }
+  const btn=document.getElementById('plPublishBtn');
+  if(btn)btn.disabled=!slots||plBusy;
+}
+
+// ── Публикация: сначала подтверждение (уходит рассылка исполнителям) ───
+function plAskPublish(){
+  const box=document.getElementById('plConfirm');
+  if(!box)return;
+  const keys=Object.keys(plCells);
+  if(!keys.length)return;
+  const vagas=keys.reduce((a,k)=>a+(plCells[k].qty||1),0);
+  box.style.display='block';
+  box.innerHTML=`<div class="pl-confirm-txt">${t('pl_confirm')
+    .replace('{n}',keys.length).replace('{v}',vagas)
+    .replace('{c}',CITY_NAMES[plCity]||plCity)}</div>`+
+    `<div class="pl-confirm-btns">`+
+    `<button class="slot-btn slot-btn-order" onclick="plPublish()">${t('pl_confirm_yes')}</button>`+
+    `<button class="slot-btn" style="background:var(--surface2);color:var(--text)" onclick="document.getElementById('plConfirm').style.display='none'">${t('btn_cancel')}</button>`+
+    `</div>`;
+}
+
+async function plPublish(){
+  if(plBusy)return;
+  const box=document.getElementById('plConfirm');
+  const res=document.getElementById('plResult');
+  if(box)box.style.display='none';
+  const keys=Object.keys(plCells).sort();
+  if(!keys.length||!plCity)return;
+  plBusy=true;
+  const btn=document.getElementById('plPublishBtn');
+  if(btn)btn.disabled=true;
+
+  const note=(document.getElementById('plNote')||{}).value||'';
+  let done=0,sent=0;
+  const failed=[];
+  for(const k of keys){
+    const [iso,shift]=k.split('|');
+    const c=plCells[k];
+    if(res)res.innerHTML=`<div class="pl-progress">${t('pl_sending')} ${done+1}/${keys.length}…</div>`;
+    try{
+      const r=await fetch(API_BASE+'/api/slot',{method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({key:API_KEY,cidade:plCity,data:iso,tipo:c.tipo,shift:shift,
+          vagas:c.qty,preco:c.preco===''?null:c.preco,descricao:note,mode:'day'})});
+      const j=await r.json();
+      if(!r.ok||!j.ok)throw new Error(j.error||('HTTP '+r.status));
+      done++;sent+=(j.sent||0);
+      delete plCells[k];               // опубликованное убираем из черновика
+      plSaveDraft();
+    }catch(e){
+      failed.push(`${iso.slice(8,10)}.${iso.slice(5,7)} ${plShiftName(shift)}: ${e.message}`);
+    }
+  }
+  plBusy=false;
+  if(btn)btn.disabled=false;
+  if(res){
+    res.innerHTML=`<div class="pl-done">✅ ${t('pl_created')}: <b>${done}</b> · ${t('pl_notified')}: <b>${sent}</b></div>`+
+      (failed.length?`<div class="pl-failed">❌ ${t('pl_failed')} (${failed.length}):<br>${failed.join('<br>')}</div>`:'');
+  }
+  renderPlanner();
+  setTimeout(()=>{fetchBotData();},1200);
+}
+
 async function createSlot(){
   const res=document.getElementById('nsResult');
   const cidade=document.getElementById('nsCity').value;
@@ -3001,6 +3360,17 @@ setTimeout(function(){
   .ov-links::-webkit-scrollbar{display:none}
   .ov-link{white-space:nowrap;min-height:40px}
   .an-canvas-wrap{height:200px}
+
+  /* ── Планировщик недели ─────────────────────────────────────── */
+  .pl-wrap{padding:0 12px 8px}
+  .pl-brush{gap:8px;padding:9px 10px}
+  .pl-field .slot-input{width:88px}
+  .pl-seg-btn{padding:9px 10px;font-size:10.5px}
+  .pl-table{min-width:640px;border-spacing:2px}
+  .pl-shift-col{width:104px}
+  .pl-box{min-height:44px;font-size:10.5px}
+  .pl-note{min-width:100%;order:5}
+  .pl-city{max-width:100%;flex:1}
 
   /* ── Календарь «Задачи» ─────────────────────────────────────── */
   /* table-layout:fixed игнорируется при width:auto — колонка имён разрасталась
