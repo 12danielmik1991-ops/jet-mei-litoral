@@ -104,6 +104,13 @@
   .pl-seg-btn{background:var(--surface2);color:var(--text-dim);border:none;padding:9px 12px;
     font-size:11px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer}
   .pl-seg-btn.is-on{background:var(--accent);color:#04121a}
+  .pl-tariff{font-size:11px;align-self:center}
+  .pl-tariff-ok{color:var(--accent3);font-weight:700}
+  .pl-tariff-wait{color:var(--text-dim)}
+  .pl-tariff-bad{color:var(--accent2);font-weight:700}
+  .pl-box-hint{font-size:9.5px;color:var(--text-dim);opacity:.8}
+  .pl-box.pl-notariff{border-style:solid;border-color:var(--border);opacity:.45;cursor:not-allowed}
+  .form-hint{font-size:9.5px;color:var(--text-dim);margin-top:3px;font-family:'Space Mono',monospace}
   .pl-presets{display:flex;gap:5px;flex-wrap:wrap}
   .pl-preset{background:var(--surface2);border:1px solid var(--border);color:var(--text-dim);
     border-radius:5px;padding:7px 9px;font-size:11px;font-family:'Space Mono',monospace;cursor:pointer}
@@ -417,9 +424,7 @@
       </div>
       <label class="pl-field"><span data-i18n="pl_qty">Vagas</span>
         <input class="slot-input" type="number" id="plQty" min="1" max="20" value="1" onchange="plSetQty(this.value)"></label>
-      <label class="pl-field"><span data-i18n="pl_price">R$/ação</span>
-        <input class="slot-input" type="number" id="plPreco" step="0.25" min="0" placeholder="2,50" onchange="plSetPreco(this.value)"></label>
-      <div class="pl-presets" id="plPresets"></div>
+      <div class="pl-tariff" id="plTariff"></div>
     </div>
 
     <!-- Сетка недели: строки — смены, колонки — дни -->
@@ -457,7 +462,9 @@
           </select>
         </div>
         <div class="form-row"><div class="form-label" data-i18n="lbl_qty">Кол-во мест</div><input class="slot-input" type="number" id="nsQty" value="1" min="1" max="20"></div>
-        <div class="form-row"><div class="form-label" data-i18n="lbl_preco">Ставка R$/ação</div><input class="slot-input" type="number" id="nsPreco" step="0.5" min="0" placeholder="2,50"></div>
+        <div class="form-row"><div class="form-label" data-i18n="lbl_preco">Ставка R$/ação</div>
+          <input class="slot-input" type="text" id="nsPreco" readonly data-i18n-ph="pl_tariff_auto" placeholder="da tabela">
+          <div class="form-hint" id="nsPrecoHint"></div></div>
         <div class="form-row"><div class="form-label" data-i18n="lbl_mode">Период</div>
           <select class="slot-select" id="nsMode">
             <option value="day" data-i18n="mode_day">Только на этот день</option>
@@ -708,6 +715,11 @@ const I18N={
     pl_qty:'Мест',pl_price:'R$/действие',pl_pick_city:'Выбери город — откроется неделя по сменам.',
     pl_fill_day:'Заполнить весь день',pl_fill_row:'Заполнить всю неделю по этой смене',
     pl_already:'уже создано слотов на эту смену',pl_note_ph:'Примечание ко всем слотам (необязательно)',
+    pl_tariff_fixed:'Ставка из таблицы тарифов — изменить нельзя',
+    pl_tariff_load:'Загружаю тарифы…',pl_tariff_err:'Тарифы не загрузились',
+    pl_tariff_auto:'из таблицы',pl_tariff_need:'Выбери город и дату — подставится тариф',
+    pl_no_tariff:'На {d} для города {c} тариф в таблице не задан — слот не создать. Заполни ставку в таблице расценок.',
+    pl_no_tariff_short:'нет тарифа в таблице',
     pl_clear:'Очистить',pl_publish:'🚀 Опубликовать',pl_sum_slots:'слот(ов)',pl_sum_vagas:'мест',
     pl_sum_empty:'Натыкай нужные дни и смены — потом «Опубликовать».',
     pl_confirm:'Создать {n} слот(ов) на {v} мест в городе {c}? Исполнителям уйдут уведомления.',
@@ -748,6 +760,11 @@ const I18N={
     pl_qty:'Vagas',pl_price:'R$/ação',pl_pick_city:'Escolha a cidade — a semana abre por turnos.',
     pl_fill_day:'Preencher o dia todo',pl_fill_row:'Preencher a semana toda neste turno',
     pl_already:'turnos já criados neste horário',pl_note_ph:'Observação para todos os turnos (opcional)',
+    pl_tariff_fixed:'Valor vem da planilha de tarifas — não editável',
+    pl_tariff_load:'Carregando tarifas…',pl_tariff_err:'Falha ao carregar tarifas',
+    pl_tariff_auto:'da planilha',pl_tariff_need:'Escolha cidade e data — o valor é preenchido',
+    pl_no_tariff:'Não há tarifa na planilha para {c} em {d} — o turno não pode ser criado. Preencha o valor na planilha.',
+    pl_no_tariff_short:'sem tarifa na planilha',
     pl_clear:'Limpar',pl_publish:'🚀 Publicar',pl_sum_slots:'turno(s)',pl_sum_vagas:'vagas',
     pl_sum_empty:'Marque os dias e turnos necessários e clique em «Publicar».',
     pl_confirm:'Criar {n} turno(s) com {v} vagas em {c}? Os MEIs receberão aviso.',
@@ -1165,7 +1182,9 @@ function switchTab(tab){
   try{localStorage.setItem('jet_active_tab',tab);}catch(e){} // запомнить вкладку
   if(tab==='slots'){
     try{if(typeof renderSlotsGrid==='function')renderSlotsGrid();
-        if(typeof renderPlanner==='function')renderPlanner();}catch(e){console.error('switchTab→slots failed',e);}
+        if(typeof renderPlanner==='function')renderPlanner();
+        if(typeof loadPrices==='function')loadPrices(!priceState.loaded);
+        if(typeof plSyncSingleForm==='function')plSyncSingleForm();}catch(e){console.error('switchTab→slots failed',e);}
   }
   if(tab==='schedule'&&typeof loadSchedule==='function'){
     try{renderSchedule();if(!window.allSlots||!window.allSlots.length)fetchBotData();}catch(e){console.error('switchTab→schedule failed',e);}
@@ -1390,6 +1409,93 @@ function toggleNewSlotForm(){
   }
 }
 // ══════════════════════════════════════════════════════════════════════
+//  ТАРИФЫ — единственный источник ставки за действие.
+//  Два листа «ДАШБОРД ДЕЙСТВИЙ MEI 2026»: строки — города, колонки — даты,
+//  значение — R$/ação. Ставка зависит и от города, и от дня (выходные дороже),
+//  поэтому вручную её в панели больше не задают: подставляется из таблицы.
+// ══════════════════════════════════════════════════════════════════════
+const PRICE_SHEET_ID='1BMwn5kkDwrMjlxYkHYbtm4h4f9Yy5Il5wMhU-_-NSso';
+const PRICE_GIDS={SCOUT:'1789943004',CHARGER:'690919185'};
+let priceTable={SCOUT:{},CHARGER:{}};     // tipo → код города → {iso: число}
+let priceState={loaded:false,error:null,at:null};
+
+function _priceNum(v){
+  const s=String(v||'').replace(/\s|R\$/g,'').replace(',','.');
+  if(!s)return null;
+  const n=Number(s);
+  return isNaN(n)||n<=0?null:n;
+}
+// «31.07.2026» → «2026-07-31»
+function _priceIso(h){
+  const m=String(h||'').trim().match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
+  return m?`${m[3]}-${m[2]}-${m[1]}`:null;
+}
+function _priceCsv(text){
+  const rows=[];let row=[],cur='',q=false;
+  for(let i=0;i<text.length;i++){
+    const c=text[i];
+    if(q){
+      if(c==='"'){ if(text[i+1]==='"'){cur+='"';i++;} else q=false; }
+      else cur+=c;
+    }else if(c==='"')q=true;
+    else if(c===','){row.push(cur);cur='';}
+    else if(c==='\n'){row.push(cur);rows.push(row);row=[];cur='';}
+    else if(c!=='\r')cur+=c;
+  }
+  if(cur!==''||row.length){row.push(cur);rows.push(row);}
+  return rows;
+}
+
+async function loadPrices(force){
+  if(priceState.loaded&&!force)return priceTable;
+  const out={SCOUT:{},CHARGER:{}};
+  try{
+    for(const tipo of Object.keys(PRICE_GIDS)){
+      const url=`https://docs.google.com/spreadsheets/d/${PRICE_SHEET_ID}/gviz/tq?tqx=out:csv&gid=${PRICE_GIDS[tipo]}&_=${Date.now()}`;
+      const r=await fetch(url,{cache:'no-store'});
+      if(!r.ok)throw new Error('HTTP '+r.status);
+      const rows=_priceCsv(await r.text());
+      if(!rows.length)throw new Error('лист пуст');
+      const head=rows[0];
+      const cols=[];
+      for(let i=1;i<head.length;i++){
+        const iso=_priceIso(head[i]);
+        if(iso)cols.push([i,iso]);
+      }
+      rows.slice(1).forEach(row=>{
+        const code=(typeof ourCity==='function')?ourCity(row[0]):null;
+        if(!code)return;                       // город не нашего кластера
+        const byDate=out[tipo][code]||(out[tipo][code]={});
+        cols.forEach(([i,iso])=>{
+          const n=_priceNum(row[i]);
+          if(n!==null)byDate[iso]=n;
+        });
+      });
+    }
+    priceTable=out;
+    priceState={loaded:true,error:null,at:new Date()};
+    console.info('[prices] тарифы загружены:',
+      Object.keys(out).map(k=>k+'='+Object.keys(out[k]).length+' городов').join(', '));
+  }catch(e){
+    priceState={loaded:false,error:e.message,at:null};
+    console.error('loadPrices failed:',e);
+  }
+  if(typeof renderPlanner==='function'){try{renderPlanner();}catch(e){}}
+  if(typeof plSyncSingleForm==='function'){try{plSyncSingleForm();}catch(e){}}
+  return priceTable;
+}
+
+// Ставка за действие: город + дата + тип работы. null — тарифа нет.
+function priceFor(tipo,city,iso){
+  const t=priceTable[tipo==='SCOUT'?'SCOUT':'CHARGER']||{};
+  const c=t[city];
+  return (c&&c[iso]!==undefined)?c[iso]:null;
+}
+function priceFmt(v){
+  return (v===null||v===undefined)?'—':('R$'+Number(v).toFixed(2).replace('.',','));
+}
+
+// ══════════════════════════════════════════════════════════════════════
 //  ПЛАНИРОВЩИК НЕДЕЛИ — сетка «день × смена»: тыкаешь ячейки, потом
 //  публикуешь всё разом. Каждая ячейка уходит отдельным POST /api/slot,
 //  как и одиночная форма ниже.
@@ -1408,7 +1514,7 @@ function plShiftName(k){return (PL_SHIFT_NAMES[lang]||PL_SHIFT_NAMES.pt)[k]||k;}
 let plCity=(function(){try{return localStorage.getItem('jet_plan_city')||'';}catch(e){return '';}})();
 let plWeekStart=null;
 let plCells={};                       // "iso|shift" → {qty,preco,tipo}
-let plBrush={tipo:'CHARGER',qty:1,preco:''};
+let plBrush={tipo:'CHARGER',qty:1};
 let plBusy=false;
 
 function plDraftKey(){return `jet_plan_${plCity}_${plWeekStart?schIso(plWeekStart):''}`;}
@@ -1438,15 +1544,24 @@ function plShiftWeek(dir){
 }
 function plThisWeek(){plWeekStart=schMonday(new Date());plLoadDraft();renderPlanner();}
 function plSetTipo(v){plBrush.tipo=v;plSaveDraft();renderPlanner();}
-function plSetQty(v){plBrush.qty=Math.max(1,parseInt(v||'1',10));plSaveDraft();}
-function plSetPreco(v){plBrush.preco=v===''?'':String(v).replace(',','.');plSaveDraft();renderPlanner();}
+function plSetQty(v){plBrush.qty=Math.max(1,parseInt(v||'1',10));plSaveDraft();renderPlanner();}
 
 // Клик по ячейке: пустую заполняем кистью, заполненную — очищаем.
 function plToggle(iso,shift){
   if(iso<schIso(new Date()))return;   // прошедший день заказать нельзя
   const k=iso+'|'+shift;
-  if(plCells[k])delete plCells[k];
-  else plCells[k]={qty:plBrush.qty,preco:plBrush.preco,tipo:plBrush.tipo};
+  if(plCells[k]){delete plCells[k];plSaveDraft();renderPlanner();return;}
+  // Ставка берётся из таблицы тарифов по городу, дате и типу работы.
+  // Нет тарифа — слот не создаём: иначе он ушёл бы MEI с пустой ценой.
+  const pr=priceFor(plBrush.tipo,plCity,iso);
+  if(pr===null){
+    plModal(`<div class="pl-confirm-txt">${t('pl_no_tariff')
+      .replace('{c}',CITY_NAMES[plCity]||plCity)
+      .replace('{d}',iso.slice(8,10)+'.'+iso.slice(5,7))}</div>`+
+      `<div class="pl-confirm-btns"><button class="slot-btn" onclick="plModalClose()">OK</button></div>`,true);
+    return;
+  }
+  plCells[k]={qty:plBrush.qty,preco:pr,tipo:plBrush.tipo};
   plSaveDraft();renderPlanner();
 }
 // Заполнить/очистить всю строку смены или весь день.
@@ -1456,18 +1571,22 @@ function plFillRow(shift){
   const all=days.every(d=>plCells[d+'|'+shift]);
   days.forEach(d=>{
     const k=d+'|'+shift;
-    if(all)delete plCells[k];
-    else plCells[k]={qty:plBrush.qty,preco:plBrush.preco,tipo:plBrush.tipo};
+    if(all){delete plCells[k];return;}
+    const pr=priceFor(plBrush.tipo,plCity,d);
+    if(pr===null)return;                       // день без тарифа пропускаем
+    plCells[k]={qty:plBrush.qty,preco:pr,tipo:plBrush.tipo};
   });
   plSaveDraft();renderPlanner();
 }
 function plFillDay(iso){
   if(iso<schIso(new Date()))return;
   const all=PL_SHIFTS.every(s=>plCells[iso+'|'+s.key]);
+  const pr=priceFor(plBrush.tipo,plCity,iso);
   PL_SHIFTS.forEach(s=>{
     const k=iso+'|'+s.key;
-    if(all)delete plCells[k];
-    else plCells[k]={qty:plBrush.qty,preco:plBrush.preco,tipo:plBrush.tipo};
+    if(all){delete plCells[k];return;}
+    if(pr===null)return;
+    plCells[k]={qty:plBrush.qty,preco:pr,tipo:plBrush.tipo};
   });
   plSaveDraft();renderPlanner();
 }
@@ -1511,10 +1630,12 @@ function renderPlanner(){
   document.querySelectorAll('#plTipo .pl-seg-btn').forEach(b=>
     b.classList.toggle('is-on',b.dataset.v===plBrush.tipo));
   const q=document.getElementById('plQty');if(q&&document.activeElement!==q)q.value=plBrush.qty;
-  const pr=document.getElementById('plPreco');if(pr&&document.activeElement!==pr)pr.value=plBrush.preco;
-  const pres=document.getElementById('plPresets');
-  if(pres)pres.innerHTML=PL_PRESETS.map(v=>
-    `<button class="pl-preset${String(plBrush.preco)===String(v)?' is-on':''}" onclick="plSetPreco('${v}')">${plFmtMoney(v)}</button>`).join('');
+  const tf=document.getElementById('plTariff');
+  if(tf){
+    if(priceState.error)tf.innerHTML=`<span class="pl-tariff-bad">⚠ ${t('pl_tariff_err')}: ${priceState.error}</span>`;
+    else if(!priceState.loaded)tf.innerHTML=`<span class="pl-tariff-wait">${t('pl_tariff_load')}</span>`;
+    else tf.innerHTML=`<span class="pl-tariff-ok">🔒 ${t('pl_tariff_fixed')}</span>`;
+  }
 
   const days=plDays();
   const wkEnd=new Date(plWeekStart);wkEnd.setDate(wkEnd.getDate()+6);
@@ -1545,11 +1666,15 @@ function renderPlanner(){
       const c=plCells[k];
       const had=plExisting(iso,sh.key);
       const past=iso<today;
+      const tariff=priceFor(plBrush.tipo,plCity,iso);
+      const noTariff=priceState.loaded&&tariff===null;
       html+=`<td class="pl-cell${past?' pl-past':''}">`+
-        `<button class="pl-box${c?' is-set':''}"${past?' disabled':''} onclick="plToggle('${iso}','${sh.key}')">`+
+        `<button class="pl-box${c?' is-set':''}${(!c&&noTariff)?' pl-notariff':''}"${past?' disabled':''} onclick="plToggle('${iso}','${sh.key}')">`+
         (c?`<span class="pl-box-top">${c.tipo==='SCOUT'?'🛴':'🔌'} ×${c.qty}</span>`+
-            `<span class="pl-box-price">${plFmtMoney(c.preco)||'—'}</span>`
-          :`<span class="pl-box-plus">+</span>`)+
+            `<span class="pl-box-price">${priceFmt(c.preco)}</span>`
+          :(noTariff?`<span class="pl-box-plus">—</span>`
+                    :`<span class="pl-box-plus">+</span>`+
+                     (tariff!==null?`<span class="pl-box-hint">${priceFmt(tariff)}</span>`:'')))+
         `</button>`+
         (had?`<span class="pl-had" title="${t('pl_already')}">✓${had}</span>`:'')+
         `</td>`;
@@ -1563,12 +1688,12 @@ function renderPlanner(){
   const keys=Object.keys(plCells);
   const slots=keys.length;
   const vagas=keys.reduce((a,k)=>a+(plCells[k].qty||1),0);
-  const precos=[...new Set(keys.map(k=>plCells[k].preco).filter(v=>v!==''&&v!==null&&v!==undefined))];
+  const precos=[...new Set(keys.map(k=>plCells[k].preco).filter(v=>v!==null&&v!==undefined))];
   const sum=document.getElementById('plSummary');
   if(sum){
     sum.innerHTML=slots
       ?`<b>${slots}</b> ${t('pl_sum_slots')} · <b>${vagas}</b> ${t('pl_sum_vagas')}`+
-       (precos.length?` · ${precos.sort((a,b)=>a-b).map(plFmtMoney).join(' / ')}`:'')
+       (precos.length?` · ${precos.sort((a,b)=>a-b).map(priceFmt).join(' / ')}`:'')
       :`<span style="opacity:.6">${t('pl_sum_empty')}</span>`;
   }
   // Кнопку не гасим: молчаливая серая кнопка читается как «сломалась».
@@ -1630,7 +1755,7 @@ function plPlanPreview(){
   return Object.keys(byDay).sort().map(iso=>{
     const d=`${iso.slice(8,10)}.${iso.slice(5,7)}`;
     const items=byDay[iso].map(x=>`${x.c.tipo==='SCOUT'?'🛴':'🔌'} ${plShiftName(x.shift)} ×${x.c.qty}`+
-      (x.c.preco!==''?` · ${plFmtMoney(x.c.preco)}`:'')).join(' · ');
+      ` · ${priceFmt(x.c.preco)}`).join(' · ');
     return `<div class="pl-prev-row"><b>${d}</b> ${items}</div>`;
   }).join('');
 }
@@ -1655,9 +1780,13 @@ async function plPublish(){
     plModal(prog,false);
     if(res)res.innerHTML=`<div class="pl-progress">${t('pl_sending')} ${done+1}/${keys.length}…</div>`;
     try{
+      // Цену перечитываем из таблицы в момент отправки — чтобы в бот ушла
+      // именно тарифная ставка, даже если черновик пролежал день.
+      const fresh=priceFor(c.tipo,plCity,iso);
+      if(fresh===null)throw new Error(t('pl_no_tariff_short'));
       const r=await fetch(API_BASE+'/api/slot',{method:'POST',headers:{'Content-Type':'application/json'},
         body:JSON.stringify({key:API_KEY,cidade:plCity,data:iso,tipo:c.tipo,shift:shift,
-          vagas:c.qty,preco:c.preco===''?null:c.preco,descricao:note,mode:'day'})});
+          vagas:c.qty,preco:fresh,descricao:note,mode:'day'})});
       const j=await r.json();
       if(!r.ok||!j.ok)throw new Error(j.error||('HTTP '+r.status));
       done++;sent+=(j.sent||0);
@@ -1678,17 +1807,40 @@ async function plPublish(){
   setTimeout(()=>{fetchBotData();},1200);
 }
 
+// Ставка одиночной формы — из той же таблицы тарифов, руками не меняется.
+function plSyncSingleForm(){
+  const c=document.getElementById('nsCity'), d=document.getElementById('nsDate'),
+        tp=document.getElementById('nsTipo'), pr=document.getElementById('nsPreco'),
+        hint=document.getElementById('nsPrecoHint');
+  if(!c||!d||!tp||!pr)return;
+  const v=(c.value&&d.value)?priceFor(tp.value,c.value,d.value):null;
+  pr.value=v===null?'':priceFmt(v);
+  pr.dataset.raw=v===null?'':String(v);
+  if(hint)hint.textContent=(!c.value||!d.value)?t('pl_tariff_need')
+    :(v===null?t('pl_no_tariff_short'):t('pl_tariff_fixed'));
+}
+['nsCity','nsDate','nsTipo'].forEach(id=>{
+  document.addEventListener('change',e=>{if(e.target&&e.target.id===id)plSyncSingleForm();},true);
+});
+
 async function createSlot(){
   const res=document.getElementById('nsResult');
   const cidade=document.getElementById('nsCity').value;
   const data=document.getElementById('nsDate').value;
   if(!cidade||!data){res.style.color='var(--accent2)';res.textContent=lang==='ru'?'Укажи город и дату':'Informe cidade e data';return;}
+  plSyncSingleForm();
+  if(!document.getElementById('nsPreco').dataset.raw){
+    res.style.color='var(--accent2)';
+    res.textContent=t('pl_no_tariff').replace('{c}',CITY_NAMES[cidade]||cidade)
+      .replace('{d}',data.slice(8,10)+'.'+data.slice(5,7));
+    return;
+  }
   const payload={
     key:API_KEY, cidade,data,
     tipo:document.getElementById('nsTipo').value,
     shift:document.getElementById('nsShift').value,
     vagas:parseInt(document.getElementById('nsQty').value||'1',10),
-    preco:document.getElementById('nsPreco').value||null,
+    preco:Number(document.getElementById('nsPreco').dataset.raw||0)||null,
     descricao:document.getElementById('nsNote').value||'',
     mode:document.getElementById('nsMode').value
   };
@@ -2301,6 +2453,8 @@ function schRenderDetail(week){
 }
 
 window.addEventListener('load',()=>{
+  setTimeout(()=>{if(typeof loadPrices==='function')loadPrices();},2200);
+  setInterval(()=>{if(typeof loadPrices==='function')loadPrices(true);},30*60*1000);
   setTimeout(loadSchedule,3000);
   setInterval(loadSchedule,5*60*1000);
 });
