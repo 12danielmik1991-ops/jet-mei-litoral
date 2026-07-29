@@ -104,6 +104,12 @@
   .pl-seg-btn{background:var(--surface2);color:var(--text-dim);border:none;padding:9px 12px;
     font-size:11px;font-weight:700;font-family:'Syne',sans-serif;cursor:pointer}
   .pl-seg-btn.is-on{background:var(--accent);color:#04121a}
+  .slot-cancel-btn{margin-top:9px;background:transparent;border:1px solid var(--accent2);
+    color:var(--accent2);border-radius:5px;padding:6px 10px;font-size:11px;font-weight:700;
+    font-family:'Syne',sans-serif;cursor:pointer;transition:all .15s}
+  .slot-cancel-btn:hover{background:var(--accent2);color:#fff}
+  .slot-cancelled-mark{margin-top:9px;font-size:11px;color:var(--text-dim);
+    font-family:'Space Mono',monospace;opacity:.75}
   .pl-tariff{font-size:11px;align-self:center}
   .pl-tariff-ok{color:var(--accent3);font-weight:700}
   .pl-tariff-wait{color:var(--text-dim)}
@@ -715,6 +721,12 @@ const I18N={
     pl_qty:'Мест',pl_price:'R$/действие',pl_pick_city:'Выбери город — откроется неделя по сменам.',
     pl_fill_day:'Заполнить весь день',pl_fill_row:'Заполнить всю неделю по этой смене',
     pl_already:'уже создано слотов на эту смену',pl_note_ph:'Примечание ко всем слотам (необязательно)',
+    cs_btn:'Отменить слот',cs_title:'Отмена слота',cs_yes:'Да, отменить',
+    cs_takers:'Приняли',cs_notify:'Им уйдёт уведомление об отмене.',
+    cs_empty:'Слот никто не принял — уведомлять некого.',
+    cs_working:'По этому слоту уже начата смена — человек работает прямо сейчас.',
+    cs_sending:'Отменяю',cs_done:'Слот отменён',cs_skipped:'Слот не отменён',
+    cs_already:'Отменён',cs_notfound:'Слот не найден в текущей выгрузке',
     pl_tariff_fixed:'Ставка из таблицы тарифов — изменить нельзя',
     pl_tariff_load:'Загружаю тарифы…',pl_tariff_err:'Тарифы не загрузились',
     pl_tariff_auto:'из таблицы',pl_tariff_need:'Выбери город и дату — подставится тариф',
@@ -760,6 +772,12 @@ const I18N={
     pl_qty:'Vagas',pl_price:'R$/ação',pl_pick_city:'Escolha a cidade — a semana abre por turnos.',
     pl_fill_day:'Preencher o dia todo',pl_fill_row:'Preencher a semana toda neste turno',
     pl_already:'turnos já criados neste horário',pl_note_ph:'Observação para todos os turnos (opcional)',
+    cs_btn:'Cancelar turno',cs_title:'Cancelar turno',cs_yes:'Sim, cancelar',
+    cs_takers:'Aceitaram',cs_notify:'Eles receberão aviso do cancelamento.',
+    cs_empty:'Ninguém aceitou este turno — não há quem avisar.',
+    cs_working:'Já existe turno iniciado neste slot — a pessoa está trabalhando agora.',
+    cs_sending:'Cancelando',cs_done:'Turno cancelado',cs_skipped:'Turno não cancelado',
+    cs_already:'Cancelado',cs_notfound:'Turno não encontrado nos dados atuais',
     pl_tariff_fixed:'Valor vem da planilha de tarifas — não editável',
     pl_tariff_load:'Carregando tarifas…',pl_tariff_err:'Falha ao carregar tarifas',
     pl_tariff_auto:'da planilha',pl_tariff_need:'Escolha cidade e data — o valor é preenchido',
@@ -1409,6 +1427,89 @@ function toggleNewSlotForm(){
   }
 }
 // ══════════════════════════════════════════════════════════════════════
+//  ОТМЕНА СЛОТА — общая для всех вкладок.
+//  Бот сам уведомляет тех, кто уже принял слот, и снимает кнопки «Aceitar»
+//  в старых рассылках, поэтому отмена всегда идёт через него, а не правкой БД.
+// ══════════════════════════════════════════════════════════════════════
+let _cancelBusy=false;
+
+function slotById(id){
+  return (window.allSlots||[]).find(x=>String(x.id)===String(id))||null;
+}
+// Кто уже принял слот — их и предупредим в подтверждении
+function slotTakers(id){
+  const out=[];
+  (typeof liveOffers!=='undefined'?liveOffers:[]).forEach(o=>{
+    if(String(o.slot_id)===String(id)&&o.nome&&out.indexOf(o.nome)<0)out.push(o.nome);
+  });
+  if(!out.length){
+    const s=slotById(id);
+    try{
+      const acc=s&&(typeof s.acceptances==='string'?JSON.parse(s.acceptances||'[]'):(s.acceptances||[]));
+      (acc||[]).forEach(a=>{const nm=a&&(a.name||a.nome);if(nm&&out.indexOf(nm)<0)out.push(nm);});
+    }catch(e){}
+  }
+  return out;
+}
+// Начата ли по слоту смена — такие не отменяем: человек уже работает
+function slotHasShift(id){
+  return (typeof liveShifts!=='undefined'?liveShifts:[])
+    .some(x=>String(x.slot_id)===String(id)&&x.started_at);
+}
+
+function askCancelSlot(id){
+  const s=slotById(id);
+  if(!s){plModal(`<div class="pl-confirm-txt">${t('cs_notfound')}</div>`+
+    `<div class="pl-confirm-btns"><button class="slot-btn" onclick="plModalClose()">OK</button></div>`,true);return;}
+  if(s.status==='cancelled'){plModal(`<div class="pl-confirm-txt">${t('cs_already')}</div>`+
+    `<div class="pl-confirm-btns"><button class="slot-btn" onclick="plModalClose()">OK</button></div>`,true);return;}
+  const takers=slotTakers(id);
+  const working=slotHasShift(id);
+  plModal(`<div class="pl-modal-title">${t('cs_title')} #${id}</div>`+
+    `<div class="pl-confirm-txt">${(CITY_NAMES[s.cidade]||s.cidade)} · ${String(s.data).split('-').reverse().join('.')}`+
+      ` · ${s.tipo==='LOGISTICA'||s.tipo==='SCOUT'?'🛴':'🔌'}<br>`+
+      `${_schEsc((s.descricao||'').split('\n')[0].slice(0,90))}</div>`+
+    (working?`<div class="pl-failed">⚠ ${t('cs_working')}</div>`:'')+
+    (takers.length?`<div class="pl-confirm-list">${t('cs_takers')}: ${takers.map(_schEsc).join(', ')}<br>${t('cs_notify')}</div>`
+                  :`<div class="pl-confirm-list">${t('cs_empty')}</div>`)+
+    `<div class="pl-confirm-btns">`+
+    `<button class="slot-btn slot-btn-order" style="background:var(--accent2)" onclick="doCancelSlot(${id})">${t('cs_yes')}</button>`+
+    `<button class="slot-btn" style="background:var(--surface2);color:var(--text)" onclick="plModalClose()">${t('btn_cancel')}</button>`+
+    `</div>`,true);
+}
+
+async function doCancelSlot(id){
+  if(_cancelBusy)return;
+  _cancelBusy=true;
+  plModal(`<div class="pl-modal-title">${t('cs_title')} #${id}</div>`+
+    `<div class="pl-progress">${t('cs_sending')}…</div>`,false);
+  try{
+    const r=await fetch(API_BASE+'/api/slot/cancel',{method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({key:API_KEY,slot_ids:[Number(id)],notify:true})});
+    const j=await r.json();
+    if(!r.ok||!j.ok)throw new Error(j.error||('HTTP '+r.status));
+    const done=(j.cancelled||[]).length;
+    plModal(`<div class="pl-modal-title">${t('cs_title')} #${id}</div>`+
+      (done?`<div class="pl-done">✅ ${t('cs_done')} · ${t('pl_notified')}: <b>${j.notified||0}</b></div>`
+           :`<div class="pl-failed">⚠ ${t('cs_skipped')}: ${JSON.stringify(j.skipped||[])}</div>`)+
+      `<div class="pl-confirm-btns"><button class="slot-btn slot-btn-order" onclick="plModalClose()">OK</button></div>`,true);
+    // локально помечаем сразу, не дожидаясь следующей выгрузки бота
+    const s=slotById(id);
+    if(s&&done)s.status='cancelled';
+    ['renderSlotsGrid','renderSchedule','renderPlanner'].forEach(f=>{
+      try{if(typeof window[f]==='function')window[f]();}catch(e){}
+    });
+    setTimeout(()=>fetchBotData(),1500);
+  }catch(e){
+    plModal(`<div class="pl-modal-title">${t('cs_title')} #${id}</div>`+
+      `<div class="pl-failed">❌ ${e.message}</div>`+
+      `<div class="pl-confirm-btns"><button class="slot-btn" onclick="plModalClose()">OK</button></div>`,true);
+  }
+  _cancelBusy=false;
+}
+
+// ══════════════════════════════════════════════════════════════════════
 //  ТАРИФЫ — единственный источник ставки за действие.
 //  Два листа «ДАШБОРД ДЕЙСТВИЙ MEI 2026»: строки — города, колонки — даты,
 //  значение — R$/ação. Ставка зависит и от города, и от дня (выходные дороже),
@@ -1899,6 +2000,9 @@ function renderSlotsGrid(){
       </div>
       ${names.length?`<div style="font-size:11px;line-height:1.6">${names.map(n=>`👤 ${n}`).join('<br>')}</div>`:''}
       ${note?`<div style="font-size:10px;color:var(--text-dim);margin-top:7px;font-family:'Space Mono',monospace">${note}</div>`:''}
+      ${s.status==='cancelled'
+        ? `<div class="slot-cancelled-mark">🚫 ${t('cs_already')}</div>`
+        : `<button class="slot-cancel-btn" onclick="askCancelSlot(${s.id})">❌ ${t('cs_btn')}</button>`}
     </div>`;
   }).join('');
 }
@@ -2371,6 +2475,16 @@ function renderSchedule(){
       const recs=cityRecs.filter(r=>r.slot.data===iso);
       html+=`<td class="sch-day-cell${iso===todayIso?' today':''}">`;
       recs.forEach(r=>{
+        // Отменённый слот — один компактный чип, а не по чипу на каждого,
+        // иначе после массовой отмены сетку не разобрать.
+        if(r.cancelled){
+          if(!schOnlyIssues){
+            const who=r.people.length?' · '+r.people.length:'';
+            html+=`<div class="sch-chip sch-st-cancel" onclick="schOpenSlot(${r.slot.id})" title="${_schEsc(t('sch_st_cancel')+(r.people.length?' · '+r.people.map(p=>p.nome).join(', '):''))}">`+
+              `<span class="sch-chip-txt">${schTipoIcon(r.slot.tipo)} 🚫 ${t('sch_cancel_chip')}${who}</span></div>`;
+          }
+          return;
+        }
         r.people.forEach(p=>{
           if(schOnlyIssues&&p.state!=='noshow'&&p.state!=='unclosed'&&p.state!=='nocheck')return;
           html+=schChipHtml(r,p);
@@ -2378,10 +2492,6 @@ function renderSchedule(){
         if(r.free>0&&!r.cancelled&&!schOnlyIssues){
           html+=`<div class="sch-chip sch-st-free" onclick="schOpenSlot(${r.slot.id})" title="${_schEsc(t('sch_st_free')+' · '+(r.slot.descricao||'').slice(0,120))}">`+
             `<span class="sch-chip-txt">${schTipoIcon(r.slot.tipo)} ⬜ ${t('sch_free_chip')}${r.free>1?' ×'+r.free:''}</span></div>`;
-        }
-        if(r.cancelled&&!r.people.length&&!schOnlyIssues){
-          html+=`<div class="sch-chip sch-st-cancel" onclick="schOpenSlot(${r.slot.id})">`+
-            `<span class="sch-chip-txt">${schTipoIcon(r.slot.tipo)} 🚫 ${t('sch_cancel_chip')}</span></div>`;
         }
       });
       html+='</td>';
@@ -2434,6 +2544,9 @@ function schDetailHtml(rec,isSheet){
     <div class="sch-detail-head">
       <span>${schTipoIcon(s.tipo)} ${schOrigin(s)} <b>${CITY_NAMES[s.cidade]||s.cidade}</b> · ${s.data.split('-').reverse().join('.')}</span>
       <span class="sch-mono">#${s.id} · ${s.status} · ${t('lbl_vagas2')}: ${rec.people.length}/${Math.max(Number(s.vagas_total||1),rec.people.length)}</span>
+      <span style="flex:1"></span>
+      ${s.status==='cancelled'?`<span class="sch-mono">🚫 ${t('cs_already')}</span>`
+        :`<button class="slot-cancel-btn" onclick="askCancelSlot(${s.id})">❌ ${t('cs_btn')}</button>`}
       ${isSheet?'':`<button class="icon-btn" onclick="schOpenSlot(${s.id})">✕</button>`}
     </div>
     <div class="sch-detail-meta">${t('lbl_criado')}: ${createdStr} · ${t('lbl_criou')}: ${_schEsc(creator)}</div>
