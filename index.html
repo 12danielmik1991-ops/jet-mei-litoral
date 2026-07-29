@@ -71,12 +71,26 @@
   .sch-table th.sch-we{color:var(--accent4)}
   .sch-table th.today{color:var(--accent);font-weight:700}
   .sch-city-col{width:112px;vertical-align:top;padding:6px 8px;background:var(--surface2);border-radius:var(--radius)}
+  .sch-city-head-cell{background:var(--surface2);border-left:3px solid var(--accent);border-radius:var(--radius);
+    padding:6px 10px;font-size:12px}
+  .sch-city-head-cell b{font-family:'Space Mono',monospace;color:var(--accent);font-size:13px}
+  .sch-city-head-cell .sch-city-name{display:inline;color:var(--text-dim);font-size:11px;margin-left:6px}
+  .sch-city-head-cell .sch-city-stats{display:inline;float:right;font-family:'Space Mono',monospace;
+    font-size:10px;color:var(--text-dim)}
+  .sch-win-col{width:112px;vertical-align:middle;padding:5px 8px;background:var(--surface);
+    border-radius:var(--radius);font-size:11px;font-weight:700}
+  .sch-win-col .sch-win-time{display:block;font-family:'Space Mono',monospace;font-size:9.5px;
+    color:var(--text-dim);font-weight:400}
+  .sch-chip-name{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sch-day-win{padding:6px 12px 2px;font-size:10px;font-weight:700;color:var(--text-dim);
+    font-family:'Space Mono',monospace}
+  .sch-day-win span{opacity:.7}
   .sch-city-col b{font-size:13px;font-family:'Space Mono',monospace;color:var(--accent)}
   .sch-city-name{display:block;font-size:10px;color:var(--text-dim);margin-top:1px}
   .sch-city-stats{display:block;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);margin-top:4px}
   .sch-day-cell{vertical-align:top;padding:3px;min-width:118px;background:var(--surface);border-radius:var(--radius)}
   .sch-day-cell.today{outline:1px solid var(--accent);outline-offset:-1px}
-  .sch-chip{display:flex;flex-direction:column;gap:1px;border-radius:5px;padding:4px 6px;font-size:10.5px;
+  .sch-chip{display:flex;flex-direction:column;gap:1px;border-radius:5px;padding:4px 5px;font-size:10.5px;
     font-family:'Space Mono',monospace;margin-bottom:3px;cursor:pointer;border:1px solid transparent;transition:filter .15s}
   .sch-chip-head{display:flex;align-items:center;gap:4px;line-height:1.1}
   .sch-chip-time{font-size:10px;letter-spacing:-.2px}
@@ -392,6 +406,7 @@
   <div class="tab" data-tab="tasks" onclick="switchTab('tasks')"><span>✅</span><span data-i18n="nav_tasks">Tarefas</span></div>
   <div class="tab" data-tab="analytics" onclick="switchTab('analytics')"><span>📈</span><span data-i18n="nav_analytics">Analítica</span></div>
   <div class="tab" data-tab="team" onclick="switchTab('team')"><span>👥</span><span data-i18n="nav_team">Executores</span></div>
+  <div class="tab" data-tab="monitor" onclick="switchTab('monitor')"><span>📡</span><span data-i18n="nav_monitor">Ao vivo</span></div>
   <div class="tab" data-tab="antifraud" onclick="switchTab('antifraud')"><span>🛡</span><span data-i18n="nav_antifraud">Antifraude</span></div>
   <div class="tab" data-tab="schedule" onclick="switchTab('schedule')"><span>📅</span><span data-i18n="nav_schedule">Escalas</span></div>
   </div>
@@ -659,6 +674,66 @@
   </div>
 </div>
 
+<!-- TAB MONITOR (действия в реальном времени из реестров Urent через VPS:8002) -->
+<style>
+.ml-dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:6px;vertical-align:middle}
+.ml-on{background:var(--accent3);box-shadow:0 0 6px var(--accent3);animation:mlPulse 2s infinite}
+.ml-off{background:var(--text-dim);opacity:.5}
+@keyframes mlPulse{0%,100%{opacity:1}50%{opacity:.35}}
+.ml-row-on{background:rgba(0,255,170,.04)}
+.ml-busy{font-size:10px;color:var(--accent4);font-family:'Space Mono',monospace}
+.ml-shuttle{background:var(--accent4);color:#000;border-radius:3px;padding:1px 5px;font-size:10px;font-weight:700;margin-left:6px}
+.ml-stale{color:var(--accent2)}
+#mlMap{height:520px;border-radius:8px;overflow:hidden;position:relative;background:var(--surface2)}
+.ml-maphint{font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;margin:8px 0 10px}
+.ml-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;font-family:'Space Mono',monospace;margin-top:10px}
+.ml-legend span b{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:middle}
+</style>
+<div class="tab-content" id="tab-monitor">
+  <div class="ov-hero">
+    <div class="ov-hero-left">
+      <div class="ov-hero-title" data-i18n="ml_title">📡 Ações em tempo real</div>
+      <div class="ov-hero-sub" id="mlMeta">—</div>
+    </div>
+    <button class="icon-btn" onclick="loadMonitor(true)">⟳ Sync</button>
+  </div>
+  <div class="summary">
+    <div class="card"><div class="card-label" data-i18n="ml_onshift">Em turno agora</div><div class="card-val green" id="mlOnShift">—</div><div class="card-sub" id="mlOnShiftSub"></div></div>
+    <div class="card"><div class="card-label" data-i18n="ml_actions">Ações hoje</div><div class="card-val cyan" id="mlActions">—</div><div class="card-sub" id="mlActionsSub"></div></div>
+    <div class="card"><div class="card-label" data-i18n="ml_fail">Sem sucesso</div><div class="card-val orange" id="mlFail">—</div><div class="card-sub" data-i18n="ml_fail_sub">tentativas perdidas</div></div>
+    <div class="card"><div class="card-label" data-i18n="ml_shuttles">Vaivéns</div><div class="card-val red" id="mlShuttles">—</div><div class="card-sub" data-i18n="ml_shuttles_sub">ida e volta ao mesmo ponto</div></div>
+  </div>
+  <div class="an-panel" style="margin:0 24px 16px">
+    <div class="an-title" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span data-i18n="ml_people">👷 Quem está trabalhando</span>
+      <span style="flex:1"></span>
+      <input type="text" id="mlSearch" class="tm-input" style="max-width:220px" oninput="renderMonitor()" data-i18n-ph="ml_search" placeholder="Buscar por nome…">
+      <button class="icon-btn" onclick="mlToggleAll()" id="mlAllBtn" data-i18n="ml_showall">Mostrar todos</button>
+    </div>
+    <div id="mlPeople" style="overflow-x:auto;margin-top:10px"></div>
+  </div>
+  <div class="an-panel" style="margin:0 24px 30px">
+    <div class="an-title" style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <span data-i18n="ml_map">🗺 Mapa de movimentações</span>
+      <span id="mlMapWho" class="ml-busy"></span>
+      <span style="flex:1"></span>
+      <select id="mlMapHours" class="tm-select" onchange="mlDrawMap()">
+        <option value="3">3h</option><option value="6">6h</option>
+        <option value="12" selected>12h</option><option value="24">24h</option>
+      </select>
+      <button class="icon-btn" onclick="mlClearFocus()" data-i18n="ml_allpeople">Todos</button>
+    </div>
+    <div class="ml-maphint" data-i18n="ml_maphint">Cada arco = um patinete movido: da origem até onde foi deixado. Clique numa pessoa acima para ver só ela.</div>
+    <div id="mlMap"></div>
+    <div class="ml-legend">
+      <span><b style="background:#00e5a0"></b><span data-i18n="ml_leg_ok">movimentação concluída</span></span>
+      <span><b style="background:#ff5c7a"></b><span data-i18n="ml_leg_fail">sem sucesso</span></span>
+      <span><b style="background:#ffb020"></b><span data-i18n="ml_leg_shuttle">vaivém (ida e volta)</span></span>
+      <span><b style="background:#00d4ff"></b><span data-i18n="ml_leg_now">em andamento agora</span></span>
+    </div>
+  </div>
+</div>
+
 <!-- TAB SCHEDULE (недельный график смен из бота) -->
 <!-- TAB ESCALAS — все созданные слоты недели: кто взял, кто вышел, сколько действий -->
 <div class="tab-content" id="tab-schedule">
@@ -740,7 +815,9 @@ const I18N={
     pl_confirm_yes:'Да, публиковать',pl_sending:'Отправляю',pl_created:'Создано слотов',
     pl_notified:'уведомлено MEI',pl_failed:'Не удалось',
     lbl_tip:'Тип',lbl_cidade2:'Город',lbl_data2:'Дата',lbl_turno2:'Турно',lbl_aceitou:'Принял',lbl_vagas2:'Вакансии',lbl_criado:'Создан',lbl_criou:'Создал',lbl_aceitos:'Принявшие',
-    nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_team:'Исполнители',nav_antifraud:'Антифрод',nav_schedule:'График',
+    nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_team:'Исполнители',nav_antifraud:'Антифрод',nav_schedule:'График',nav_monitor:'В эфире',
+    ml_title:'📡 Действия в реальном времени',ml_onshift:'Сейчас на смене',ml_actions:'Действий за сутки',ml_fail:'Без результата',ml_fail_sub:'неудачные попытки',ml_shuttles:'Челноки',ml_shuttles_sub:'увёз и вернул на то же место',ml_people:'👷 Кто работает',ml_search:'Поиск по имени…',ml_showall:'Показать всех',ml_showon:'Только на смене',ml_map:'🗺 Карта перемещений',ml_maphint:'Каждая дуга — перегон самоката: откуда забрал и куда поставил. Клик по человеку в таблице — только он.',ml_allpeople:'Все',ml_leg_ok:'перегон завершён',ml_leg_fail:'без результата',ml_leg_shuttle:'челнок (туда-обратно)',ml_leg_now:'идёт прямо сейчас',
+    ml_col_fio:'ФИО',ml_col_role:'Роль',ml_col_act:'Действий',ml_col_moves:'Перегоны',ml_col_bat:'АКБ',ml_col_km:'км',ml_col_h:'ч',ml_col_rate:'в час',ml_col_idle:'Простой',ml_col_now:'Сейчас',ml_now_move:'везёт самокат',ml_now_bat:'меняет АКБ',ml_idle_min:'мин',ml_offline:'ушёл',ml_empty:'Никого нет в этом окне',ml_err:'Нет связи с сервисом мониторинга',ml_updated:'обновлено',ml_window:'окно с',ml_of:'из',ml_people_seen:'человек за сутки',ml_stale:'висит долго — проверь',ml_maploading:'Загружаю карту…',ml_nomap:'Нет перемещений с координатами за это окно',
     af_title:'🛡 Антифрод перемещений',af_score:'Балл всего',af_moves:'Перемещений',af_bad:'Плохих %',af_people:'Человек',af_bycity:'По городам',af_col_city:'Город',af_col_score:'Балл',af_col_moves:'Перем.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Плохих%',af_col_ppl:'Чел.',af_detbtn:'👤 Детализация по людям',af_dethint:'Введите пароль для просмотра ФИО:',af_show:'Показать',af_wrongpass:'Неверный пароль',af_col_fio:'ФИО',af_col_type:'Тип',af_col_pos:'Должность',af_detectors:'Как читать баллы',af_d1:'D1 — забрал с пустого монитора',af_d2:'D2 — привёз на полный монитор',af_d3:'D3 — поставил не на монитор текущего блока',af_d4:'D4 — неправильное перемещение (хотя бы одно из D1/D2/D3)',af_scorehint:'Балл = D1 + D2 + D3. Данные достоверны с 17.07.2026.',af_updated:'обновлено',af_period:'период',af_loading:'Загрузка…',af_lowdata:'мало данных (не оценивается)',af_inc_time:'Время',af_inc_bike:'Самокат',af_inc_kind:'Тип',af_inc_park:'Парковка',af_inc_none:'нет детализации',af_inc_click:'клик по строке — детали по самокатам',af_kind_d1:'забрал с пустого',af_kind_d2:'привёз на полный',af_kind_d3:'не тот монитор',af_kind_d4:'неверное перемещение',
     tm_title:'Все исполнители',tm_search:'Поиск по имени, CNPJ, телефону…',tm_all:'Все города',tm_reg:'В боте',tm_urent:'Только Urent',tm_col_name:'Полное имя',tm_col_cnpj:'CNPJ',tm_col_phone:'Телефон',tm_col_tg:'Telegram',tm_col_city:'Город',tm_col_type:'Тип',tm_col_status:'Статус',tm_col_actions:'Действий/мес',tm_count:'исполнителей',tm_export:'⬇ CSV',tm_notreg:'не в боте',tm_active:'активен',
     ov_title:'Обзор',link_heat:'Тепловая карта',link_analytics:'Аналитика',link_schedule:'График',
@@ -749,7 +826,7 @@ const I18N={
     ov_emturno:'на смене',ov_ok:'ок',ov_acoes:'действий',ov_empty:'Операций сегодня пока нет.',ov_livres:'свободно',ov_total:'всего',ov_last7:'за 7 дней',
     an_total:'Действий за месяц',an_active:'Активных MEI',an_avg:'Ср. на человека',an_low:'Отстающих',an_permonth:'действий/мес',an_withact:'с действиями',an_belownorm:'ниже нормы',
     an_chart_days:'Действия по дням',an_chart_type:'🔌 АКБ vs 🛴 Самокаты',an_chart_city:'По городам',an_chart_dn:'День vs Ночь',an_ranking:'🏆 Рейтинг эффективности',an_threshold:'порог отставания:',an_nodata:'Нет данных за этот месяц.',an_col_mei:'MEI',an_col_city:'Город',an_col_type:'Тип',an_col_actions:'Действий',an_col_progress:'Прогресс',an_day:'☀️ День',an_night:'🌙 Ночь',an_akb:'🔌 АКБ',an_scooter:'🛴 Самокаты',
-    sch_total:'Слотов создано',sch_taken:'Принято',sch_open:'Свободных мест',sch_out:'Вышли',sch_noshow:'Не вышли',sch_acts:'Действий за неделю',sch_noshow_sub:'приняли слот и не вышли',sch_now:'на смене сейчас',sch_cancelled:'отменено',sch_cd_upto:'ЦД до',sch_cd_pending:'данные ЦД ещё не пришли',sch_acts_day:'Действий за день',sch_out_short:'вышли',sch_city_none:'нет слотов',sch_thisweek:'сегодня',sch_only_issues:'⚠ только проблемы',sch_cancel_chip:'отменён',sch_noone:'Слот никто не взял',sch_detail_title:'Слот',sch_th_accepted:'Принял',sch_th_start:'Начало',sch_th_end:'Конец',sch_st_done:'вышел и закрыл смену',sch_st_onshift:'на смене сейчас',sch_st_wait:'принял, ещё не вышел',sch_st_noshow:'не вышел',sch_st_unclosed:'смену не закрыл',sch_st_nocheck:'работал без отметки в боте',sch_st_cancel:'слот отменён',sch_st_free:'свободное место',sch_declined:'Отказов',sch_confirmed_of:'из них подтвердили:',sch_wait_worker:'ждут исполнителя',sch_returned:'вернулись в пул',sch_week:'неделя',sch_prevweek:'◀ пред. неделя',sch_nextweek:'след. неделя ▶',sch_empty:'На эту неделю слотов нет. Создай их в боте (/slot) или планом /escala.',sch_accepted:'принято',
+    sch_total:'Слотов создано',sch_taken:'Принято',sch_open:'Свободных мест',sch_out:'Вышли',sch_noshow:'Не вышли',sch_acts:'Действий за неделю',sch_noshow_sub:'приняли слот и не вышли',sch_now:'на смене сейчас',sch_cancelled:'отменено',sch_cd_upto:'ЦД до',sch_cd_pending:'данные ЦД ещё не пришли',sch_acts_day:'Действий за день',sch_out_short:'вышли',sch_city_none:'нет слотов',sch_win_other:'Без времени',sch_win_other_hint:'Слоты созданы в боте без указания окна смены',sch_thisweek:'сегодня',sch_only_issues:'⚠ только проблемы',sch_cancel_chip:'отменён',sch_noone:'Слот никто не взял',sch_detail_title:'Слот',sch_th_accepted:'Принял',sch_th_start:'Начало',sch_th_end:'Конец',sch_st_done:'вышел и закрыл смену',sch_st_onshift:'на смене сейчас',sch_st_wait:'принял, ещё не вышел',sch_st_noshow:'не вышел',sch_st_unclosed:'смену не закрыл',sch_st_nocheck:'работал без отметки в боте',sch_st_cancel:'слот отменён',sch_st_free:'свободное место',sch_declined:'Отказов',sch_confirmed_of:'из них подтвердили:',sch_wait_worker:'ждут исполнителя',sch_returned:'вернулись в пул',sch_week:'неделя',sch_prevweek:'◀ пред. неделя',sch_nextweek:'след. неделя ▶',sch_empty:'На эту неделю слотов нет. Создай их в боте (/slot) или планом /escala.',sch_accepted:'принято',
     lg_free:'свободное место',lg_done:'вышел и закрыл смену',lg_onshift:'на смене сейчас',lg_wait:'принял, ещё не вышел',lg_noshow:'не вышел',lg_unclosed:'смену не закрыл',lg_nocheck:'работал без отметки',lg_cancel:'отменён',lg_roles2:'🔋 = батареи · 🚛 = логистика · ⚡ = действий за день (лист ЦД)',lg_taken:'принята',lg_confirmed:'подтверждена ✓✓',lg_declined:'отказ (снова свободна)',lg_windows:'🌅 Утро 06–15 · ☀️ День 12–21 · 🌆 Вечер 15–00 · 🌙 Ночь 21–06',lg_roles:'🔌 = замена АКБ · 🛴 = перемещение самокатов · ставка в подсказке',sch_free_chip:'свободно',sch_decl_chip:'отказ',role_bat_full:'замена АКБ',role_scout_full:'перемещение самокатов',sch_tip_confirmed:'Подтверждена',sch_tip_taken:'Принята (ждёт подтверждения)',sch_tip_declined:'Был отказ — снова свободна',sch_tip_free:'Свободная смена',
     months:['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],dow:['Вс','Пн','Вт','Ср','Чт','Пт','Сб']},
   pt:{act_tip_7d:'Em 7 dias',act_tip_month:'No mês',
@@ -791,7 +868,9 @@ const I18N={
     pl_confirm_yes:'Sim, publicar',pl_sending:'Enviando',pl_created:'Turnos criados',
     pl_notified:'MEIs avisados',pl_failed:'Falhas',
     lbl_tip:'Tipo',lbl_cidade2:'Cidade',lbl_data2:'Data',lbl_turno2:'Turno',lbl_aceitou:'Aceitou',lbl_vagas2:'Vagas',lbl_criado:'Criado',lbl_criou:'Criou',lbl_aceitos:'Aceitos',
-    nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_team:'Executores',nav_antifraud:'Antifraude',nav_schedule:'Escalas',
+    nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_team:'Executores',nav_antifraud:'Antifraude',nav_schedule:'Escalas',nav_monitor:'Ao vivo',
+    ml_title:'📡 Ações em tempo real',ml_onshift:'Em turno agora',ml_actions:'Ações hoje',ml_fail:'Sem sucesso',ml_fail_sub:'tentativas perdidas',ml_shuttles:'Vaivéns',ml_shuttles_sub:'ida e volta ao mesmo ponto',ml_people:'👷 Quem está trabalhando',ml_search:'Buscar por nome…',ml_showall:'Mostrar todos',ml_showon:'Só em turno',ml_map:'🗺 Mapa de movimentações',ml_maphint:'Cada arco = um patinete movido: da origem até onde foi deixado. Clique numa pessoa acima para ver só ela.',ml_allpeople:'Todos',ml_leg_ok:'movimentação concluída',ml_leg_fail:'sem sucesso',ml_leg_shuttle:'vaivém (ida e volta)',ml_leg_now:'em andamento agora',
+    ml_col_fio:'Nome',ml_col_role:'Função',ml_col_act:'Ações',ml_col_moves:'Movim.',ml_col_bat:'Baterias',ml_col_km:'km',ml_col_h:'h',ml_col_rate:'por hora',ml_col_idle:'Parado',ml_col_now:'Agora',ml_now_move:'levando patinete',ml_now_bat:'trocando bateria',ml_idle_min:'min',ml_offline:'saiu',ml_empty:'Ninguém nesta janela',ml_err:'Sem conexão com o serviço de monitoramento',ml_updated:'atualizado',ml_window:'janela desde',ml_of:'de',ml_people_seen:'pessoas hoje',ml_stale:'parado há muito — verifique',ml_maploading:'Carregando mapa…',ml_nomap:'Sem movimentações com coordenadas nesta janela',
     af_title:'🛡 Antifraude de movimentações',af_score:'Score total',af_moves:'Movimentações',af_bad:'Ruins %',af_people:'Pessoas',af_bycity:'Por cidade',af_col_city:'Cidade',af_col_score:'Score',af_col_moves:'Movs.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Ruins%',af_col_ppl:'Pess.',af_detbtn:'👤 Detalhes por pessoa',af_dethint:'Digite a senha para ver os nomes:',af_show:'Mostrar',af_wrongpass:'Senha incorreta',af_col_fio:'Nome',af_col_type:'Tipo',af_col_pos:'Cargo',af_detectors:'Como ler os scores',af_d1:'D1 — pegou de monitor vazio',af_d2:'D2 — levou para monitor cheio',af_d3:'D3 — deixou fora do monitor do bloco atual',af_d4:'D4 — movimentação incorreta (ao menos um de D1/D2/D3)',af_scorehint:'Score = D1 + D2 + D3. Dados confiáveis desde 17/07/2026.',af_updated:'atualizado',af_period:'período',af_loading:'Carregando…',af_lowdata:'poucos dados (não avaliado)',af_inc_time:'Hora',af_inc_bike:'Patinete',af_inc_kind:'Tipo',af_inc_park:'Parada',af_inc_none:'sem detalhes',af_inc_click:'clique na linha — detalhes por patinete',af_kind_d1:'pegou de vazio',af_kind_d2:'levou para cheio',af_kind_d3:'monitor errado',af_kind_d4:'movimentação incorreta',
     tm_title:'Todos os executores',tm_search:'Buscar por nome, CNPJ, telefone…',tm_all:'Todas as cidades',tm_reg:'No bot',tm_urent:'Só Urent',tm_col_name:'Nome completo',tm_col_cnpj:'CNPJ',tm_col_phone:'Telefone',tm_col_tg:'Telegram',tm_col_city:'Cidade',tm_col_type:'Tipo',tm_col_status:'Status',tm_col_actions:'Ações/mês',tm_count:'executores',tm_export:'⬇ CSV',tm_notreg:'fora do bot',tm_active:'ativo',
     ov_title:'Painel Geral',link_heat:'Mapa de calor',link_analytics:'Analítica',link_schedule:'Escalas',
@@ -800,7 +879,7 @@ const I18N={
     ov_emturno:'em turno',ov_ok:'ok',ov_acoes:'ações',ov_empty:'Sem operação registrada hoje ainda.',ov_livres:'livres',ov_total:'no total',ov_last7:'nos últimos 7 dias',
     an_total:'Ações no mês',an_active:'MEIs ativos',an_avg:'Média por pessoa',an_low:'Abaixo da meta',an_permonth:'ações/mês',an_withact:'com ações',an_belownorm:'abaixo de',
     an_chart_days:'Ações por dia',an_chart_type:'🔌 Baterias vs 🛴 Patinetes',an_chart_city:'Por cidade',an_chart_dn:'Dia vs Noite',an_ranking:'🏆 Ranking de Desempenho',an_threshold:'meta mínima:',an_nodata:'Sem dados neste mês.',an_col_mei:'MEI',an_col_city:'Cidade',an_col_type:'Tipo',an_col_actions:'Ações',an_col_progress:'Progresso',an_day:'☀️ Dia',an_night:'🌙 Noite',an_akb:'🔌 Baterias',an_scooter:'🛴 Patinetes',
-    sch_total:'Turnos criados',sch_taken:'Aceitos',sch_open:'Vagas livres',sch_out:'Compareceram',sch_noshow:'Faltaram',sch_acts:'Ações na semana',sch_noshow_sub:'aceitaram e não saíram',sch_now:'em turno agora',sch_cancelled:'cancelados',sch_cd_upto:'CD até',sch_cd_pending:'dados do CD ainda não chegaram',sch_acts_day:'Ações no dia',sch_out_short:'saíram',sch_city_none:'sem turnos',sch_thisweek:'hoje',sch_only_issues:'⚠ só problemas',sch_cancel_chip:'cancelado',sch_noone:'Ninguém aceitou',sch_detail_title:'Turno',sch_th_accepted:'Aceitou',sch_th_start:'Início',sch_th_end:'Fim',sch_st_done:'saiu e encerrou',sch_st_onshift:'em turno agora',sch_st_wait:'aceitou, ainda não saiu',sch_st_noshow:'faltou',sch_st_unclosed:'não encerrou o turno',sch_st_nocheck:'trabalhou sem registrar no bot',sch_st_cancel:'turno cancelado',sch_st_free:'vaga livre',sch_declined:'Desistências',sch_confirmed_of:'confirmados:',sch_wait_worker:'aguardando MEI',sch_returned:'voltaram ao pool',sch_week:'semana',sch_prevweek:'◀ semana ant.',sch_nextweek:'próx. semana ▶',sch_empty:'Nenhum turno nesta semana. Crie no bot (/slot) ou pelo plano /escala.',sch_accepted:'aceitos',
+    sch_total:'Turnos criados',sch_taken:'Aceitos',sch_open:'Vagas livres',sch_out:'Compareceram',sch_noshow:'Faltaram',sch_acts:'Ações na semana',sch_noshow_sub:'aceitaram e não saíram',sch_now:'em turno agora',sch_cancelled:'cancelados',sch_cd_upto:'CD até',sch_cd_pending:'dados do CD ainda não chegaram',sch_acts_day:'Ações no dia',sch_out_short:'saíram',sch_city_none:'sem turnos',sch_win_other:'Sem horário',sch_win_other_hint:'Turnos criados no bot sem janela de horário',sch_thisweek:'hoje',sch_only_issues:'⚠ só problemas',sch_cancel_chip:'cancelado',sch_noone:'Ninguém aceitou',sch_detail_title:'Turno',sch_th_accepted:'Aceitou',sch_th_start:'Início',sch_th_end:'Fim',sch_st_done:'saiu e encerrou',sch_st_onshift:'em turno agora',sch_st_wait:'aceitou, ainda não saiu',sch_st_noshow:'faltou',sch_st_unclosed:'não encerrou o turno',sch_st_nocheck:'trabalhou sem registrar no bot',sch_st_cancel:'turno cancelado',sch_st_free:'vaga livre',sch_declined:'Desistências',sch_confirmed_of:'confirmados:',sch_wait_worker:'aguardando MEI',sch_returned:'voltaram ao pool',sch_week:'semana',sch_prevweek:'◀ semana ant.',sch_nextweek:'próx. semana ▶',sch_empty:'Nenhum turno nesta semana. Crie no bot (/slot) ou pelo plano /escala.',sch_accepted:'aceitos',
     lg_free:'vaga livre',lg_done:'saiu e encerrou',lg_onshift:'em turno agora',lg_wait:'aceitou, ainda não saiu',lg_noshow:'faltou',lg_unclosed:'não encerrou',lg_nocheck:'trabalhou sem registrar',lg_cancel:'cancelado',lg_roles2:'🔋 = baterias · 🚛 = logística · ⚡ = ações no dia (planilha CD)',lg_taken:'pego',lg_confirmed:'confirmado ✓✓',lg_declined:'desistiu (livre de novo)',lg_windows:'🌅 Manhã 06–15 · ☀️ Dia 12–21 · 🌆 Noite 15–00 · 🌙 Madrugada 21–06',lg_roles:'🔌 = troca de baterias · 🛴 = movimentação de patinetes · valor na dica',sch_free_chip:'livre',sch_decl_chip:'desistiu',role_bat_full:'troca de baterias',role_scout_full:'movimentação de patinetes',sch_tip_confirmed:'Confirmado',sch_tip_taken:'Aceito (aguardando confirmação)',sch_tip_declined:'Houve desistência — livre de novo',sch_tip_free:'Turno livre',
     months:['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'],dow:['Dom','Seg','Ter','Qua','Qui','Sex','Sáb']}
 };
@@ -1224,6 +1303,10 @@ function switchTab(tab){
   if(tab==='antifraud'&&typeof loadAntifraud==='function'){
     try{ afData?renderAntifraud():loadAntifraud(); }catch(e){console.error('switchTab→antifraud failed',e);}
   }
+  if(tab==='monitor'&&typeof loadMonitor==='function'){
+    // Данные живые: при каждом заходе тянем заново и запускаем автообновление.
+    try{ loadMonitor(); mlStartAuto(); }catch(e){console.error('switchTab→monitor failed',e);}
+  }else if(typeof mlStopAuto==='function'){ mlStopAuto(); }
   if(tab==='overview'&&typeof renderOverview==='function'){
     try{
       if(!dailyActions.length)loadDailyActions().then(()=>renderOverview());
@@ -2268,6 +2351,15 @@ async function loadSchedule(force){
 // Окно смены. В выгрузке времени нет отдельным полем — бот пишет его в
 // описание: «madrugada 21:00-06:00». Берём оттуда, иначе по названию смены.
 const SCH_WINDOWS={manha:'06–15',dia:'12–21',noite:'15–00',madrugada:'21–06'};
+// Порядок строк внутри города: утро → день → вечер → ночь, прочее в конец.
+const SCH_WIN_ORDER=['06–15','12–21','15–00','21–06'];
+const SCH_WIN_EMOJI={'06–15':'🌅','12–21':'☀️','15–00':'🌆','21–06':'🌙'};
+const SCH_WIN_NAME={ru:{'06–15':'Утро','12–21':'День','15–00':'Вечер','21–06':'Ночь'},
+                    pt:{'06–15':'Manhã','12–21':'Dia','15–00':'Noite','21–06':'Madrugada'}};
+function schWinLabel(w){
+  const nm=(SCH_WIN_NAME[lang]||SCH_WIN_NAME.pt)[w];
+  return nm?`${SCH_WIN_EMOJI[w]} ${nm}`:'🕘 '+t('sch_win_other');
+}
 function schWindow(slot){
   const d=String(slot.descricao||'');
   const m=d.match(/(\d{1,2}):(\d{2})\s*[-–—]\s*(\d{1,2}):(\d{2})/);
@@ -2421,9 +2513,8 @@ function schChipHtml(rec,p){
   ].filter(Boolean).join(' · ');
   return `<div class="sch-chip sch-st-${p.state}" title="${_schEsc(tip)}" onclick="schOpenSlot(${s.id})">`+
     `<span class="sch-chip-head">${schTipoIcon(s.tipo)}`+
-      (win?`<b class="sch-chip-time">${win}</b>`:'')+
+      `<span class="sch-chip-name">${_schEsc(label)}</span>`+
       (actStr?`<span class="sch-chip-act">${actStr}</span>`:'')+`</span>`+
-    `<span class="sch-chip-txt">${_schEsc(label)}</span>`+
     `</div>`;
 }
 
@@ -2478,7 +2569,7 @@ function renderSchedule(){
     .filter(c=>true)
     .concat(Object.keys(withSlots).filter(c=>(typeof CITIES==='undefined')||CITIES.indexOf(c)<0))
     .sort();
-  let html='<table class="sch-table"><thead><tr><th class="sch-city-col"></th>';
+  let html='<table class="sch-table"><thead><tr><th class="sch-win-col"></th>';
   days.forEach((iso,i)=>{
     const cls=(i>=5?'sch-we':'')+(iso===todayIso?' today':'');
     html+=`<th class="${cls}">${schDow()[i]}<br>${iso.slice(8,10)}.${iso.slice(5,7)}</th>`;
@@ -2490,10 +2581,27 @@ function renderSchedule(){
     const cityPeople=[].concat.apply([],cityRecs.filter(r=>!r.cancelled).map(r=>r.people));
     const cityOut=cityPeople.filter(p=>p.state==='done'||p.state==='onshift'||p.state==='unclosed'||p.state==='nocheck').length;
     const cityEmpty=cityRecs.length===0;
-    html+=`<tr${cityEmpty?' class="sch-row-empty"':''}><td class="sch-city-col"><b>${city}</b><span class="sch-city-name">${CITY_NAMES[city]||''}</span>`+
-      `<span class="sch-city-stats">${cityEmpty?t('sch_city_none'):cityOut+'/'+cityPeople.length+' '+t('sch_out_short')}</span></td>`;
+
+    // Заголовок города, под ним — по строке на каждую заказанную смену
+    html+=`<tr class="sch-city-row${cityEmpty?' sch-row-empty':''}"><td class="sch-city-head-cell" colspan="8">`+
+      `<b>${city}</b> <span class="sch-city-name">${CITY_NAMES[city]||''}</span>`+
+      `<span class="sch-city-stats">${cityEmpty?t('sch_city_none'):cityOut+'/'+cityPeople.length+' '+t('sch_out_short')}</span></td></tr>`;
+    if(cityEmpty)return;
+
+    // Какие смены вообще заказаны в этом городе на неделе
+    const wins=[];
+    cityRecs.forEach(r=>{const w=schWindow(r.slot)||'';if(wins.indexOf(w)<0)wins.push(w);});
+    wins.sort((a,b)=>{
+      const ia=SCH_WIN_ORDER.indexOf(a), ib=SCH_WIN_ORDER.indexOf(b);
+      return (ia<0?99:ia)-(ib<0?99:ib)||String(a).localeCompare(String(b));
+    });
+
+    wins.forEach(win=>{
+    const winRecs=cityRecs.filter(r=>(schWindow(r.slot)||'')===win);
+    html+=`<tr class="sch-win-row"><td class="sch-win-col"${win?'':` title="${_schEsc(t('sch_win_other_hint'))}"`}>${schWinLabel(win)}`+
+      `<span class="sch-win-time">${win||'—'}</span></td>`;
     days.forEach(iso=>{
-      const recs=cityRecs.filter(r=>r.slot.data===iso);
+      const recs=winRecs.filter(r=>r.slot.data===iso);
       html+=`<td class="sch-day-cell${iso===todayIso?' today':''}">`;
       recs.forEach(r=>{
         // Отменённый слот — один компактный чип, а не по чипу на каждого,
@@ -2503,8 +2611,7 @@ function renderSchedule(){
             const who=r.people.length?' · '+r.people.length:'';
             html+=`<div class="sch-chip sch-st-cancel" onclick="schOpenSlot(${r.slot.id})" title="${_schEsc(t('sch_st_cancel')+(r.people.length?' · '+r.people.map(p=>p.nome).join(', '):''))}">`+
               `<span class="sch-chip-head">${schTipoIcon(r.slot.tipo)}`+
-                (schWindow(r.slot)?`<b class="sch-chip-time">${schWindow(r.slot)}</b>`:'')+`</span>`+
-              `<span class="sch-chip-txt">🚫 ${t('sch_cancel_chip')}${who}</span></div>`;
+                `<span class="sch-chip-name">🚫 ${t('sch_cancel_chip')}${who}</span></span></div>`;
           }
           return;
         }
@@ -2515,13 +2622,13 @@ function renderSchedule(){
         if(r.free>0&&!r.cancelled&&!schOnlyIssues){
           html+=`<div class="sch-chip sch-st-free" onclick="schOpenSlot(${r.slot.id})" title="${_schEsc(t('sch_st_free')+' · '+(r.slot.descricao||'').slice(0,120))}">`+
             `<span class="sch-chip-head">${schTipoIcon(r.slot.tipo)}`+
-              (schWindow(r.slot)?`<b class="sch-chip-time">${schWindow(r.slot)}</b>`:'')+`</span>`+
-            `<span class="sch-chip-txt">⬜ ${t('sch_free_chip')}${r.free>1?' ×'+r.free:''}</span></div>`;
+              `<span class="sch-chip-name">⬜ ${t('sch_free_chip')}${r.free>1?' ×'+r.free:''}</span></span></div>`;
         }
       });
       html+='</td>';
     });
     html+='</tr>';
+    });
   });
   html+='</tbody></table>';
   grid.innerHTML=html;
@@ -3248,6 +3355,193 @@ function afToggleInc(eid,rowEl){
   tr.innerHTML=`<td colspan="8" style="padding:0 10px 12px;background:var(--surface2)">${sub}</td>`;
   rowEl.after(tr);
   const c0=rowEl.querySelector('td');c0.innerHTML=c0.innerHTML.replace('▸','▾');
+}
+
+// ── MONITOR (действия в эфире: реестры Urent через сервис на VPS) ────
+// Данные идут не через Gist, а напрямую с VPS: тут ФИО и координаты живых
+// людей, им не место в публичном Gist. Пароль входа в дашборд служит ключом.
+const ML_API='https://2.24.100.85.sslip.io/145ed6e0b55f517f75098ee7d294b813';
+const ML_REFRESH_MS=60000;
+let mlData=null,mlFocus=null,mlShowAll=false,mlTimer=null,mlMap=null,mlOverlay=null,mlLibs=null;
+
+async function mlFetch(path){
+  const r=await fetch(ML_API+path,{headers:{'X-Auth-Pass':PASSWORD},cache:'no-store'});
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return r.json();
+}
+async function loadMonitor(force){
+  try{
+    const d=await mlFetch('/api/live');
+    const a=await mlFetch('/api/arcs?hours=24');
+    mlData=d;mlData.arcs=a.arcs||[];mlData.shuttles=a.shuttles||d.shuttles||[];
+    renderMonitor();
+    mlDrawMap();
+  }catch(e){
+    console.error('loadMonitor failed',e);
+    const el=document.getElementById('mlPeople');
+    if(el)el.innerHTML=`<div class="mon-empty" style="color:var(--accent2)">${t('ml_err')}: ${e.message}</div>`;
+  }
+}
+function mlStartAuto(){
+  if(mlTimer)clearInterval(mlTimer);
+  // Обновляем только пока вкладка открыта и вкладка браузера видима —
+  // иначе фоновые копии дашборда молотили бы Urent круглые сутки.
+  mlTimer=setInterval(()=>{
+    const on=document.getElementById('tab-monitor');
+    if(on&&on.classList.contains('active')&&!document.hidden)loadMonitor();
+  },ML_REFRESH_MS);
+}
+function mlStopAuto(){if(mlTimer){clearInterval(mlTimer);mlTimer=null;}}
+
+function mlFmtIdle(m){
+  if(m===null||m===undefined)return '—';
+  if(m<60)return m+' '+t('ml_idle_min');
+  const h=Math.floor(m/60);return h+t('ml_col_h')+' '+(m%60)+t('ml_idle_min').slice(0,1);
+}
+function mlNowLabel(p){
+  if(!p.in_progress)return '';
+  const since=new Date(p.in_progress.since);
+  const min=Math.round((Date.now()-since.getTime())/60000);
+  const what=p.in_progress.kind==='move'?t('ml_now_move'):t('ml_now_bat');
+  // Перегон, висящий больше двух часов, обычно означает забытый статус,
+  // а не работу — подсвечиваем, чтобы супервайзер уточнил.
+  const stale=min>120?` <span class="ml-stale">⚠ ${t('ml_stale')}</span>`:'';
+  return `<span class="ml-busy">${what} ${p.in_progress.vehicle||''} · ${mlFmtIdle(min)}</span>${stale}`;
+}
+function renderMonitor(){
+  if(!mlData)return;
+  const tot=mlData.totals||{};
+  document.getElementById('mlOnShift').textContent=tot.on_shift??'—';
+  document.getElementById('mlOnShiftSub').textContent=`${tot.people_seen||0} ${t('ml_people_seen')}`;
+  document.getElementById('mlActions').textContent=tot.actions??'—';
+  document.getElementById('mlActionsSub').textContent=
+    `${tot.moves_ok||0} ${t('ml_col_moves').toLowerCase()} · ${tot.batteries_ok||0} ${t('ml_col_bat').toLowerCase()}`;
+  const fail=(tot.moves_fail||0)+(tot.batteries_fail||0);
+  document.getElementById('mlFail').textContent=fail;
+  document.getElementById('mlShuttles').textContent=tot.shuttles??'—';
+  document.getElementById('mlMeta').textContent=
+    `${t('ml_updated')} ${new Date(mlData.generated_at).toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR')} · `+
+    `${t('ml_window')} ${new Date(mlData.window_from).toLocaleString(lang==='ru'?'ru-RU':'pt-BR')}`;
+  document.getElementById('mlAllBtn').textContent=mlShowAll?t('ml_showon'):t('ml_showall');
+
+  const q=(document.getElementById('mlSearch')?.value||'').trim().toLowerCase();
+  let rows=(mlData.people||[]).filter(p=>mlShowAll||p.on_shift);
+  if(q)rows=rows.filter(p=>(p.fio||'').toLowerCase().includes(q));
+  const box=document.getElementById('mlPeople');
+  if(!rows.length){box.innerHTML=`<div class="mon-empty">${t('ml_empty')}</div>`;return;}
+
+  const maxAct=Math.max(...rows.map(p=>p.actions_total),1);
+  let html=`<table class="af-table"><thead><tr>
+    <th>#</th><th>${t('ml_col_fio')}</th><th>${t('ml_col_now')}</th>
+    <th>${t('ml_col_act')}</th><th>${t('ml_col_moves')}</th><th>${t('ml_col_bat')}</th>
+    <th>${t('ml_col_km')}</th><th>${t('ml_col_h')}</th><th>${t('ml_col_rate')}</th>
+    <th>${t('ml_col_idle')}</th><th style="width:14%"></th></tr></thead><tbody>`;
+  rows.forEach((p,i)=>{
+    const w=Math.round(p.actions_total/maxAct*100);
+    const sh=p.shuttles?`<span class="ml-shuttle">↔${p.shuttles}</span>`:'';
+    const focused=mlFocus===p.employee_id;
+    html+=`<tr class="${p.on_shift?'ml-row-on':''}" style="cursor:pointer${focused?';outline:1px solid var(--accent1)':''}"
+        onclick="mlFocusPerson('${p.employee_id}')">
+      <td class="tm-mono">${i+1}</td>
+      <td style="font-weight:700"><span class="ml-dot ${p.on_shift?'ml-on':'ml-off'}"></span>${p.fio||'?'}${sh}</td>
+      <td>${mlNowLabel(p)}</td>
+      <td class="tm-mono" style="font-weight:700">${p.actions_total}</td>
+      <td class="tm-mono">${p.moves_ok}${p.moves_fail?`<span style="color:var(--accent2)">/${p.moves_fail}</span>`:''}</td>
+      <td class="tm-mono">${p.batteries_ok}${p.batteries_fail?`<span style="color:var(--accent2)">/${p.batteries_fail}</span>`:''}</td>
+      <td class="tm-mono">${p.distance_km}</td>
+      <td class="tm-mono">${p.worked_h}</td>
+      <td class="tm-mono">${p.per_hour??'—'}</td>
+      <td class="tm-mono">${p.on_shift?mlFmtIdle(p.idle_min):`<span style="color:var(--text-dim)">${t('ml_offline')} ${mlFmtIdle(p.idle_min)}</span>`}</td>
+      <td><div class="af-bar" style="width:${w}%;background:${p.on_shift?'var(--accent3)':'var(--text-dim)'}"></div></td></tr>`;
+  });
+  box.innerHTML=html+'</tbody></table>';
+}
+function mlToggleAll(){mlShowAll=!mlShowAll;renderMonitor();}
+function mlFocusPerson(eid){
+  mlFocus=(mlFocus===eid)?null:eid;
+  const p=(mlData?.people||[]).find(x=>x.employee_id===eid);
+  document.getElementById('mlMapWho').textContent=(mlFocus&&p)?`— ${p.fio}`:'';
+  renderMonitor();mlDrawMap();
+  if(mlFocus)document.getElementById('mlMap')?.scrollIntoView({behavior:'smooth',block:'center'});
+}
+function mlClearFocus(){mlFocus=null;document.getElementById('mlMapWho').textContent='';renderMonitor();mlDrawMap();}
+
+// deck.gl и maplibre грузим лениво: вкладку мониторинга открывают не все,
+// а это ~1 МБ, который иначе тормозил бы загрузку всего дашборда.
+function mlLoadLibs(){
+  if(mlLibs)return mlLibs;
+  const add=(tag,attrs)=>new Promise((res,rej)=>{
+    const el=document.createElement(tag);Object.assign(el,attrs);
+    el.onload=res;el.onerror=()=>rej(new Error('не загрузился '+(attrs.src||attrs.href)));
+    document.head.appendChild(el);
+  });
+  mlLibs=Promise.all([
+    add('link',{rel:'stylesheet',href:'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css'}),
+    add('script',{src:'https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js'}),
+  ]).then(()=>add('script',{src:'https://unpkg.com/deck.gl@9.0.36/dist.min.js'}));
+  return mlLibs;
+}
+function mlArcColor(a,shuttleKeys){
+  if(a.status==='InProgress')return [0,212,255];
+  if(shuttleKeys.has(a.employee_id+'|'+a.at))return [255,176,32];
+  if(a.status==='Successful')return [0,229,160];
+  return [255,92,122];
+}
+async function mlDrawMap(){
+  const host=document.getElementById('mlMap');
+  if(!host||!mlData)return;
+  const hours=parseFloat(document.getElementById('mlMapHours')?.value||'12');
+  const edge=Date.now()-hours*3600000;
+  let arcs=(mlData.arcs||[]).filter(a=>a.from&&a.to&&new Date(a.at).getTime()>=edge);
+  if(mlFocus)arcs=arcs.filter(a=>a.employee_id===mlFocus);
+  if(!arcs.length){host.innerHTML=`<div class="mon-empty" style="padding:40px">${t('ml_nomap')}</div>`;mlMap=null;return;}
+
+  try{await mlLoadLibs();}catch(e){
+    host.innerHTML=`<div class="mon-empty" style="padding:40px;color:var(--accent2)">${e.message}</div>`;return;
+  }
+  const shuttleKeys=new Set((mlData.shuttles||[]).map(s=>s.employee_id+'|'+s.out_at));
+
+  if(!mlMap){
+    host.innerHTML='';
+    const lat=arcs.reduce((s,a)=>s+a.from.lat,0)/arcs.length;
+    const lng=arcs.reduce((s,a)=>s+a.from.lng,0)/arcs.length;
+    mlMap=new maplibregl.Map({
+      container:'mlMap',
+      style:'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+      center:[lng,lat],zoom:10,attributionControl:false,
+    });
+    mlMap.addControl(new maplibregl.NavigationControl({showCompass:false}),'top-right');
+    mlOverlay=new deck.MapboxOverlay({interleaved:false,layers:[]});
+    mlMap.addControl(mlOverlay);
+    await new Promise(res=>mlMap.on('load',res));
+  }
+  const layers=[
+    new deck.ArcLayer({
+      id:'ml-arcs',data:arcs,
+      getSourcePosition:d=>[d.from.lng,d.from.lat],
+      getTargetPosition:d=>[d.to.lng,d.to.lat],
+      getSourceColor:d=>mlArcColor(d,shuttleKeys),
+      getTargetColor:d=>mlArcColor(d,shuttleKeys),
+      getWidth:d=>shuttleKeys.has(d.employee_id+'|'+d.at)?4:2,
+      getHeight:.4,pickable:true,autoHighlight:true,
+    }),
+    new deck.ScatterplotLayer({
+      id:'ml-drops',data:arcs,
+      getPosition:d=>[d.to.lng,d.to.lat],
+      getFillColor:d=>mlArcColor(d,shuttleKeys),
+      getRadius:22,radiusMinPixels:3,radiusMaxPixels:9,pickable:true,opacity:.75,
+    }),
+  ];
+  mlOverlay.setProps({
+    layers,
+    getTooltip:({object})=>object&&{
+      html:`<b>${object.fio||'?'}</b><br>${object.vehicle||''} · ${object.status}<br>`+
+           `${Math.round((object.distance_m||0))} m · ${Math.round((object.duration_s||0)/60)} min<br>`+
+           `${new Date(object.at).toLocaleString(lang==='ru'?'ru-RU':'pt-BR')}`,
+      style:{background:'rgba(10,12,18,.94)',color:'#e8eaf0',fontSize:'11px',
+             padding:'8px 10px',borderRadius:'6px',border:'1px solid rgba(255,255,255,.15)'},
+    },
+  });
 }
 
 // ── TEAM (Executores — справочник исполнителей) ─────────────────────
@@ -4042,7 +4336,16 @@ setTimeout(function(){
         dayRecs.forEach(r=>{(byCity[r.slot.cidade]=byCity[r.slot.cidade]||[]).push(r);});
         Object.keys(byCity).sort().forEach(city=>{
           html+=`<div class="sch-day-city">${CITY_NAMES[city]||city}</div>`;
+          // внутри города — по сменам, как в недельной сетке
+          byCity[city].sort((a,b)=>{
+            const wa=schWindow(a.slot)||'', wb=schWindow(b.slot)||'';
+            const ia=SCH_WIN_ORDER.indexOf(wa), ib=SCH_WIN_ORDER.indexOf(wb);
+            return (ia<0?99:ia)-(ib<0?99:ib)||wa.localeCompare(wb);
+          });
+          let lastWin=null;
           byCity[city].forEach(r=>{
+            const w=schWindow(r.slot)||'';
+            if(w!==lastWin){lastWin=w;html+=`<div class="sch-day-win">${schWinLabel(w)} <span>${w||'—'}</span></div>`;}
             r.people.forEach(p=>{
               if(schOnlyIssues&&p.state!=='noshow'&&p.state!=='unclosed'&&p.state!=='nocheck')return;
               const acts=p.acts||{};
