@@ -76,8 +76,10 @@
   .sch-city-stats{display:block;font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);margin-top:4px}
   .sch-day-cell{vertical-align:top;padding:3px;min-width:118px;background:var(--surface);border-radius:var(--radius)}
   .sch-day-cell.today{outline:1px solid var(--accent);outline-offset:-1px}
-  .sch-chip{display:flex;align-items:center;gap:5px;border-radius:5px;padding:4px 6px;font-size:10.5px;
+  .sch-chip{display:flex;flex-direction:column;gap:1px;border-radius:5px;padding:4px 6px;font-size:10.5px;
     font-family:'Space Mono',monospace;margin-bottom:3px;cursor:pointer;border:1px solid transparent;transition:filter .15s}
+  .sch-chip-head{display:flex;align-items:center;gap:4px;line-height:1.1}
+  .sch-chip-time{font-size:10px;letter-spacing:-.2px}
   .sch-chip:hover{filter:brightness(1.25)}
   .sch-chip-txt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .sch-chip-act{font-weight:700;flex-shrink:0}
@@ -2263,6 +2265,22 @@ async function loadSchedule(force){
   renderSchedule();
 }
 
+// Окно смены. В выгрузке времени нет отдельным полем — бот пишет его в
+// описание: «madrugada 21:00-06:00». Берём оттуда, иначе по названию смены.
+const SCH_WINDOWS={manha:'06–15',dia:'12–21',noite:'15–00',madrugada:'21–06'};
+function schWindow(slot){
+  const d=String(slot.descricao||'');
+  const m=d.match(/(\d{1,2}):(\d{2})\s*[-–—]\s*(\d{1,2}):(\d{2})/);
+  if(m)return `${m[1].padStart(2,'0')}–${m[3].padStart(2,'0')}`;
+  const low=d.toLowerCase();
+  for(const k in SCH_WINDOWS){if(low.indexOf(k)>=0)return SCH_WINDOWS[k];}
+  if(slot.turno_code&&typeof TURNO_LABELS!=='undefined'&&TURNO_LABELS[slot.turno_code]){
+    const t=TURNO_LABELS[slot.turno_code].label.match(/(\d{2}):\d{2}.(\d{2}):/);
+    if(t)return `${t[1]}–${t[2]}`;
+  }
+  return '';
+}
+
 function schShortName(full){
   if(!full)return '';
   const p=String(full).trim().split(/\s+/);
@@ -2393,16 +2411,19 @@ function schChipHtml(rec,p){
   const s=rec.slot;
   const acts=p.acts||{};
   const actStr=acts.pending?'⏳':(acts.n===null?'':'⚡'+acts.n);
-  const label=`${schTipoIcon(s.tipo)} ${SCH_STATE_ICON[p.state]||''} ${schShortName(p.nome)}`;
-  const tip=[p.nome,(CITY_NAMES[s.cidade]||s.cidade)+' · '+s.data.split('-').reverse().join('.'),
+  const win=schWindow(s);
+  const label=`${SCH_STATE_ICON[p.state]||''} ${schShortName(p.nome)}`;
+  const tip=[p.nome,(CITY_NAMES[s.cidade]||s.cidade)+' · '+s.data.split('-').reverse().join('.')+(win?' · '+win:''),
     t('sch_st_'+p.state),
     p.started_at?`${t('sch_th_start')} ${schFmtBRT(p.started_at)}`+(p.ended_at?` → ${schFmtBRT(p.ended_at)}`:''):'',
     acts.pending?t('sch_cd_pending'):(acts.n!==null?`${t('sch_acts_day')}: ${acts.n}`:''),
     (s.descricao||'').slice(0,90)
   ].filter(Boolean).join(' · ');
   return `<div class="sch-chip sch-st-${p.state}" title="${_schEsc(tip)}" onclick="schOpenSlot(${s.id})">`+
+    `<span class="sch-chip-head">${schTipoIcon(s.tipo)}`+
+      (win?`<b class="sch-chip-time">${win}</b>`:'')+
+      (actStr?`<span class="sch-chip-act">${actStr}</span>`:'')+`</span>`+
     `<span class="sch-chip-txt">${_schEsc(label)}</span>`+
-    (actStr?`<span class="sch-chip-act">${actStr}</span>`:'')+
     `</div>`;
 }
 
@@ -2481,7 +2502,9 @@ function renderSchedule(){
           if(!schOnlyIssues){
             const who=r.people.length?' · '+r.people.length:'';
             html+=`<div class="sch-chip sch-st-cancel" onclick="schOpenSlot(${r.slot.id})" title="${_schEsc(t('sch_st_cancel')+(r.people.length?' · '+r.people.map(p=>p.nome).join(', '):''))}">`+
-              `<span class="sch-chip-txt">${schTipoIcon(r.slot.tipo)} 🚫 ${t('sch_cancel_chip')}${who}</span></div>`;
+              `<span class="sch-chip-head">${schTipoIcon(r.slot.tipo)}`+
+                (schWindow(r.slot)?`<b class="sch-chip-time">${schWindow(r.slot)}</b>`:'')+`</span>`+
+              `<span class="sch-chip-txt">🚫 ${t('sch_cancel_chip')}${who}</span></div>`;
           }
           return;
         }
@@ -2491,7 +2514,9 @@ function renderSchedule(){
         });
         if(r.free>0&&!r.cancelled&&!schOnlyIssues){
           html+=`<div class="sch-chip sch-st-free" onclick="schOpenSlot(${r.slot.id})" title="${_schEsc(t('sch_st_free')+' · '+(r.slot.descricao||'').slice(0,120))}">`+
-            `<span class="sch-chip-txt">${schTipoIcon(r.slot.tipo)} ⬜ ${t('sch_free_chip')}${r.free>1?' ×'+r.free:''}</span></div>`;
+            `<span class="sch-chip-head">${schTipoIcon(r.slot.tipo)}`+
+              (schWindow(r.slot)?`<b class="sch-chip-time">${schWindow(r.slot)}</b>`:'')+`</span>`+
+            `<span class="sch-chip-txt">⬜ ${t('sch_free_chip')}${r.free>1?' ×'+r.free:''}</span></div>`;
         }
       });
       html+='</td>';
@@ -2542,7 +2567,7 @@ function schDetailHtml(rec,isSheet){
 
   return `<div class="sch-detail${isSheet?' is-sheet':''}">
     <div class="sch-detail-head">
-      <span>${schTipoIcon(s.tipo)} ${schOrigin(s)} <b>${CITY_NAMES[s.cidade]||s.cidade}</b> · ${s.data.split('-').reverse().join('.')}</span>
+      <span>${schTipoIcon(s.tipo)} ${schOrigin(s)} <b>${CITY_NAMES[s.cidade]||s.cidade}</b> · ${s.data.split('-').reverse().join('.')}${schWindow(s)?' · '+schWindow(s):''}</span>
       <span class="sch-mono">#${s.id} · ${s.status} · ${t('lbl_vagas2')}: ${rec.people.length}/${Math.max(Number(s.vagas_total||1),rec.people.length)}</span>
       <span style="flex:1"></span>
       ${s.status==='cancelled'?`<span class="sch-mono">🚫 ${t('cs_already')}</span>`
@@ -2566,10 +2591,17 @@ function schRenderDetail(week){
 }
 
 window.addEventListener('load',()=>{
+  // Выгрузка бота обновляется каждые 5 минут — тянем с тем же шагом,
+  // иначе открытая вкладка живёт со снимком на момент открытия.
+  setInterval(()=>{if(typeof fetchBotData==='function')fetchBotData();},3*60*1000);
   setTimeout(()=>{if(typeof loadPrices==='function')loadPrices();},2200);
   setInterval(()=>{if(typeof loadPrices==='function')loadPrices(true);},30*60*1000);
   setTimeout(loadSchedule,3000);
   setInterval(loadSchedule,5*60*1000);
+  // Возврат на вкладку браузера — данные могли устареть, пока её не смотрели
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible'&&typeof fetchBotData==='function')fetchBotData();
+  });
 });
 
 // ── ANALYTICS (графики трендов + рейтинг Desempenho) ─────────────────
@@ -4015,7 +4047,8 @@ setTimeout(function(){
               if(schOnlyIssues&&p.state!=='noshow'&&p.state!=='unclosed'&&p.state!=='nocheck')return;
               const acts=p.acts||{};
               const actStr=acts.pending?'⏳':(acts.n===null?'':'⚡'+acts.n);
-              const time=p.started_at?(schFmtBRT(p.started_at)+(p.ended_at?'–'+schFmtBRT(p.ended_at):'…')):'—';
+              const win=schWindow(r.slot);
+              const time=p.started_at?(schFmtBRT(p.started_at)+(p.ended_at?'–'+schFmtBRT(p.ended_at):'…')):(win||'—');
               html+=`<div class="sch-row sch-st-${p.state}" onclick="schOpenSlot(${r.slot.id})">`+
                 `<span class="sch-row-emoji">${schTipoIcon(r.slot.tipo)}${ICO[p.state]||''}</span>`+
                 `<span class="sch-row-main"><span class="sch-row-name">${p.nome||'?'}</span>`+
