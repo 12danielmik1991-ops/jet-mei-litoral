@@ -3392,13 +3392,20 @@ async function mlFetch(path){
   if(!r.ok)throw new Error('HTTP '+r.status);
   return r.json();
 }
+// Смена живёт 16 часов, как и в боте: календарной датой мерить нельзя —
+// ночной слот начинается вчера и заканчивается сегодня. Всё, что висит дольше,
+// бот закрывает сам, и в «сейчас на линии» ему не место.
+const ML_SHIFT_MAX_H=16;
+function mlShiftFresh(s){
+  if(!s.started_at)return false;
+  return (Date.now()-new Date(s.started_at).getTime())/3600000<=ML_SHIFT_MAX_H;
+}
 // Текущие позиции самокатов, на которых люди вышли в смену: {'S.282640': {...}}
 let mlVehPos={};
 async function mlLoadVehPos(){
   // Номера берём только из открытых смен: запрашивать весь парк незачем.
-  const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});
   const nums=[...new Set((typeof liveShifts!=='undefined'?liveShifts:[])
-    .filter(s=>!s.ended_at&&(s.started_at||'').slice(0,10)>=today&&s.vehicle_number)
+    .filter(s=>!s.ended_at&&mlShiftFresh(s)&&s.vehicle_number)
     .map(s=>s.vehicle_number))];
   if(!nums.length){mlVehPos={};return;}
   try{
@@ -3567,9 +3574,8 @@ function mlRenderBotShifts(){
   if(!box)return;
   // «Открыта» = есть начало и нет конца. Смены из бота живут в гисте, поэтому
   // блок работает даже когда сервис мониторинга недоступен.
-  const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});
   const rows=(typeof liveShifts!=='undefined'?liveShifts:[])
-    .filter(s=>!s.ended_at&&(s.started_at||'').slice(0,10)>=today)
+    .filter(s=>!s.ended_at&&mlShiftFresh(s))
     .sort((a,b)=>(a.cidade||'').localeCompare(b.cidade||''));
   if(!rows.length){box.innerHTML=`<div class="mon-empty">${t('ml_nobot')}</div>`;return;}
 
@@ -3685,9 +3691,8 @@ async function mlDrawMap(){
     pts=pts.filter(p=>(p.vehicle||'').toUpperCase()===v);
   }
   // Метки исполнителей: позиция их самоката + имя из смены бота.
-  const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});
   let riders=(typeof liveShifts!=='undefined'?liveShifts:[])
-    .filter(s=>!s.ended_at&&(s.started_at||'').slice(0,10)>=today&&s.vehicle_number)
+    .filter(s=>!s.ended_at&&mlShiftFresh(s)&&s.vehicle_number)
     .map(s=>{const p=mlVehPos[s.vehicle_number.toUpperCase()];
              return p?{...p,nome:s.nome,cidade:s.cidade,started_at:s.started_at}:null;})
     .filter(Boolean);
