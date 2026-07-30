@@ -743,6 +743,7 @@
       <span><b style="background:#ff5c7a"></b><span data-i18n="ml_leg_fail">sem sucesso</span></span>
       <span><b style="background:#ffb020"></b><span data-i18n="ml_leg_shuttle">vaivém (ida e volta)</span></span>
       <span><b style="background:#00d4ff"></b><span data-i18n="ml_leg_now">em andamento agora</span></span>
+      <span><b style="background:#ffd60a;border-radius:50%"></b><span data-i18n="ml_leg_rider">🟡 executor (patinete do bot)</span></span>
       <span><b style="background:#00e5a0;border-radius:50%"></b><span data-i18n="ml_leg_bat">🔋 troca de bateria</span></span>
       <span><b style="background:#ff5c7a;border-radius:50%"></b><span data-i18n="ml_leg_batfail">🔋 troca sem sucesso</span></span>
     </div>
@@ -832,7 +833,7 @@ const I18N={
     lbl_tip:'Тип',lbl_cidade2:'Город',lbl_data2:'Дата',lbl_turno2:'Турно',lbl_aceitou:'Принял',lbl_vagas2:'Вакансии',lbl_criado:'Создан',lbl_criou:'Создал',lbl_aceitos:'Принявшие',
     nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_team:'Исполнители',nav_antifraud:'Антифрод',nav_schedule:'График',nav_monitor:'В эфире',
     ml_title:'📡 Действия в реальном времени',ml_onshift:'Сейчас на смене',ml_actions:'Действий за сутки',ml_fail:'Без результата',ml_fail_sub:'неудачные попытки',ml_shuttles:'Челноки',ml_shuttles_sub:'увёз и вернул на то же место',ml_people:'👷 Кто работает',ml_search:'Поиск по имени…',ml_showall:'Показать всех',ml_showon:'Только на смене',ml_map:'🗺 Карта перемещений',ml_maphint:'Каждая дуга — перегон самоката: откуда забрал и куда поставил. Клик по человеку в таблице — только он.',ml_allpeople:'Все',ml_leg_ok:'перегон завершён',ml_leg_fail:'без результата',ml_leg_shuttle:'челнок (туда-обратно)',ml_leg_now:'идёт прямо сейчас',
-    ml_col_city:'Город',ml_bycity:'🏙 По городам',ml_allcities:'Все города',ml_col_ppl:'Чел.',ml_col_fio:'ФИО',ml_col_role:'Роль',ml_col_act:'Действий',ml_col_moves:'Перегоны',ml_col_bat:'АКБ',ml_col_km:'км',ml_col_h:'ч',ml_col_rate:'в час',ml_col_idle:'Простой',ml_col_now:'Сейчас',ml_now_move:'везёт самокат',ml_now_bat:'меняет АКБ',ml_idle_min:'мин',ml_offline:'ушёл',ml_empty:'Никого нет в этом окне',ml_err:'Нет связи с сервисом мониторинга',ml_updated:'обновлено',ml_window:'окно с',ml_of:'из',ml_people_seen:'человек за сутки',ml_stale:'висит долго — проверь',ml_dataold:'данные устарели на',ml_bot_shifts:'🛴 Открытые смены в боте',ml_col_veh:'Самокат',ml_since:'С',ml_noveh:'не указан',ml_nobot:'Открытых смен в боте нет',ml_leg_bat:'🔋 замена АКБ',ml_leg_batfail:'🔋 замена не удалась',ml_maploading:'Загружаю карту…',ml_nomap:'Нет перемещений с координатами за это окно',
+    ml_col_city:'Город',ml_bycity:'🏙 По городам',ml_allcities:'Все города',ml_col_ppl:'Чел.',ml_col_fio:'ФИО',ml_col_role:'Роль',ml_col_act:'Действий',ml_col_moves:'Перегоны',ml_col_bat:'АКБ',ml_col_km:'км',ml_col_h:'ч',ml_col_rate:'в час',ml_col_idle:'Простой',ml_col_now:'Сейчас',ml_now_move:'везёт самокат',ml_now_bat:'меняет АКБ',ml_idle_min:'мин',ml_offline:'ушёл',ml_empty:'Никого нет в этом окне',ml_err:'Нет связи с сервисом мониторинга',ml_updated:'обновлено',ml_window:'окно с',ml_of:'из',ml_people_seen:'человек за сутки',ml_stale:'висит долго — проверь',ml_dataold:'данные устарели на',ml_bot_shifts:'🛴 Открытые смены в боте',ml_col_veh:'Самокат',ml_since:'С',ml_noveh:'не указан',ml_nobot:'Открытых смен в боте нет',ml_leg_bat:'🔋 замена АКБ',ml_col_charge:'Заряд',ml_col_pos:'Где сейчас',ml_leg_rider:'🟡 исполнитель (самокат из бота)',ml_leg_batfail:'🔋 замена не удалась',ml_maploading:'Загружаю карту…',ml_nomap:'Нет перемещений с координатами за это окно',
     af_title:'🛡 Антифрод перемещений',af_score:'Балл всего',af_moves:'Перемещений',af_bad:'Плохих %',af_people:'Человек',af_bycity:'По городам',af_col_city:'Город',af_col_score:'Балл',af_col_moves:'Перем.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Плохих%',af_col_ppl:'Чел.',af_detbtn:'👤 Детализация по людям',af_dethint:'Введите пароль для просмотра ФИО:',af_show:'Показать',af_wrongpass:'Неверный пароль',af_col_fio:'ФИО',af_col_type:'Тип',af_col_pos:'Должность',af_detectors:'Как читать баллы',af_d1:'D1 — забрал с пустого монитора',af_d2:'D2 — привёз на полный монитор',af_d3:'D3 — поставил не на монитор текущего блока',af_d4:'D4 — неправильное перемещение (хотя бы одно из D1/D2/D3)',af_scorehint:'Балл = D1 + D2 + D3. Данные достоверны с 17.07.2026.',af_updated:'обновлено',af_period:'период',af_loading:'Загрузка…',af_lowdata:'мало данных (не оценивается)',af_inc_time:'Время',af_inc_bike:'Самокат',af_inc_kind:'Тип',af_inc_park:'Парковка',af_inc_none:'нет детализации',af_inc_click:'клик по строке — детали по самокатам',af_kind_d1:'забрал с пустого',af_kind_d2:'привёз на полный',af_kind_d3:'не тот монитор',af_kind_d4:'неверное перемещение',
     tm_title:'Все исполнители',tm_search:'Поиск по имени, CNPJ, телефону…',tm_all:'Все города',tm_reg:'В боте',tm_urent:'Только Urent',tm_col_name:'Полное имя',tm_col_cnpj:'CNPJ',tm_col_phone:'Телефон',tm_col_tg:'Telegram',tm_col_city:'Город',tm_col_type:'Тип',tm_col_status:'Статус',tm_col_actions:'Действий/мес',tm_count:'исполнителей',tm_export:'⬇ CSV',tm_notreg:'не в боте',tm_active:'активен',
     ov_title:'Обзор',link_heat:'Тепловая карта',link_analytics:'Аналитика',link_schedule:'График',
@@ -885,7 +886,7 @@ const I18N={
     lbl_tip:'Tipo',lbl_cidade2:'Cidade',lbl_data2:'Data',lbl_turno2:'Turno',lbl_aceitou:'Aceitou',lbl_vagas2:'Vagas',lbl_criado:'Criado',lbl_criou:'Criou',lbl_aceitos:'Aceitos',
     nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_team:'Executores',nav_antifraud:'Antifraude',nav_schedule:'Escalas',nav_monitor:'Ao vivo',
     ml_title:'📡 Ações em tempo real',ml_onshift:'Em turno agora',ml_actions:'Ações hoje',ml_fail:'Sem sucesso',ml_fail_sub:'tentativas perdidas',ml_shuttles:'Vaivéns',ml_shuttles_sub:'ida e volta ao mesmo ponto',ml_people:'👷 Quem está trabalhando',ml_search:'Buscar por nome…',ml_showall:'Mostrar todos',ml_showon:'Só em turno',ml_map:'🗺 Mapa de movimentações',ml_maphint:'Cada arco = um patinete movido: da origem até onde foi deixado. Clique numa pessoa acima para ver só ela.',ml_allpeople:'Todos',ml_leg_ok:'movimentação concluída',ml_leg_fail:'sem sucesso',ml_leg_shuttle:'vaivém (ida e volta)',ml_leg_now:'em andamento agora',
-    ml_col_city:'Cidade',ml_bycity:'🏙 Por cidade',ml_allcities:'Todas as cidades',ml_col_ppl:'Pessoas',ml_col_fio:'Nome',ml_col_role:'Função',ml_col_act:'Ações',ml_col_moves:'Movim.',ml_col_bat:'Baterias',ml_col_km:'km',ml_col_h:'h',ml_col_rate:'por hora',ml_col_idle:'Parado',ml_col_now:'Agora',ml_now_move:'levando patinete',ml_now_bat:'trocando bateria',ml_idle_min:'min',ml_offline:'saiu',ml_empty:'Ninguém nesta janela',ml_err:'Sem conexão com o serviço de monitoramento',ml_updated:'atualizado',ml_window:'janela desde',ml_of:'de',ml_people_seen:'pessoas hoje',ml_stale:'parado há muito — verifique',ml_dataold:'dados atrasados em',ml_bot_shifts:'🛴 Turnos abertos no bot',ml_col_veh:'Patinete',ml_since:'Desde',ml_noveh:'não informado',ml_nobot:'Nenhum turno aberto no bot',ml_leg_bat:'🔋 troca de bateria',ml_leg_batfail:'🔋 troca sem sucesso',ml_maploading:'Carregando mapa…',ml_nomap:'Sem movimentações com coordenadas nesta janela',
+    ml_col_city:'Cidade',ml_bycity:'🏙 Por cidade',ml_allcities:'Todas as cidades',ml_col_ppl:'Pessoas',ml_col_fio:'Nome',ml_col_role:'Função',ml_col_act:'Ações',ml_col_moves:'Movim.',ml_col_bat:'Baterias',ml_col_km:'km',ml_col_h:'h',ml_col_rate:'por hora',ml_col_idle:'Parado',ml_col_now:'Agora',ml_now_move:'levando patinete',ml_now_bat:'trocando bateria',ml_idle_min:'min',ml_offline:'saiu',ml_empty:'Ninguém nesta janela',ml_err:'Sem conexão com o serviço de monitoramento',ml_updated:'atualizado',ml_window:'janela desde',ml_of:'de',ml_people_seen:'pessoas hoje',ml_stale:'parado há muito — verifique',ml_dataold:'dados atrasados em',ml_bot_shifts:'🛴 Turnos abertos no bot',ml_col_veh:'Patinete',ml_since:'Desde',ml_noveh:'não informado',ml_nobot:'Nenhum turno aberto no bot',ml_leg_bat:'🔋 troca de bateria',ml_col_charge:'Bateria',ml_col_pos:'Onde está',ml_leg_rider:'🟡 executor (patinete do bot)',ml_leg_batfail:'🔋 troca sem sucesso',ml_maploading:'Carregando mapa…',ml_nomap:'Sem movimentações com coordenadas nesta janela',
     af_title:'🛡 Antifraude de movimentações',af_score:'Score total',af_moves:'Movimentações',af_bad:'Ruins %',af_people:'Pessoas',af_bycity:'Por cidade',af_col_city:'Cidade',af_col_score:'Score',af_col_moves:'Movs.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Ruins%',af_col_ppl:'Pess.',af_detbtn:'👤 Detalhes por pessoa',af_dethint:'Digite a senha para ver os nomes:',af_show:'Mostrar',af_wrongpass:'Senha incorreta',af_col_fio:'Nome',af_col_type:'Tipo',af_col_pos:'Cargo',af_detectors:'Como ler os scores',af_d1:'D1 — pegou de monitor vazio',af_d2:'D2 — levou para monitor cheio',af_d3:'D3 — deixou fora do monitor do bloco atual',af_d4:'D4 — movimentação incorreta (ao menos um de D1/D2/D3)',af_scorehint:'Score = D1 + D2 + D3. Dados confiáveis desde 17/07/2026.',af_updated:'atualizado',af_period:'período',af_loading:'Carregando…',af_lowdata:'poucos dados (não avaliado)',af_inc_time:'Hora',af_inc_bike:'Patinete',af_inc_kind:'Tipo',af_inc_park:'Parada',af_inc_none:'sem detalhes',af_inc_click:'clique na linha — detalhes por patinete',af_kind_d1:'pegou de vazio',af_kind_d2:'levou para cheio',af_kind_d3:'monitor errado',af_kind_d4:'movimentação incorreta',
     tm_title:'Todos os executores',tm_search:'Buscar por nome, CNPJ, telefone…',tm_all:'Todas as cidades',tm_reg:'No bot',tm_urent:'Só Urent',tm_col_name:'Nome completo',tm_col_cnpj:'CNPJ',tm_col_phone:'Telefone',tm_col_tg:'Telegram',tm_col_city:'Cidade',tm_col_type:'Tipo',tm_col_status:'Status',tm_col_actions:'Ações/mês',tm_count:'executores',tm_export:'⬇ CSV',tm_notreg:'fora do bot',tm_active:'ativo',
     ov_title:'Painel Geral',link_heat:'Mapa de calor',link_analytics:'Analítica',link_schedule:'Escalas',
@@ -3391,11 +3392,26 @@ async function mlFetch(path){
   if(!r.ok)throw new Error('HTTP '+r.status);
   return r.json();
 }
+// Текущие позиции самокатов, на которых люди вышли в смену: {'S.282640': {...}}
+let mlVehPos={};
+async function mlLoadVehPos(){
+  // Номера берём только из открытых смен: запрашивать весь парк незачем.
+  const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});
+  const nums=[...new Set((typeof liveShifts!=='undefined'?liveShifts:[])
+    .filter(s=>!s.ended_at&&(s.started_at||'').slice(0,10)>=today&&s.vehicle_number)
+    .map(s=>s.vehicle_number))];
+  if(!nums.length){mlVehPos={};return;}
+  try{
+    const r=await mlFetch('/api/vehicles?numbers='+encodeURIComponent(nums.join(',')));
+    mlVehPos={};(r.vehicles||[]).forEach(v=>{mlVehPos[v.vehicle.toUpperCase()]=v;});
+  }catch(e){console.warn('mlLoadVehPos failed',e.message);}
+}
 async function loadMonitor(force){
   try{
     const d=await mlFetch('/api/live');
     const a=await mlFetch('/api/arcs?hours=24');
     mlData=d;mlData.arcs=a.arcs||[];mlData.points=a.points||[];mlData.shuttles=a.shuttles||d.shuttles||[];
+    await mlLoadVehPos();
     renderMonitor();
     mlDrawMap();
   }catch(e){
@@ -3545,19 +3561,27 @@ function mlRenderBotShifts(){
   };
   let html=`<table class="af-table"><thead><tr>
     <th>${t('ml_col_fio')}</th><th>${t('ml_col_city')}</th><th>${t('ml_since')}</th>
-    <th>🛴 ${t('ml_col_veh')}</th><th>${t('ml_col_moves')}</th><th>${t('ml_col_bat')}</th>
+    <th>🛴 ${t('ml_col_veh')}</th><th>${t('ml_col_charge')}</th><th>${t('ml_col_pos')}</th>
+    <th>${t('ml_col_moves')}</th><th>${t('ml_col_bat')}</th>
     </tr></thead><tbody>`;
   rows.forEach(s=>{
     const v=s.vehicle_number||null;
     const st=stat(v);
+    const pos=v?mlVehPos[v.toUpperCase()]:null;
     const on=v&&mlVehFocus&&v.toUpperCase()===mlVehFocus.toUpperCase();
     const started=s.started_at?new Date(s.started_at).toLocaleTimeString(
       lang==='ru'?'ru-RU':'pt-BR',{hour:'2-digit',minute:'2-digit'}):'—';
+    // Заряд самоката — сразу видно, кто вот-вот встанет посреди смены.
+    const pct=pos&&pos.charge!=null?Math.round(pos.charge*100):null;
+    const chColor=pct==null?'var(--text-dim)':(pct<=20?'var(--accent2)':(pct<=40?'var(--accent4)':'var(--accent3)'));
+    const posAge=pos&&pos.at?Math.round((Date.now()-new Date(pos.at).getTime())/60000):null;
     html+=`<tr ${v?`style="cursor:pointer${on?';outline:1px solid var(--accent1)':''}" onclick="mlPickVeh('${v}')"`:''}>
       <td style="font-weight:700">${s.nome||'?'}</td>
       <td class="tm-mono" style="font-size:11px">${s.cidade||'—'}</td>
       <td class="tm-mono">${started}</td>
       <td class="tm-mono">${v?`<b>${v}</b>`:`<span style="color:var(--accent4)">${t('ml_noveh')}</span>`}</td>
+      <td class="tm-mono" style="color:${chColor};font-weight:700">${pct!=null?pct+'%':'—'}</td>
+      <td class="tm-mono" style="font-size:11px">${pos?`${pos.status||''} · ${posAge} ${t('ml_idle_min')}`:'—'}</td>
       <td class="tm-mono">${st?st.mv:'—'}</td>
       <td class="tm-mono">${st?st.bt:'—'}</td></tr>`;
   });
@@ -3626,7 +3650,15 @@ async function mlDrawMap(){
     arcs=arcs.filter(a=>(a.vehicle||'').toUpperCase()===v);
     pts=pts.filter(p=>(p.vehicle||'').toUpperCase()===v);
   }
-  if(!arcs.length&&!pts.length){host.innerHTML=`<div class="mon-empty" style="padding:40px">${t('ml_nomap')}</div>`;mlMap=null;return;}
+  // Метки исполнителей: позиция их самоката + имя из смены бота.
+  const today=new Date().toLocaleDateString('en-CA',{timeZone:'America/Sao_Paulo'});
+  let riders=(typeof liveShifts!=='undefined'?liveShifts:[])
+    .filter(s=>!s.ended_at&&(s.started_at||'').slice(0,10)>=today&&s.vehicle_number)
+    .map(s=>{const p=mlVehPos[s.vehicle_number.toUpperCase()];
+             return p?{...p,nome:s.nome,cidade:s.cidade,started_at:s.started_at}:null;})
+    .filter(Boolean);
+  if(mlVehFocus)riders=riders.filter(r=>r.vehicle.toUpperCase()===mlVehFocus.toUpperCase());
+  if(!arcs.length&&!pts.length&&!riders.length){host.innerHTML=`<div class="mon-empty" style="padding:40px">${t('ml_nomap')}</div>`;mlMap=null;return;}
 
   try{await mlLoadLibs();}catch(e){
     host.innerHTML=`<div class="mon-empty" style="padding:40px;color:var(--accent2)">${e.message}</div>`;return;
@@ -3637,7 +3669,7 @@ async function mlDrawMap(){
     host.innerHTML='';
     // Центр берём по всем объектам: в городе без перегонов карта иначе
     // улетала в NaN и оставалась пустой.
-    const all=arcs.map(a=>a.from).concat(pts.map(p=>p.at));
+    const all=arcs.map(a=>a.from).concat(pts.map(p=>p.at)).concat(riders.map(r=>({lat:r.lat,lng:r.lng})));
     const lat=all.reduce((s,x)=>s+x.lat,0)/all.length;
     const lng=all.reduce((s,x)=>s+x.lng,0)/all.length;
     mlMap=new maplibregl.Map({
@@ -3666,6 +3698,22 @@ async function mlDrawMap(){
       getFillColor:d=>mlArcColor(d,shuttleKeys),
       getRadius:22,radiusMinPixels:3,radiusMaxPixels:9,pickable:true,opacity:.75,
     }),
+    // Где исполнители прямо сейчас: позиция служебного самоката из смены бота.
+    new deck.ScatterplotLayer({
+      id:'ml-riders',data:riders,
+      getPosition:d=>[d.lng,d.lat],
+      getFillColor:[255,214,10,235],getLineColor:[20,22,30,255],
+      lineWidthMinPixels:2,stroked:true,
+      getRadius:60,radiusMinPixels:8,radiusMaxPixels:18,pickable:true,
+    }),
+    new deck.TextLayer({
+      id:'ml-riders-label',data:riders,
+      getPosition:d=>[d.lng,d.lat],
+      getText:d=>d.nome||d.vehicle,
+      getSize:11,getColor:[255,214,10,255],
+      getPixelOffset:[0,-18],fontWeight:700,
+      background:true,getBackgroundColor:[10,12,18,200],backgroundPadding:[4,2],
+    }),
     new deck.ScatterplotLayer({
       id:'ml-bat',data:pts,
       getPosition:d=>[d.at.lng,d.at.lat],
@@ -3678,7 +3726,14 @@ async function mlDrawMap(){
   ];
   mlOverlay.setProps({
     layers,
-    getTooltip:({object,layer})=>object&&(layer?.id==='ml-bat'?{
+    getTooltip:({object,layer})=>object&&(layer?.id?.startsWith('ml-riders')?{
+      html:`<b>${object.nome||'?'}</b><br>🛴 ${object.vehicle} · ${object.status||''}<br>`+
+           `🔋 ${object.charge!=null?Math.round(object.charge*100)+'%':'—'}`+
+           `${object.range_km!=null?` · ${Math.round(object.range_km)} km`:''}<br>`+
+           `${t('ml_updated')} ${object.at?new Date(object.at).toLocaleTimeString(lang==='ru'?'ru-RU':'pt-BR'):'—'}`,
+      style:{background:'rgba(10,12,18,.94)',color:'#ffd60a',fontSize:'11px',
+             padding:'8px 10px',borderRadius:'6px',border:'1px solid rgba(255,214,10,.35)'},
+    }:layer?.id==='ml-bat'?{
       html:`<b>${object.fio||'?'}</b><br>🔋 ${object.vehicle||''} · ${object.status}<br>`+
            `${Math.round((object.charge_from||0)*100)}% → ${Math.round((object.charge_to||0)*100)}%<br>`+
            `${new Date(object.time).toLocaleString(lang==='ru'?'ru-RU':'pt-BR')}`,
