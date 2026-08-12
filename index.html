@@ -668,6 +668,25 @@
     <div class="an-title" data-i18n="af_bycity">Por cidade</div>
     <div id="afCities" style="overflow-x:auto"></div>
   </div>
+  <!-- Выбор суток: взыскание выписывается за конкретный день, а не за неделю —
+       поэтому нарушения и кандидаты считаются по выбранной дате. -->
+  <div class="an-panel" style="margin:0 24px 16px">
+    <div style="display:flex;gap:12px;align-items:center;flex-wrap:wrap">
+      <span class="an-title" style="margin:0" data-i18n="af_day">Data</span>
+      <input type="date" id="afDayPick" onchange="afSetDay(this.value)"
+             style="background:var(--surface2);color:var(--text);border:1px solid var(--border);
+                    border-radius:6px;padding:6px 10px;font-family:'Space Mono',monospace">
+      <button class="icon-btn" onclick="afSetDay('')" data-i18n="af_allperiod">Todo o período</button>
+      <span id="afDayHint" style="font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace"
+            data-i18n="af_dayhint"></span>
+    </div>
+  </div>
+  <div class="an-panel" id="afCandPanel" style="margin:0 24px 16px;display:none">
+    <div class="an-title"><span data-i18n="af_cand">⚖️ Candidatos a medida disciplinar</span></div>
+    <div style="font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;margin:4px 0 10px"
+         data-i18n="af_cand_hint"></div>
+    <div id="afCandBox" style="overflow-x:auto"></div>
+  </div>
   <div class="an-panel" style="margin:0 24px 30px">
     <div class="an-title"><span data-i18n="af_detbtn">👤 Detalhes por pessoa</span></div>
     <div id="afPeopleBox" style="overflow-x:auto;margin-top:10px"></div>
@@ -833,8 +852,9 @@ const I18N={
     lbl_tip:'Тип',lbl_cidade2:'Город',lbl_data2:'Дата',lbl_turno2:'Турно',lbl_aceitou:'Принял',lbl_vagas2:'Вакансии',lbl_criado:'Создан',lbl_criou:'Создал',lbl_aceitos:'Принявшие',
     nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_team:'Исполнители',nav_antifraud:'Антифрод',nav_schedule:'График',nav_monitor:'В эфире',
     ml_title:'📡 Действия в реальном времени',ml_onshift:'Сейчас на смене',ml_actions:'Действий за сутки',ml_fail:'Без результата',ml_fail_sub:'неудачные попытки',ml_shuttles:'Челноки',ml_shuttles_sub:'увёз и вернул на то же место',ml_people:'👷 Кто работает',ml_search:'Поиск по имени…',ml_showall:'Показать всех',ml_showon:'Только на смене',ml_map:'🗺 Карта перемещений',ml_maphint:'Каждая дуга — перегон самоката: откуда забрал и куда поставил. Клик по человеку в таблице — только он.',ml_allpeople:'Все',ml_leg_ok:'перегон завершён',ml_leg_fail:'без результата',ml_leg_shuttle:'челнок (туда-обратно)',ml_leg_now:'идёт прямо сейчас',
-    ml_col_city:'Город',ml_bycity:'🏙 По городам',ml_allcities:'Все города',ml_col_ppl:'Чел.',ml_col_fio:'ФИО',ml_col_role:'Роль',ml_col_act:'Действий',ml_col_moves:'Перегоны',ml_col_bat:'АКБ',ml_col_km:'км',ml_col_h:'ч',ml_col_rate:'в час',ml_col_idle:'Простой',ml_col_now:'Сейчас',ml_now_move:'везёт самокат',ml_now_bat:'меняет АКБ',ml_idle_min:'мин',ml_offline:'ушёл',ml_empty:'Никого нет в этом окне',ml_err:'Нет связи с сервисом мониторинга',ml_updated:'обновлено',ml_window:'окно с',ml_of:'из',ml_people_seen:'человек за сутки',ml_stale:'висит долго — проверь',ml_dataold:'данные устарели на',ml_bot_shifts:'🛴 Открытые смены в боте',ml_col_veh:'Самокат',ml_since:'С',ml_noveh:'не указан',ml_nobot:'Открытых смен в боте нет',ml_leg_bat:'🔋 замена АКБ',ml_col_charge:'Заряд',ml_col_state:'План/факт',ml_st_working:'работает',ml_st_idle:'смена открыта, действий нет',ml_st_nomatch:'нет в Urent',ml_ghosts:'Работают без открытой смены в боте',ml_col_pos:'Где сейчас',ml_leg_rider:'🟡 исполнитель (самокат из бота)',ml_leg_batfail:'🔋 замена не удалась',ml_maploading:'Загружаю карту…',ml_nomap:'Нет перемещений с координатами за это окно',
+    ml_col_city:'Город',ml_bycity:'🏙 По городам',ml_allcities:'Все города',ml_col_ppl:'Чел.',ml_col_fio:'ФИО',ml_col_role:'Роль',ml_col_act:'Действий',ml_col_moves:'Перегоны',ml_col_bat:'АКБ',ml_col_km:'км',ml_col_h:'ч',ml_col_rate:'в час',ml_col_idle:'Простой',ml_col_now:'Сейчас',ml_now_move:'везёт самокат',ml_now_bat:'меняет АКБ',ml_idle_min:'мин',ml_offline:'ушёл',ml_empty:'Никого нет в этом окне',ml_err:'Нет связи с сервисом мониторинга',ml_updated:'обновлено',ml_window:'окно с',ml_of:'из',ml_people_seen:'человек за сутки',ml_stale:'висит долго — проверь',ml_dataold:'данные устарели на',ml_bot_shifts:'🛴 Открытые смены в боте',ml_col_veh:'ТС',ml_since:'С',ml_noveh:'не указан',ml_notrack:'на машине — без слежения',ml_nobot:'Открытых смен в боте нет',ml_leg_bat:'🔋 замена АКБ',ml_col_charge:'Заряд',ml_col_state:'План/факт',ml_st_working:'работает',ml_st_idle:'смена открыта, действий нет',ml_st_nomatch:'нет в Urent',ml_ghosts:'Работают без открытой смены в боте',ml_col_pos:'Где сейчас',ml_leg_rider:'🟡 исполнитель (самокат из бота)',ml_leg_batfail:'🔋 замена не удалась',ml_maploading:'Загружаю карту…',ml_nomap:'Нет перемещений с координатами за это окно',
     af_title:'🛡 Антифрод перемещений',af_score:'Балл всего',af_moves:'Перемещений',af_bad:'Плохих %',af_people:'Человек',af_bycity:'По городам',af_col_city:'Город',af_col_score:'Балл',af_col_moves:'Перем.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Плохих%',af_col_ppl:'Чел.',af_detbtn:'👤 Детализация по людям',af_dethint:'Введите пароль для просмотра ФИО:',af_show:'Показать',af_wrongpass:'Неверный пароль',af_col_fio:'ФИО',af_col_type:'Тип',af_col_pos:'Должность',af_detectors:'Как читать баллы',af_d1:'D1 — забрал с пустого монитора',af_d2:'D2 — привёз на полный монитор',af_d3:'D3 — поставил не на монитор текущего блока',af_d4:'D4 — неправильное перемещение (хотя бы одно из D1/D2/D3)',af_scorehint:'Балл = D1 + D2 + D3. Данные достоверны с 17.07.2026.',af_updated:'обновлено',af_period:'период',af_loading:'Загрузка…',af_lowdata:'мало данных (не оценивается)',af_inc_time:'Время',af_inc_bike:'Самокат',af_inc_kind:'Тип',af_inc_park:'Парковка',af_inc_none:'нет детализации',af_inc_click:'клик по строке — детали по самокатам',af_kind_d1:'забрал с пустого',af_kind_d2:'привёз на полный',af_kind_d3:'не тот монитор',af_kind_d4:'неверное перемещение',
+    af_day:'Дата',af_allperiod:'Весь период',af_dayhint:'Выбери число — покажу нарушения за эти сутки и кандидатов на взыскание',af_cand:'⚖️ Кандидаты на взыскание',af_cand_none:'За эти сутки никто не превысил порог',af_cand_hint:'Порог: больше 5 нарушений за сутки. Мера — Advertência.',af_punish:'⚖️ Взыскание',af_incday:'Наруш. за день',af_proof_dl:'Скриншот скачан, форма открыта. Осталось: отметить e-mail → Avançar → выбрать «Advertencia» и «Procedimento operacional» → прикрепить PNG → Enviar',af_noday:'нет данных за эту дату',af_dayonly:'показаны нарушения только за выбранное число',
     tm_title:'Все исполнители',tm_search:'Поиск по имени, CNPJ, телефону…',tm_all:'Все города',tm_reg:'В боте',tm_urent:'Только Urent',tm_col_name:'Полное имя',tm_col_cnpj:'CNPJ',tm_col_phone:'Телефон',tm_col_tg:'Telegram',tm_col_city:'Город',tm_col_type:'Тип',tm_col_status:'Статус',tm_col_actions:'Действий/мес',tm_count:'исполнителей',tm_export:'⬇ CSV',tm_notreg:'не в боте',tm_active:'активен',
     ov_title:'Обзор',link_heat:'Тепловая карта',link_analytics:'Аналитика',link_schedule:'График',
     kpi_active:'MEI активных',kpi_onshift:'🟢 На смене сейчас',kpi_done:'✅ Завершили сегодня',kpi_noshow:'❌ Не вышли сегодня',kpi_acttoday:'⚡ Действий сегодня',kpi_schedweek:'📅 Смен на неделе',
@@ -886,8 +906,9 @@ const I18N={
     lbl_tip:'Tipo',lbl_cidade2:'Cidade',lbl_data2:'Data',lbl_turno2:'Turno',lbl_aceitou:'Aceitou',lbl_vagas2:'Vagas',lbl_criado:'Criado',lbl_criou:'Criou',lbl_aceitos:'Aceitos',
     nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_team:'Executores',nav_antifraud:'Antifraude',nav_schedule:'Escalas',nav_monitor:'Ao vivo',
     ml_title:'📡 Ações em tempo real',ml_onshift:'Em turno agora',ml_actions:'Ações hoje',ml_fail:'Sem sucesso',ml_fail_sub:'tentativas perdidas',ml_shuttles:'Vaivéns',ml_shuttles_sub:'ida e volta ao mesmo ponto',ml_people:'👷 Quem está trabalhando',ml_search:'Buscar por nome…',ml_showall:'Mostrar todos',ml_showon:'Só em turno',ml_map:'🗺 Mapa de movimentações',ml_maphint:'Cada arco = um patinete movido: da origem até onde foi deixado. Clique numa pessoa acima para ver só ela.',ml_allpeople:'Todos',ml_leg_ok:'movimentação concluída',ml_leg_fail:'sem sucesso',ml_leg_shuttle:'vaivém (ida e volta)',ml_leg_now:'em andamento agora',
-    ml_col_city:'Cidade',ml_bycity:'🏙 Por cidade',ml_allcities:'Todas as cidades',ml_col_ppl:'Pessoas',ml_col_fio:'Nome',ml_col_role:'Função',ml_col_act:'Ações',ml_col_moves:'Movim.',ml_col_bat:'Baterias',ml_col_km:'km',ml_col_h:'h',ml_col_rate:'por hora',ml_col_idle:'Parado',ml_col_now:'Agora',ml_now_move:'levando patinete',ml_now_bat:'trocando bateria',ml_idle_min:'min',ml_offline:'saiu',ml_empty:'Ninguém nesta janela',ml_err:'Sem conexão com o serviço de monitoramento',ml_updated:'atualizado',ml_window:'janela desde',ml_of:'de',ml_people_seen:'pessoas hoje',ml_stale:'parado há muito — verifique',ml_dataold:'dados atrasados em',ml_bot_shifts:'🛴 Turnos abertos no bot',ml_col_veh:'Patinete',ml_since:'Desde',ml_noveh:'não informado',ml_nobot:'Nenhum turno aberto no bot',ml_leg_bat:'🔋 troca de bateria',ml_col_charge:'Bateria',ml_col_state:'Plano/real',ml_st_working:'trabalhando',ml_st_idle:'turno aberto, sem ações',ml_st_nomatch:'não achado no Urent',ml_ghosts:'Trabalhando sem turno aberto no bot',ml_col_pos:'Onde está',ml_leg_rider:'🟡 executor (patinete do bot)',ml_leg_batfail:'🔋 troca sem sucesso',ml_maploading:'Carregando mapa…',ml_nomap:'Sem movimentações com coordenadas nesta janela',
+    ml_col_city:'Cidade',ml_bycity:'🏙 Por cidade',ml_allcities:'Todas as cidades',ml_col_ppl:'Pessoas',ml_col_fio:'Nome',ml_col_role:'Função',ml_col_act:'Ações',ml_col_moves:'Movim.',ml_col_bat:'Baterias',ml_col_km:'km',ml_col_h:'h',ml_col_rate:'por hora',ml_col_idle:'Parado',ml_col_now:'Agora',ml_now_move:'levando patinete',ml_now_bat:'trocando bateria',ml_idle_min:'min',ml_offline:'saiu',ml_empty:'Ninguém nesta janela',ml_err:'Sem conexão com o serviço de monitoramento',ml_updated:'atualizado',ml_window:'janela desde',ml_of:'de',ml_people_seen:'pessoas hoje',ml_stale:'parado há muito — verifique',ml_dataold:'dados atrasados em',ml_bot_shifts:'🛴 Turnos abertos no bot',ml_col_veh:'Veículo',ml_since:'Desde',ml_noveh:'não informado',ml_notrack:'de carro — sem rastreio',ml_nobot:'Nenhum turno aberto no bot',ml_leg_bat:'🔋 troca de bateria',ml_col_charge:'Bateria',ml_col_state:'Plano/real',ml_st_working:'trabalhando',ml_st_idle:'turno aberto, sem ações',ml_st_nomatch:'não achado no Urent',ml_ghosts:'Trabalhando sem turno aberto no bot',ml_col_pos:'Onde está',ml_leg_rider:'🟡 executor (patinete do bot)',ml_leg_batfail:'🔋 troca sem sucesso',ml_maploading:'Carregando mapa…',ml_nomap:'Sem movimentações com coordenadas nesta janela',
     af_title:'🛡 Antifraude de movimentações',af_score:'Score total',af_moves:'Movimentações',af_bad:'Ruins %',af_people:'Pessoas',af_bycity:'Por cidade',af_col_city:'Cidade',af_col_score:'Score',af_col_moves:'Movs.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Ruins%',af_col_ppl:'Pess.',af_detbtn:'👤 Detalhes por pessoa',af_dethint:'Digite a senha para ver os nomes:',af_show:'Mostrar',af_wrongpass:'Senha incorreta',af_col_fio:'Nome',af_col_type:'Tipo',af_col_pos:'Cargo',af_detectors:'Como ler os scores',af_d1:'D1 — pegou de monitor vazio',af_d2:'D2 — levou para monitor cheio',af_d3:'D3 — deixou fora do monitor do bloco atual',af_d4:'D4 — movimentação incorreta (ao menos um de D1/D2/D3)',af_scorehint:'Score = D1 + D2 + D3. Dados confiáveis desde 17/07/2026.',af_updated:'atualizado',af_period:'período',af_loading:'Carregando…',af_lowdata:'poucos dados (não avaliado)',af_inc_time:'Hora',af_inc_bike:'Patinete',af_inc_kind:'Tipo',af_inc_park:'Parada',af_inc_none:'sem detalhes',af_inc_click:'clique na linha — detalhes por patinete',af_kind_d1:'pegou de vazio',af_kind_d2:'levou para cheio',af_kind_d3:'monitor errado',af_kind_d4:'movimentação incorreta',
+    af_day:'Data',af_allperiod:'Todo o período',af_dayhint:'Escolha a data — mostro as irregularidades do dia e os candidatos a medida disciplinar',af_cand:'⚖️ Candidatos a medida disciplinar',af_cand_none:'Ninguém ultrapassou o limite nesta data',af_cand_hint:'Limite: mais de 5 irregularidades por dia. Medida: Advertência.',af_punish:'⚖️ Advertência',af_incday:'Irreg. no dia',af_proof_dl:'Print baixado, formulário aberto. Falta: marcar o e-mail → Avançar → escolher «Advertencia» e «Procedimento operacional» → anexar o PNG → Enviar',af_noday:'sem dados nesta data',af_dayonly:'mostrando apenas as irregularidades da data escolhida',
     tm_title:'Todos os executores',tm_search:'Buscar por nome, CNPJ, telefone…',tm_all:'Todas as cidades',tm_reg:'No bot',tm_urent:'Só Urent',tm_col_name:'Nome completo',tm_col_cnpj:'CNPJ',tm_col_phone:'Telefone',tm_col_tg:'Telegram',tm_col_city:'Cidade',tm_col_type:'Tipo',tm_col_status:'Status',tm_col_actions:'Ações/mês',tm_count:'executores',tm_export:'⬇ CSV',tm_notreg:'fora do bot',tm_active:'ativo',
     ov_title:'Painel Geral',link_heat:'Mapa de calor',link_analytics:'Analítica',link_schedule:'Escalas',
     kpi_active:'MEIs ativos',kpi_onshift:'🟢 Em turno agora',kpi_done:'✅ Concluíram hoje',kpi_noshow:'❌ Faltas hoje',kpi_acttoday:'⚡ Ações hoje',kpi_schedweek:'📅 Escalas na semana',
@@ -2968,6 +2989,11 @@ function renderOverview(){
 
 // ── ANTIFRAUD (мост из jet-operation через VPS+Gist, ФИО шифрованы) ──
 let afData=null, afPeople=null, afIncidents={};
+// Выбранные сутки (YYYY-MM-DD) или '' — весь период. Взыскание выписывают за
+// конкретный день, поэтому и нарушения, и кандидаты считаются по дате.
+let afDay='';
+// Порог из регламента: больше 5 нарушений за сутки → Advertência.
+const AF_DAY_LIMIT=5;
 // ══════════════════════════════════════════════════════════════
 //  ДЕДУП ЛЮДЕЙ
 //  Один человек приходит дважды: как зарегистрированный MEI из БД бота
@@ -3294,6 +3320,7 @@ function renderAntifraud(){
   });
   html+='</tbody></table>';
   document.getElementById('afCities').innerHTML=html;
+  afInitDayPicker();
   // ФИО расшифровываются паролем входа на сайт — тем же, что весь дашборд.
   // Вошёл на сайт → фамилии видны сразу, без второго ввода.
   if(afData.enc)afReveal(PASSWORD);
@@ -3324,30 +3351,42 @@ async function afDecrypt(enc,pass){
   return JSON.parse(new TextDecoder().decode(pt));
 }
 function renderAfPeople(people){
+  renderAfCandidates();
   const minMoves=afData.min_moves||30;
+  // Медиану считаем по всем людям периода, а не по дневной выборке: иначе
+  // порог «bad↑» скачет от того, сколько человек попало в конкретный день.
   const sig=people.filter(p=>p.moves>=minMoves);
   const med=sig.length?sig.map(p=>p.bad_pct).sort((a,b)=>a-b)[Math.floor(sig.length/2)]:0;
   const maxS=Math.max(...people.map(p=>p.score),1);
   const red=anCssVar('--accent2'),org=anCssVar('--accent4'),grn=anCssVar('--accent3');
   const hasInc=afData.has_incidents;
+  // С выбранной датой в таблице остаются только те, у кого в этот день были
+  // нарушения: искать их глазами среди всех людей недели невозможно.
+  const rows=afDay?people.filter(p=>afIncOf(p.eid,afDay).length):people;
   let html='';
+  if(afDay)html+=`<div style="font-size:11px;color:var(--accent4);font-family:'Space Mono',monospace;margin-bottom:8px">📅 ${t('af_dayonly')}</div>`;
   if(hasInc)html+=`<div style="font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:8px">👆 ${t('af_inc_click')}</div>`;
+  if(!rows.length){document.getElementById('afPeopleBox').innerHTML=html+`<div class="mon-empty">${t('af_noday')}</div>`;return;}
   html+=`<table class="af-table"><thead><tr>
     <th>#</th><th>${t('af_col_fio')}</th><th>${t('af_col_type')}</th><th>${t('af_col_city')}</th>
+    ${afDay?`<th>${t('af_incday')}</th>`:''}
     <th>${t('af_col_moves')}</th><th>${t('af_col_score')}</th><th>${t('af_col_bad')}</th>
     <th style="width:18%"></th></tr></thead><tbody>`;
-  people.forEach((p,i)=>{
+  rows.forEach((p,i)=>{
     const low=p.moves<minMoves;
     const flag=(!low&&med&&p.bad_pct>med*1.3)?`<span class="af-flag">bad↑</span>`:'';
     const chip=p.emp_type==='MEI'?`<span class="af-chip-mei">MEI</span>`:`<span class="af-chip-clt">CLT</span>`;
     const w=Math.round(p.score/maxS*100);
     const cityNames=(p.cities||[]).map(cn=>resolveCityAF(cn)).join(', ');
-    const incN=(afIncidents[p.eid]||[]).length;
+    const incN=afIncOf(p.eid,afDay).length;
     const clickable=hasInc&&incN>0;
+    // За сутки счёт нарушений важнее недельного: по нему выписывают взыскание.
+    const over=afDay&&incN>AF_DAY_LIMIT;
     html+=`<tr class="${low?'af-low':''}" ${clickable?`style="cursor:pointer" onclick="afToggleInc('${p.eid}',this)"`:''}>
       <td class="tm-mono">${clickable?'▸ ':''}${i+1}</td>
       <td style="font-weight:700">${p.fio||'?'}${flag}${low?` <span style="font-size:9px;color:var(--text-dim)">${t('af_lowdata')}</span>`:''}</td>
       <td>${chip}</td><td class="tm-mono">${cityNames}</td>
+      ${afDay?`<td class="tm-mono ${over?'af-badhi':''}" style="font-weight:700">${incN}</td>`:''}
       <td class="tm-mono">${p.moves}</td>
       <td style="font-family:'Space Mono',monospace;font-weight:700">${p.score}</td>
       <td class="${p.bad_pct>=med*1.3&&med?'af-badhi':''}">${p.bad_pct}%</td>
@@ -3356,12 +3395,225 @@ function renderAfPeople(people){
   html+='</tbody></table>';
   document.getElementById('afPeopleBox').innerHTML=html;
 }
+// ── ВЫБОР СУТОК И ВЗЫСКАНИЯ ──────────────────────────────────────────
+// Инциденты внутри зашифрованной части хранят день каждого события, поэтому
+// разбивка по датам считается прямо здесь — бэкенд трогать не нужно.
+
+function afIncOf(eid, day){
+  const all=afIncidents[eid]||[];
+  return day ? all.filter(x=>x.day===day) : all;
+}
+
+function afSetDay(v){
+  afDay=v||'';
+  const pick=document.getElementById('afDayPick');
+  if(pick&&pick.value!==afDay)pick.value=afDay;
+  if(afPeople)renderAfPeople(afPeople);
+}
+
+function afInitDayPicker(){
+  const pick=document.getElementById('afDayPick');
+  if(!pick||!afData)return;
+  // Границы — окно выгрузки: за его пределами инцидентов в файле просто нет.
+  if(afData.from)pick.min=afData.from;
+  if(afData.to)pick.max=afData.to;
+}
+
+// Наши коды городов → варианты в форме RH (там свои написания без диакритики).
+const AF_FORM_CITY={PG:'PRAIA GRANDE',GR:'GUARUJA',KG:'CARAGUATATUBA',IB:'ILHA BELA',
+  UB:'UBATUBA',BR:'BERTIOGA',IT:'ITANHAEM',MN:'MONGAGUA',PE:'PERUIBE'};
+
+const AF_FORM={
+  url:'https://docs.google.com/forms/d/e/1FAIpQLSdOeQgCE85s9uJvAD__HgIzwaSAjhqJhnsaSk9h9winNkQrlg/viewform',
+  autor:'entry.1970639682', cidade:'entry.1584967510', tipo:'entry.483833114',
+  nome:'entry.939909362', data:'entry.800596707', medida:'entry.119073583',
+  fato:'entry.50669013', norma:'entry.639936468',
+  test1:'entry.129596271', test2:'entry.1575588816',
+};
+// Значения по умолчанию согласованы с Daniel: мера всегда Advertência,
+// нарушается операционный регламент, свидетели — постоянная пара.
+const AF_FORM_FIX={autor:'Daniel M', medida:'Advertencia', tipo:'Medidas Disciplinares',
+  norma:'Procedimento operacional', test1:'Arthur Costa', test2:'Evgeny Dyba'};
+
+function afKindPT(k){
+  const m={d1:'pegou patinete de monitor vazio',d2:'levou patinete para monitor cheio',
+           d3:'deixou fora do monitor do bloco atual',d4:'movimentação incorreta'};
+  return m[k]||k;
+}
+
+// Текст для поля «Descreva o fato em detalhes» — на португальском, его читает RH.
+function afFatoText(p, inc, day){
+  const [y,m,dd]=(day||'').split('-');
+  const dataBR=day?`${dd}/${m}/${y}`:'';
+  const cnt={d1:0,d2:0,d3:0,d4:0};
+  inc.forEach(x=>{if(cnt[x.kind]!==undefined)cnt[x.kind]++;});
+  const linhas=inc.slice().sort((a,b)=>(a.t||'').localeCompare(b.t||''))
+    .map(x=>`${x.t||'--:--'} · ${x.bike||'patinete ?'} · ${(x.kind||'').toUpperCase()} (${afKindPT(x.kind)}) · ${x.parking||'-'}`);
+  return [
+    `Colaborador: ${p.fio}`,
+    `Data do fato: ${dataBR}`,
+    `Total de movimentações irregulares registradas no dia: ${inc.length}`,
+    `Detalhamento: D1=${cnt.d1}, D2=${cnt.d2}, D3=${cnt.d3}, D4=${cnt.d4}`,
+    '',
+    'As irregularidades foram identificadas pelo sistema automático de antifraude da operação,',
+    'com base nos registros de movimentação de patinetes do sistema Urent.',
+    '',
+    'Ocorrências no dia:',
+    ...linhas,
+    '',
+    'O arquivo anexo contém o mesmo detalhamento exportado do painel.',
+  ].join('\n');
+}
+
+// Доказательство для RH — картинка, а не таблица: её видно прямо в тикете,
+// не надо ничего открывать. Повторы одного ТС выделены отдельно — именно они
+// показывают, что человек катал один и тот же самокат по кругу.
+function afProofCanvas(p, inc, day){
+  const rows=inc.slice().sort((a,b)=>(a.t||'').localeCompare(b.t||''));
+  // Сколько раз встречается каждый самокат: повтор — главный признак.
+  const bikeCount={};
+  rows.forEach(x=>{const b=x.bike||'?';bikeCount[b]=(bikeCount[b]||0)+1;});
+  const repeats=Object.entries(bikeCount).filter(([,n])=>n>1).sort((a,b)=>b[1]-a[1]);
+  const cnt={d1:0,d2:0,d3:0,d4:0};rows.forEach(x=>{if(cnt[x.kind]!==undefined)cnt[x.kind]++;});
+  const [y,m,dd]=(day||'').split('-');
+
+  const W=1000, HEAD=150, ROW=30, FOOT=40+(repeats.length?28+repeats.length*22:0);
+  const H=HEAD+rows.length*ROW+FOOT;
+  const cv=document.createElement('canvas');
+  const dpr=2; cv.width=W*dpr; cv.height=H*dpr;
+  const g=cv.getContext('2d'); g.scale(dpr,dpr);
+  g.textBaseline='middle';
+  const F=s=>`${s}px "Segoe UI",Arial,sans-serif`;
+  const MONO=s=>`${s}px "Consolas","Courier New",monospace`;
+
+  g.fillStyle='#0f1420';g.fillRect(0,0,W,H);
+  g.fillStyle='#1a2130';g.fillRect(0,0,W,HEAD-30);
+  g.fillStyle='#00d9ff';g.font='bold '+F(20);
+  g.fillText('ANTIFRAUDE — MOVIMENTAÇÕES IRREGULARES',24,34);
+  g.fillStyle='#e8ecf4';g.font=F(15);
+  g.fillText(`Colaborador: ${p.fio||'?'}`,24,64);
+  g.fillText(`Data: ${dd}/${m}/${y}`,24,86);
+  g.fillText(`Cidade: ${(p.cities||[]).map(c=>resolveCityAF(c)).join(', ')||'-'}`,420,64);
+  g.fillStyle='#ff5c7a';g.font='bold '+F(15);
+  g.fillText(`Total no dia: ${rows.length}  ·  D1=${cnt.d1} D2=${cnt.d2} D3=${cnt.d3} D4=${cnt.d4}`,420,86);
+
+  const COL={t:24,bike:150,kind:330,desc:430,park:760};
+  g.fillStyle='#8892a6';g.font='bold '+MONO(12);
+  g.fillText('HORA',COL.t,HEAD-14);g.fillText('PATINETE',COL.bike,HEAD-14);
+  g.fillText('TIPO',COL.kind,HEAD-14);g.fillText('DESCRIÇÃO',COL.desc,HEAD-14);
+  g.fillText('PARADA',COL.park,HEAD-14);
+  g.strokeStyle='#2a3346';g.beginPath();g.moveTo(16,HEAD-2);g.lineTo(W-16,HEAD-2);g.stroke();
+
+  const KIND_COLOR={d1:'#ff5c7a',d2:'#ffa94d',d3:'#ffd43b',d4:'#ff3b3b'};
+  rows.forEach((x,i)=>{
+    const yy=HEAD+i*ROW+ROW/2, rep=(bikeCount[x.bike||'?']||0)>1;
+    if(i%2) {g.fillStyle='#141a28';g.fillRect(16,HEAD+i*ROW,W-32,ROW);}
+    if(rep) {g.fillStyle='rgba(255,212,59,.10)';g.fillRect(16,HEAD+i*ROW,W-32,ROW);}
+    // Время выделяем — по нему видно плотность нарушений подряд.
+    g.fillStyle='#ffd43b';g.font='bold '+MONO(14);g.fillText(x.t||'--:--',COL.t,yy);
+    g.fillStyle=rep?'#ffd43b':'#e8ecf4';g.font=(rep?'bold ':'')+MONO(14);
+    g.fillText((x.bike||'?')+(rep?`  ×${bikeCount[x.bike||'?']}`:''),COL.bike,yy);
+    g.fillStyle=KIND_COLOR[x.kind]||'#8892a6';g.font='bold '+MONO(14);
+    g.fillText((x.kind||'').toUpperCase(),COL.kind,yy);
+    g.fillStyle='#b8c2d4';g.font=F(13);
+    g.fillText(afKindPT(x.kind).slice(0,42),COL.desc,yy);
+    g.fillStyle='#8892a6';g.font=F(12);
+    g.fillText(String(x.parking||'-').slice(0,26),COL.park,yy);
+  });
+
+  let fy=HEAD+rows.length*ROW+22;
+  if(repeats.length){
+    g.fillStyle='#ffd43b';g.font='bold '+F(14);
+    g.fillText('⚠ MESMO PATINETE REPETIDO NO MESMO DIA:',24,fy);fy+=24;
+    repeats.forEach(([b,n])=>{
+      const horas=rows.filter(r=>(r.bike||'?')===b).map(r=>r.t||'--:--').join(', ');
+      g.fillStyle='#e8ecf4';g.font=MONO(13);
+      g.fillText(`${b} — ${n}× (${horas})`,40,fy);fy+=22;
+    });
+    fy+=6;
+  }
+  g.fillStyle='#5a6478';g.font=F(11);
+  g.fillText(`Fonte: sistema antifraude JET · registros Urent · gerado em ${new Date().toLocaleString('pt-BR')}`,24,fy+4);
+  return cv;
+}
+
+function afDownloadProof(p, inc, day){
+  const cv=afProofCanvas(p,inc,day);
+  cv.toBlob(b=>{
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(b);
+    a.download=`antifraude_${(p.fio||'colaborador').replace(/\s+/g,'_')}_${day}.png`;
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  },'image/png');
+}
+
+function afPunish(eid){
+  if(!afDay){alert(t('af_dayhint'));return;}
+  const p=(afPeople||[]).find(x=>x.eid===eid);
+  if(!p)return;
+  const inc=afIncOf(eid,afDay);
+  if(!inc.length){alert(t('af_noday'));return;}
+  const code=resolveCityAF((p.cities||[])[0]||'');
+  const [y,m,dd]=afDay.split('-');
+  const q=new URLSearchParams();
+  q.set('usp','pp_url');
+  q.set(AF_FORM.autor,AF_FORM_FIX.autor);
+  if(AF_FORM_CITY[code])q.set(AF_FORM.cidade,AF_FORM_CITY[code]);
+  q.set(AF_FORM.tipo,AF_FORM_FIX.tipo);
+  q.set(AF_FORM.nome,p.fio||'');
+  // Поле-дата в Google Forms предзаполняется тремя отдельными параметрами.
+  q.set(AF_FORM.data+'_year',y);q.set(AF_FORM.data+'_month',String(+m));q.set(AF_FORM.data+'_day',String(+dd));
+  q.set(AF_FORM.medida,AF_FORM_FIX.medida);
+  q.set(AF_FORM.fato,afFatoText(p,inc,afDay));
+  q.set(AF_FORM.norma,AF_FORM_FIX.norma);
+  q.set(AF_FORM.test1,AF_FORM_FIX.test1);
+  q.set(AF_FORM.test2,AF_FORM_FIX.test2);
+  afDownloadProof(p,inc,afDay);
+  // Форма закрыта авторизацией и требует вложения — дозаполняет человек,
+  // он же принимает решение. Автоматически ничего не отправляется.
+  // Радио-кнопки Google не восстанавливает при переходе между страницами,
+  // поэтому меру и норму выбирают руками — об этом и напоминает подсказка.
+  window.open(AF_FORM.url+'?'+q.toString(),'_blank','noopener');
+  const hint=document.getElementById('afDayHint');
+  if(hint){hint.textContent='✅ '+t('af_proof_dl');hint.style.color='var(--accent3)';
+    setTimeout(()=>{hint.textContent=t('af_dayhint');hint.style.color='';},20000);}
+}
+
+function renderAfCandidates(){
+  const panel=document.getElementById('afCandPanel'), box=document.getElementById('afCandBox');
+  if(!panel||!box)return;
+  if(!afDay||!afPeople){panel.style.display='none';return;}
+  panel.style.display='';
+  const cands=afPeople.map(p=>({p,inc:afIncOf(p.eid,afDay)}))
+    .filter(x=>x.inc.length>AF_DAY_LIMIT)
+    .sort((a,b)=>b.inc.length-a.inc.length);
+  if(!cands.length){box.innerHTML=`<div class="mon-empty">${t('af_cand_none')}</div>`;return;}
+  let html=`<table class="af-table"><thead><tr>
+    <th>${t('af_col_fio')}</th><th>${t('af_col_type')}</th><th>${t('af_col_city')}</th>
+    <th>${t('af_incday')}</th><th>D1</th><th>D2</th><th>D3</th><th>D4</th><th></th>
+    </tr></thead><tbody>`;
+  cands.forEach(({p,inc})=>{
+    const c={d1:0,d2:0,d3:0,d4:0};inc.forEach(x=>{if(c[x.kind]!==undefined)c[x.kind]++;});
+    const chip=p.emp_type==='MEI'?`<span class="af-chip-mei">MEI</span>`:`<span class="af-chip-clt">CLT</span>`;
+    html+=`<tr><td style="font-weight:700">${p.fio||'?'}</td><td>${chip}</td>
+      <td class="tm-mono">${(p.cities||[]).map(cn=>resolveCityAF(cn)).join(', ')}</td>
+      <td class="tm-mono af-badhi" style="font-weight:700">${inc.length}</td>
+      <td class="tm-mono">${c.d1}</td><td class="tm-mono">${c.d2}</td>
+      <td class="tm-mono">${c.d3}</td><td class="tm-mono">${c.d4}</td>
+      <td><button class="icon-btn" onclick="afPunish('${p.eid}')">${t('af_punish')}</button></td></tr>`;
+  });
+  box.innerHTML=html+'</tbody></table>';
+}
+
 const AF_KIND={d1:['🔴','af_kind_d1'],d2:['🟠','af_kind_d2'],d3:['🟡','af_kind_d3'],d4:['❌','af_kind_d4']};
 function afToggleInc(eid,rowEl){
   const next=rowEl.nextElementSibling;
   if(next&&next.classList.contains('af-inc-row')){next.remove();
     rowEl.querySelector('td').innerHTML=rowEl.querySelector('td').innerHTML.replace('▾','▸');return;}
-  const inc=(afIncidents[eid]||[]).slice().sort((a,b)=>(a.day+a.t).localeCompare(b.day+b.t));
+  // Раскрытая детализация подчиняется выбранной дате — иначе под строкой
+  // «3 нарушения за 7 августа» разворачивался бы список за всю неделю.
+  const inc=afIncOf(eid,afDay).slice().sort((a,b)=>((a.day||'')+(a.t||'')).localeCompare((b.day||'')+(b.t||'')));
   let sub=`<table class="af-inc-tbl"><thead><tr><th>${t('af_inc_time')}</th><th>${t('af_inc_bike')}</th><th>${t('af_inc_kind')}</th><th>${t('af_inc_park')}</th></tr></thead><tbody>`;
   inc.forEach(x=>{
     const k=AF_KIND[x.kind]||['·',''];
@@ -3372,7 +3624,7 @@ function afToggleInc(eid,rowEl){
   });
   sub+='</tbody></table>';
   const tr=document.createElement('tr');tr.className='af-inc-row';
-  tr.innerHTML=`<td colspan="8" style="padding:0 10px 12px;background:var(--surface2)">${sub}</td>`;
+  tr.innerHTML=`<td colspan="${afDay?9:8}" style="padding:0 10px 12px;background:var(--surface2)">${sub}</td>`;
   rowEl.after(tr);
   const c0=rowEl.querySelector('td');c0.innerHTML=c0.innerHTML.replace('▸','▾');
 }
@@ -3400,12 +3652,18 @@ function mlShiftFresh(s){
   if(!s.started_at)return false;
   return (Date.now()-new Date(s.started_at).getTime())/3600000<=ML_SHIFT_MAX_H;
 }
+// Часть исполнителей работает на своей машине — их бот пишет с vehicle_type
+// 'car' и placa вместо номера патинета. На карте их нет и быть не может:
+// машина не в парке Urent. Пустой тип = смены до этой правки, самокат.
+function mlIsCar(s){return (s&&s.vehicle_type)==='car';}
 // Текущие позиции самокатов, на которых люди вышли в смену: {'S.282640': {...}}
 let mlVehPos={};
 async function mlLoadVehPos(){
   // Номера берём только из открытых смен: запрашивать весь парк незачем.
+  // Машины пропускаем: их нет в парке Urent, запрос вернул бы пусто, а
+  // человек выглядел бы потерянным.
   const nums=[...new Set((typeof liveShifts!=='undefined'?liveShifts:[])
-    .filter(s=>!s.ended_at&&mlShiftFresh(s)&&s.vehicle_number)
+    .filter(s=>!s.ended_at&&mlShiftFresh(s)&&s.vehicle_number&&!mlIsCar(s))
     .map(s=>s.vehicle_number))];
   if(!nums.length){mlVehPos={};return;}
   try{
@@ -3581,16 +3839,17 @@ function mlRenderBotShifts(){
 
   let html=`<table class="af-table"><thead><tr>
     <th>${t('ml_col_fio')}</th><th>${t('ml_col_city')}</th><th>${t('ml_since')}</th>
-    <th>🛴 ${t('ml_col_veh')}</th><th>${t('ml_col_charge')}</th><th>${t('ml_col_pos')}</th>
+    <th>🛴/🚗 ${t('ml_col_veh')}</th><th>${t('ml_col_charge')}</th><th>${t('ml_col_pos')}</th>
     <th>${t('ml_col_act')}</th><th>${t('ml_col_idle')}</th><th>${t('ml_col_state')}</th>
     </tr></thead><tbody>`;
   rows.forEach(s=>{
     const v=s.vehicle_number||null;
+    const car=mlIsCar(s);
     // Действия считаем по человеку, а не по его самокату: с самокатом мог
     // работать кто-то ещё (ночная смена), и цифры получались чужие.
     const person=mlMatchPerson(s.nome);
-    const pos=v?mlVehPos[v.toUpperCase()]:null;
-    const on=v&&mlVehFocus&&v.toUpperCase()===mlVehFocus.toUpperCase();
+    const pos=(v&&!car)?mlVehPos[v.toUpperCase()]:null;
+    const on=v&&!car&&mlVehFocus&&v.toUpperCase()===mlVehFocus.toUpperCase();
     const started=s.started_at?new Date(s.started_at).toLocaleTimeString(
       lang==='ru'?'ru-RU':'pt-BR',{hour:'2-digit',minute:'2-digit'}):'—';
     // Заряд самоката — сразу видно, кто вот-вот встанет посреди смены.
@@ -3602,13 +3861,15 @@ function mlRenderBotShifts(){
     const state=!person?`<span style="color:var(--text-dim)">${t('ml_st_nomatch')}</span>`
       :person.on_shift?`<span style="color:var(--accent3)">🟢 ${t('ml_st_working')}</span>`
       :`<span style="color:var(--accent2)">⚠️ ${t('ml_st_idle')}</span>`;
-    html+=`<tr ${v?`style="cursor:pointer${on?';outline:1px solid var(--accent1)':''}" onclick="mlPickVeh('${v}')"`:''}>
+    // Машину на карту не навесить — строка не кликабельна, а в колонках
+    // заряда и позиции честное «без слежения» вместо прочерка.
+    html+=`<tr ${v&&!car?`style="cursor:pointer${on?';outline:1px solid var(--accent1)':''}" onclick="mlPickVeh('${v}')"`:''}>
       <td style="font-weight:700">${s.nome||'?'}</td>
       <td class="tm-mono" style="font-size:11px">${s.cidade||'—'}</td>
       <td class="tm-mono">${started}</td>
-      <td class="tm-mono">${v?`<b>${v}</b>`:`<span style="color:var(--accent4)">${t('ml_noveh')}</span>`}</td>
-      <td class="tm-mono" style="color:${chColor};font-weight:700">${pct!=null?pct+'%':'—'}</td>
-      <td class="tm-mono" style="font-size:11px">${pos?`${pos.status||''} · ${posAge} ${t('ml_idle_min')}`:'—'}</td>
+      <td class="tm-mono">${v?(car?`🚗 <b>${v}</b>`:`<b>${v}</b>`):`<span style="color:var(--accent4)">${t('ml_noveh')}</span>`}</td>
+      <td class="tm-mono" style="color:${chColor};font-weight:700">${car?'—':(pct!=null?pct+'%':'—')}</td>
+      <td class="tm-mono" style="font-size:11px">${car?`<span style="color:var(--text-dim)">${t('ml_notrack')}</span>`:(pos?`${pos.status||''} · ${posAge} ${t('ml_idle_min')}`:'—')}</td>
       <td class="tm-mono" style="font-weight:700">${person?person.actions_total:'—'}</td>
       <td class="tm-mono">${person?mlFmtIdle(person.idle_min):'—'}</td>
       <td style="font-size:11px">${state}</td></tr>`;
@@ -3692,7 +3953,7 @@ async function mlDrawMap(){
   }
   // Метки исполнителей: позиция их самоката + имя из смены бота.
   let riders=(typeof liveShifts!=='undefined'?liveShifts:[])
-    .filter(s=>!s.ended_at&&mlShiftFresh(s)&&s.vehicle_number)
+    .filter(s=>!s.ended_at&&mlShiftFresh(s)&&s.vehicle_number&&!mlIsCar(s))
     .map(s=>{const p=mlVehPos[s.vehicle_number.toUpperCase()];
              return p?{...p,nome:s.nome,cidade:s.cidade,started_at:s.started_at}:null;})
     .filter(Boolean);
