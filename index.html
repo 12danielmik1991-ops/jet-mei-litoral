@@ -3401,7 +3401,20 @@ function renderAfPeople(people){
 
 function afIncOf(eid, day){
   const all=afIncidents[eid]||[];
-  return day ? all.filter(x=>x.day===day) : all;
+  const list=day ? all.filter(x=>x.day===day) : all;
+  // D4 — не отдельный вид нарушения, а итоговый флаг «сработал хотя бы один из
+  // D1/D2/D3». Платформа отдаёт его отдельной записью, поэтому одно и то же
+  // перемещение приходит дважды. Схлопываем по «день + время + самокат»,
+  // иначе счёт нарушений задваивается.
+  const moves=new Map();
+  list.forEach(x=>{
+    const key=`${x.day}|${x.t}|${x.bike}`;
+    let m=moves.get(key);
+    if(!m){m={...x,kinds:[]};moves.set(key,m);}
+    if(!m.kinds.includes(x.kind))m.kinds.push(x.kind);
+  });
+  // Для показа берём конкретный детектор; D4 остаётся, только если других нет.
+  return [...moves.values()].map(m=>({...m,kind:m.kinds.find(k=>k!=='d4')||'d4'}));
 }
 
 function afSetDay(v){
@@ -3453,7 +3466,8 @@ function afFatoText(p, inc, day){
     `Colaborador: ${p.fio}`,
     `Data do fato: ${dataBR}`,
     `Total de movimentações irregulares registradas no dia: ${inc.length}`,
-    `Detalhamento: D1=${cnt.d1}, D2=${cnt.d2}, D3=${cnt.d3}, D4=${cnt.d4}`,
+    // D4 не показываем: это итоговый флаг, а не отдельный вид нарушения.
+    `Detalhamento: D1=${cnt.d1}, D2=${cnt.d2}, D3=${cnt.d3}`,
     '',
     'As irregularidades foram identificadas pelo sistema automático de antifraude da operação,',
     'com base nos registros de movimentação de patinetes do sistema Urent.',
@@ -3495,7 +3509,7 @@ function afProofCanvas(p, inc, day){
   g.fillText(`Data: ${dd}/${m}/${y}`,24,86);
   g.fillText(`Cidade: ${(p.cities||[]).map(c=>resolveCityAF(c)).join(', ')||'-'}`,420,64);
   g.fillStyle='#ff5c7a';g.font='bold '+F(15);
-  g.fillText(`Total no dia: ${rows.length}  ·  D1=${cnt.d1} D2=${cnt.d2} D3=${cnt.d3} D4=${cnt.d4}`,420,86);
+  g.fillText(`Total no dia: ${rows.length}  ·  D1=${cnt.d1} D2=${cnt.d2} D3=${cnt.d3}`,420,86);
 
   const COL={t:24,bike:150,kind:330,desc:430,park:760};
   g.fillStyle='#8892a6';g.font='bold '+MONO(12);
@@ -3569,7 +3583,7 @@ async function afSendPreview(eid, btn){
     `🏙 ${(p.cities||[]).map(c=>resolveCityAF(c)).join(', ')||'-'}`,
     `📅 Дата факта: <b>${dd}/${m}/${y}</b>`,
     `🚨 Нарушений за сутки: <b>${inc.length}</b> (порог ${AF_DAY_LIMIT})`,
-    `   D1=${cnt.d1} · D2=${cnt.d2} · D3=${cnt.d3} · D4=${cnt.d4}`,
+    `   D1=${cnt.d1} · D2=${cnt.d2} · D3=${cnt.d3}`,
     rep.length?`🔁 Повтор ТС: ${rep.map(([b,n])=>`${b}×${n}`).join(', ')}`:'',
     ``,
     `Мера: <b>Advertencia</b> · Норма: Procedimento operacional`,
@@ -3636,7 +3650,7 @@ function renderAfCandidates(){
   if(!cands.length){box.innerHTML=`<div class="mon-empty">${t('af_cand_none')}</div>`;return;}
   let html=`<table class="af-table"><thead><tr>
     <th>${t('af_col_fio')}</th><th>${t('af_col_type')}</th><th>${t('af_col_city')}</th>
-    <th>${t('af_incday')}</th><th>D1</th><th>D2</th><th>D3</th><th>D4</th><th></th>
+    <th>${t('af_incday')}</th><th>D1</th><th>D2</th><th>D3</th><th></th>
     </tr></thead><tbody>`;
   cands.forEach(({p,inc})=>{
     const c={d1:0,d2:0,d3:0,d4:0};inc.forEach(x=>{if(c[x.kind]!==undefined)c[x.kind]++;});
@@ -3645,7 +3659,7 @@ function renderAfCandidates(){
       <td class="tm-mono">${(p.cities||[]).map(cn=>resolveCityAF(cn)).join(', ')}</td>
       <td class="tm-mono af-badhi" style="font-weight:700">${inc.length}</td>
       <td class="tm-mono">${c.d1}</td><td class="tm-mono">${c.d2}</td>
-      <td class="tm-mono">${c.d3}</td><td class="tm-mono">${c.d4}</td>
+      <td class="tm-mono">${c.d3}</td>
       <td style="white-space:nowrap">
         <button class="icon-btn" onclick="afSendPreview('${p.eid}',this)" title="${t('af_preview_t')}">📨</button>
         <button class="icon-btn" onclick="afPunish('${p.eid}')">${t('af_punish')}</button></td></tr>`;
