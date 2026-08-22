@@ -409,6 +409,7 @@
   <div class="tab" data-tab="monitor" onclick="switchTab('monitor')"><span>📡</span><span data-i18n="nav_monitor">Ao vivo</span></div>
   <div class="tab" data-tab="antifraud" onclick="switchTab('antifraud')"><span>🛡</span><span data-i18n="nav_antifraud">Antifraude</span></div>
   <div class="tab" data-tab="schedule" onclick="switchTab('schedule')"><span>📅</span><span data-i18n="nav_schedule">Escalas</span></div>
+  <div class="tab" data-tab="rentals" onclick="switchTab('rentals')"><span>🗺</span><span data-i18n="nav_rentals">Aluguéis</span></div>
   </div>
 
 <!-- Строка состояния: источник данных, время синка, возраст выгрузки бота.
@@ -806,6 +807,117 @@
   <div id="schDetail" style="padding:0 24px 24px"></div>
 </div>
 
+<style>
+/* ── Aluguéis: вкладка аналитики прошедших аренд ───────────────────── */
+#tab-rentals{--rt-s:#F07A2B;--rt-e:#2E6FD9}
+.rt-bar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:16px 24px 8px}
+.rt-bar select,.rt-bar input[type=date]{background:var(--card,#171b21);color:inherit;
+  border:1px solid var(--border,#2a2f38);border-radius:8px;padding:7px 10px;font:inherit}
+.rt-nav{display:inline-flex;gap:4px}
+.rt-nav button{width:32px;height:32px;border-radius:8px;border:1px solid var(--border,#2a2f38);
+  background:var(--card,#171b21);color:inherit;cursor:pointer;font-size:15px}
+.rt-nav button:disabled{opacity:.35;cursor:default}
+.rt-periods{display:inline-flex;flex-wrap:wrap;gap:6px}
+.rt-per{border:1px solid var(--border,#2a2f38);background:var(--card,#171b21);color:inherit;
+  border-radius:999px;padding:7px 13px;cursor:pointer;font:inherit;font-size:13px;
+  display:inline-flex;align-items:center;gap:6px;transition:border-color .15s,color .15s}
+.rt-per.active{border-color:var(--rt-s);color:var(--rt-s);font-weight:600}
+.rt-per:focus-visible{outline:2px solid var(--rt-s);outline-offset:2px}
+.rt-note{font-size:12px;opacity:.6;margin-left:auto}
+.rt-subs{display:inline-flex;gap:6px}
+.rt-sub{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--border,#2a2f38);
+  background:var(--card,#171b21);color:inherit;border-radius:999px;padding:7px 13px;
+  cursor:pointer;font:inherit;font-size:13px}
+.rt-sub b{font-variant-numeric:tabular-nums;opacity:.75;font-weight:600}
+.rt-sub.off{opacity:.42;text-decoration:line-through}
+.rt-sub:focus-visible{outline:2px solid var(--rt-s);outline-offset:2px}
+.rt-key{width:9px;height:9px;border-radius:2px;background:var(--rt-s);display:inline-block;
+  transform:rotate(45deg)}
+.rt-key.nk{background:transparent;border:1.5px solid var(--rt-e)}
+.rt-card{font-size:12.5px;line-height:1.5;min-width:212px}
+.rt-card-h{font-weight:700;font-size:14px;margin-bottom:6px;display:flex;
+  justify-content:space-between;gap:10px;align-items:baseline}
+.rt-card-h span{font-weight:400;font-size:11.5px;opacity:.6}
+.rt-card-r{display:flex;justify-content:space-between;gap:14px}
+.rt-card-r span{opacity:.6}
+.rt-card-r b{font-weight:600;font-variant-numeric:tabular-nums}
+.rt-pop .maplibregl-popup-content{background:var(--card,#171b21);color:var(--text,#e6e9ee);
+  border:1px solid var(--border,#2a2f38);border-radius:10px;padding:11px 13px;
+  box-shadow:0 8px 26px rgba(0,0,0,.3)}
+.rt-pop .maplibregl-popup-tip{border-top-color:var(--card,#171b21);
+  border-bottom-color:var(--card,#171b21)}
+
+.rt-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;padding:8px 24px}
+.rt-kpi{background:var(--card,#171b21);border:1px solid var(--border,#2a2f38);
+  border-radius:10px;padding:11px 13px}
+.rt-kpi .v{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15}
+.rt-kpi .k{font-size:10.5px;opacity:.55;text-transform:uppercase;letter-spacing:.07em;margin-top:3px}
+.rt-mapwrap{position:relative;margin:10px 24px;border-radius:12px;overflow:hidden;
+  border:1px solid var(--border,#2a2f38);height:min(62vh,560px)}
+#rtMap{position:absolute;inset:0}
+.rt-legend{position:absolute;left:12px;bottom:12px;z-index:2;display:flex;gap:14px;
+  background:rgba(20,24,30,.82);color:#fff;border-radius:9px;padding:7px 11px;font-size:12px;
+  backdrop-filter:blur(4px)}
+.rt-legend.light{background:rgba(255,255,255,.9);color:#1a1f26;
+  box-shadow:0 1px 6px rgba(0,0,0,.16)}
+.rt-legend span{display:inline-flex;align-items:center;gap:6px}
+.rt-dot{width:10px;height:10px;border-radius:50%;display:inline-block}
+.rt-hours{margin:0 24px 22px;background:var(--card,#171b21);
+  border:1px solid var(--border,#2a2f38);border-radius:12px;padding:13px 15px}
+.rt-hours h4{margin:0 0 9px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;
+  opacity:.55;font-weight:600}
+.rt-bars{display:flex;align-items:flex-end;gap:3px;height:92px}
+.rt-bars i{flex:1;background:var(--rt-s);opacity:.35;border-radius:3px 3px 0 0;min-height:2px;
+  display:block;transition:opacity .15s}
+.rt-bars i.on{opacity:.95}
+.rt-hlab{display:flex;justify-content:space-between;font-size:10.5px;opacity:.5;margin-top:6px}
+.rt-empty{padding:40px 24px;text-align:center;opacity:.6}
+@media(max-width:900px){
+  .rt-kpis{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .rt-note{margin-left:0;width:100%}
+}
+</style>
+
+<div class="tab-content" id="tab-rentals">
+  <div class="rt-bar">
+    <select id="rtCity" aria-label="Cidade"></select>
+    <div class="rt-nav">
+      <button id="rtPrev" title="Dia anterior">‹</button>
+      <input type="date" id="rtDate">
+      <button id="rtNext" title="Próximo dia">›</button>
+    </div>
+    <div class="rt-periods" id="rtPeriods">
+      <button class="rt-per active" data-p="all"><span data-i18n="rt_all">Dia todo</span></button>
+      <button class="rt-per" data-p="madrugada">🌌 <span data-i18n="rt_madrugada">Madrugada</span></button>
+      <button class="rt-per" data-p="manha">🌅 <span data-i18n="rt_manha">Manhã</span></button>
+      <button class="rt-per" data-p="tarde">☀️ <span data-i18n="rt_tarde">Tarde</span></button>
+      <button class="rt-per" data-p="noite">🌆 <span data-i18n="rt_noite">Noite</span></button>
+    </div>
+    <div class="rt-subs" id="rtSubs">
+      <button class="rt-sub" data-k="sub" aria-pressed="true"><i class="rt-key"></i><span data-i18n="rt_with_sub">Com assinatura</span> <b id="rtSubN">0</b></button>
+      <button class="rt-sub" data-k="nosub" aria-pressed="true"><i class="rt-key nk"></i><span data-i18n="rt_no_sub">Sem assinatura</span> <b id="rtNoSubN">0</b></button>
+    </div>
+    <div class="rt-note" id="rtNote"></div>
+  </div>
+
+  <div class="rt-kpis" id="rtKpis"></div>
+
+  <div class="rt-mapwrap">
+    <div id="rtMap"></div>
+    <div class="rt-legend" id="rtLegend">
+      <span><i class="rt-dot" id="rtLegS"></i><span data-i18n="rt_start">início</span></span>
+      <span><i class="rt-dot" id="rtLegE"></i><span data-i18n="rt_end">fim</span></span>
+      <span id="rtLegCount"></span>
+    </div>
+  </div>
+
+  <div class="rt-hours">
+    <h4 data-i18n="rt_by_hour">Aluguéis por hora (BRT)</h4>
+    <div class="rt-bars" id="rtBars"></div>
+    <div class="rt-hlab"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>
+  </div>
+</div>
+
 <div class="tooltip" id="tooltip"></div>
 
 <script>
@@ -850,7 +962,7 @@ const I18N={
     pl_confirm_yes:'Да, публиковать',pl_sending:'Отправляю',pl_created:'Создано слотов',
     pl_notified:'уведомлено MEI',pl_failed:'Не удалось',
     lbl_tip:'Тип',lbl_cidade2:'Город',lbl_data2:'Дата',lbl_turno2:'Турно',lbl_aceitou:'Принял',lbl_vagas2:'Вакансии',lbl_criado:'Создан',lbl_criou:'Создал',lbl_aceitos:'Принявшие',
-    nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_team:'Исполнители',nav_antifraud:'Антифрод',nav_schedule:'График',nav_monitor:'В эфире',
+    nav_rentals:'Аренды',rt_all:'Весь день',rt_madrugada:'Ночь',rt_manha:'Утро',rt_tarde:'День',rt_noite:'Вечер',rt_start:'старт',rt_end:'финиш',rt_rides:'поездок',rt_by_hour:'Поездки по часам (BRT)',rt_all_cities:'🌐 Все города',rt_days_available:'дней в архиве: {n}',rt_k_rides:'Поездок',rt_k_revenue:'Выручка',rt_k_ticket:'Средний чек',rt_k_dur:'Средняя длительность',rt_k_dist:'Средний путь',nav_overview:'Обзор',nav_slots:'Создать слот',nav_tasks:'Задачи',nav_analytics:'Аналитика',nav_team:'Исполнители',nav_antifraud:'Антифрод',nav_schedule:'График',nav_monitor:'В эфире',
     ml_title:'📡 Действия в реальном времени',ml_onshift:'Сейчас на смене',ml_actions:'Действий за сутки',ml_fail:'Без результата',ml_fail_sub:'неудачные попытки',ml_shuttles:'Челноки',ml_shuttles_sub:'увёз и вернул на то же место',ml_people:'👷 Кто работает',ml_search:'Поиск по имени…',ml_showall:'Показать всех',ml_showon:'Только на смене',ml_map:'🗺 Карта перемещений',ml_maphint:'Каждая дуга — перегон самоката: откуда забрал и куда поставил. Клик по человеку в таблице — только он.',ml_allpeople:'Все',ml_leg_ok:'перегон завершён',ml_leg_fail:'без результата',ml_leg_shuttle:'челнок (туда-обратно)',ml_leg_now:'идёт прямо сейчас',
     ml_col_city:'Город',ml_bycity:'🏙 По городам',ml_allcities:'Все города',ml_col_ppl:'Чел.',ml_col_fio:'ФИО',ml_col_role:'Роль',ml_col_act:'Действий',ml_col_moves:'Перегоны',ml_col_bat:'АКБ',ml_col_km:'км',ml_col_h:'ч',ml_col_rate:'в час',ml_col_idle:'Простой',ml_col_now:'Сейчас',ml_now_move:'везёт самокат',ml_now_bat:'меняет АКБ',ml_idle_min:'мин',ml_offline:'ушёл',ml_empty:'Никого нет в этом окне',ml_err:'Нет связи с сервисом мониторинга',ml_updated:'обновлено',ml_window:'окно с',ml_of:'из',ml_people_seen:'человек за сутки',ml_stale:'висит долго — проверь',ml_dataold:'данные устарели на',ml_bot_shifts:'🛴 Открытые смены в боте',ml_col_veh:'ТС',ml_since:'С',ml_noveh:'не указан',ml_notrack:'на машине — без слежения',ml_nobot:'Открытых смен в боте нет',ml_leg_bat:'🔋 замена АКБ',ml_col_charge:'Заряд',ml_col_state:'План/факт',ml_st_working:'работает',ml_st_idle:'смена открыта, действий нет',ml_st_nomatch:'нет в Urent',ml_ghosts:'Работают без открытой смены в боте',ml_col_pos:'Где сейчас',ml_leg_rider:'🟡 исполнитель (самокат из бота)',ml_leg_batfail:'🔋 замена не удалась',ml_maploading:'Загружаю карту…',ml_nomap:'Нет перемещений с координатами за это окно',
     af_title:'🛡 Антифрод перемещений',af_score:'Балл всего',af_moves:'Перемещений',af_bad:'Плохих %',af_people:'Человек',af_bycity:'По городам',af_col_city:'Город',af_col_score:'Балл',af_col_moves:'Перем.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Плохих%',af_col_ppl:'Чел.',af_detbtn:'👤 Детализация по людям',af_dethint:'Введите пароль для просмотра ФИО:',af_show:'Показать',af_wrongpass:'Неверный пароль',af_col_fio:'ФИО',af_col_type:'Тип',af_col_pos:'Должность',af_detectors:'Как читать баллы',af_d1:'D1 — забрал с пустого монитора',af_d2:'D2 — привёз на полный монитор',af_d3:'D3 — поставил не на монитор текущего блока',af_d4:'D4 — неправильное перемещение (хотя бы одно из D1/D2/D3)',af_scorehint:'Балл = D1 + D2 + D3. Данные достоверны с 17.07.2026.',af_updated:'обновлено',af_period:'период',af_loading:'Загрузка…',af_lowdata:'мало данных (не оценивается)',af_inc_time:'Время',af_inc_bike:'Самокат',af_inc_kind:'Тип',af_inc_park:'Парковка',af_inc_none:'нет детализации',af_inc_click:'клик по строке — детали по самокатам',af_kind_d1:'забрал с пустого',af_kind_d2:'привёз на полный',af_kind_d3:'не тот монитор',af_kind_d4:'неверное перемещение',
@@ -904,7 +1016,7 @@ const I18N={
     pl_confirm_yes:'Sim, publicar',pl_sending:'Enviando',pl_created:'Turnos criados',
     pl_notified:'MEIs avisados',pl_failed:'Falhas',
     lbl_tip:'Tipo',lbl_cidade2:'Cidade',lbl_data2:'Data',lbl_turno2:'Turno',lbl_aceitou:'Aceitou',lbl_vagas2:'Vagas',lbl_criado:'Criado',lbl_criou:'Criou',lbl_aceitos:'Aceitos',
-    nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_team:'Executores',nav_antifraud:'Antifraude',nav_schedule:'Escalas',nav_monitor:'Ao vivo',
+    nav_rentals:'Aluguéis',rt_all:'Dia todo',rt_madrugada:'Madrugada',rt_manha:'Manhã',rt_tarde:'Tarde',rt_noite:'Noite',rt_start:'início',rt_end:'fim',rt_rides:'aluguéis',rt_by_hour:'Aluguéis por hora (BRT)',rt_all_cities:'🌐 Todas as cidades',rt_days_available:'dias no arquivo: {n}',rt_k_rides:'Aluguéis',rt_k_revenue:'Receita',rt_k_ticket:'Ticket médio',rt_k_dur:'Duração média',rt_k_dist:'Distância média',nav_overview:'Painel Geral',nav_slots:'Criar turno',nav_tasks:'Tarefas',nav_analytics:'Analítica',nav_team:'Executores',nav_antifraud:'Antifraude',nav_schedule:'Escalas',nav_monitor:'Ao vivo',
     ml_title:'📡 Ações em tempo real',ml_onshift:'Em turno agora',ml_actions:'Ações hoje',ml_fail:'Sem sucesso',ml_fail_sub:'tentativas perdidas',ml_shuttles:'Vaivéns',ml_shuttles_sub:'ida e volta ao mesmo ponto',ml_people:'👷 Quem está trabalhando',ml_search:'Buscar por nome…',ml_showall:'Mostrar todos',ml_showon:'Só em turno',ml_map:'🗺 Mapa de movimentações',ml_maphint:'Cada arco = um patinete movido: da origem até onde foi deixado. Clique numa pessoa acima para ver só ela.',ml_allpeople:'Todos',ml_leg_ok:'movimentação concluída',ml_leg_fail:'sem sucesso',ml_leg_shuttle:'vaivém (ida e volta)',ml_leg_now:'em andamento agora',
     ml_col_city:'Cidade',ml_bycity:'🏙 Por cidade',ml_allcities:'Todas as cidades',ml_col_ppl:'Pessoas',ml_col_fio:'Nome',ml_col_role:'Função',ml_col_act:'Ações',ml_col_moves:'Movim.',ml_col_bat:'Baterias',ml_col_km:'km',ml_col_h:'h',ml_col_rate:'por hora',ml_col_idle:'Parado',ml_col_now:'Agora',ml_now_move:'levando patinete',ml_now_bat:'trocando bateria',ml_idle_min:'min',ml_offline:'saiu',ml_empty:'Ninguém nesta janela',ml_err:'Sem conexão com o serviço de monitoramento',ml_updated:'atualizado',ml_window:'janela desde',ml_of:'de',ml_people_seen:'pessoas hoje',ml_stale:'parado há muito — verifique',ml_dataold:'dados atrasados em',ml_bot_shifts:'🛴 Turnos abertos no bot',ml_col_veh:'Veículo',ml_since:'Desde',ml_noveh:'não informado',ml_notrack:'de carro — sem rastreio',ml_nobot:'Nenhum turno aberto no bot',ml_leg_bat:'🔋 troca de bateria',ml_col_charge:'Bateria',ml_col_state:'Plano/real',ml_st_working:'trabalhando',ml_st_idle:'turno aberto, sem ações',ml_st_nomatch:'não achado no Urent',ml_ghosts:'Trabalhando sem turno aberto no bot',ml_col_pos:'Onde está',ml_leg_rider:'🟡 executor (patinete do bot)',ml_leg_batfail:'🔋 troca sem sucesso',ml_maploading:'Carregando mapa…',ml_nomap:'Sem movimentações com coordenadas nesta janela',
     af_title:'🛡 Antifraude de movimentações',af_score:'Score total',af_moves:'Movimentações',af_bad:'Ruins %',af_people:'Pessoas',af_bycity:'Por cidade',af_col_city:'Cidade',af_col_score:'Score',af_col_moves:'Movs.',af_col_d1:'D1',af_col_d2:'D2',af_col_d3:'D3',af_col_bad:'Ruins%',af_col_ppl:'Pess.',af_detbtn:'👤 Detalhes por pessoa',af_dethint:'Digite a senha para ver os nomes:',af_show:'Mostrar',af_wrongpass:'Senha incorreta',af_col_fio:'Nome',af_col_type:'Tipo',af_col_pos:'Cargo',af_detectors:'Como ler os scores',af_d1:'D1 — pegou de monitor vazio',af_d2:'D2 — levou para monitor cheio',af_d3:'D3 — deixou fora do monitor do bloco atual',af_d4:'D4 — movimentação incorreta (ao menos um de D1/D2/D3)',af_scorehint:'Score = D1 + D2 + D3. Dados confiáveis desde 17/07/2026.',af_updated:'atualizado',af_period:'período',af_loading:'Carregando…',af_lowdata:'poucos dados (não avaliado)',af_inc_time:'Hora',af_inc_bike:'Patinete',af_inc_kind:'Tipo',af_inc_park:'Parada',af_inc_none:'sem detalhes',af_inc_click:'clique na linha — detalhes por patinete',af_kind_d1:'pegou de vazio',af_kind_d2:'levou para cheio',af_kind_d3:'monitor errado',af_kind_d4:'movimentação incorreta',
@@ -1325,6 +1437,9 @@ function switchTab(tab){
         if(typeof renderPlanner==='function')renderPlanner();
         if(typeof loadPrices==='function')loadPrices(!priceState.loaded);
         if(typeof plSyncSingleForm==='function')plSyncSingleForm();}catch(e){console.error('switchTab→slots failed',e);}
+  }
+  if(tab==='rentals'&&typeof loadRentals==='function'){
+    try{loadRentals();}catch(e){console.error('switchTab→rentals failed',e);}
   }
   if(tab==='schedule'&&typeof loadSchedule==='function'){
     try{renderSchedule();if(!window.allSlots||!window.allSlots.length)fetchBotData();}catch(e){console.error('switchTab→schedule failed',e);}
@@ -4773,7 +4888,8 @@ setTimeout(function(){
     {tab:'slots',    ico:'📝',key:'nav_slots'},
     {tab:'analytics',ico:'📈',key:'nav_analytics'},
     {tab:'team',     ico:'👥',key:'nav_team'},
-    {tab:'antifraud',ico:'🛡',key:'nav_antifraud'}
+    {tab:'antifraud',ico:'🛡',key:'nav_antifraud'},
+    {tab:'rentals',  ico:'🗺',key:'nav_rentals'}
   ];
   let nav;
   function buildNav(){
@@ -5012,5 +5128,279 @@ setTimeout(function(){
 })();
 </script>
 
+<script>
+// ── Aluguéis: аналитика прошедших аренд ─────────────────────────────
+// Данные готовит /root/vtc/rentals_build.py на VPS и кладёт в приватный Gist:
+// rentals_index.json — какие дни есть; rentals_<дата>.json — поездки всех городов.
+// Поездка ужата в массив: [slat,slng,elat,elng,start,dur,dist,money,app,sub,veh,model,dev],
+// координаты — град×1e5, start/dur — минуты BRT, money — сентаво, sub — по подписке.
+const RT_GIST = 'https://gist.githubusercontent.com/12danielmik1991-ops/534c28209ca610e6477c08b2fe75c1fb/raw/';
+const RT_PERIODS = {all:[0,1440], madrugada:[0,360], manha:[360,720], tarde:[720,1080], noite:[1080,1440]};
+// Тема карты идёт за временем суток: ночью тёмная подложка, днём светлая.
+const RT_THEME = {
+  all:      {style:'positron', s:'#F07A2B', e:'#2E6FD9', light:true},
+  madrugada:{style:'dark',     s:'#8C7CFF', e:'#31C8E0', light:false},
+  manha:    {style:'positron', s:'#F2B21C', e:'#9B7BD4', light:true},
+  tarde:    {style:'voyager',  s:'#12A150', e:'#0E9BB8', light:true},
+  noite:    {style:'dark',     s:'#E23A3A', e:'#3A72E2', light:false},
+};
+const RT_STYLE_URL = {
+  dark:'https://basemaps.cartocdn.com/gl/dark-matter-gl-style/style.json',
+  positron:'https://basemaps.cartocdn.com/gl/positron-gl-style/style.json',
+  voyager:'https://basemaps.cartocdn.com/gl/voyager-gl-style/style.json',
+};
+const RT_APPS = ['JET Android','JET iOS','LATAM','—'];
+const rtState = {city:'all', date:null, period:'all', sub:true, nosub:true};
+let rtIdx = null, rtDayCache = {}, rtMap = null, rtStyleKey = null, rtFitDone = null, rtPopup = null;
+
+async function loadRentals(){
+  const note = document.getElementById('rtNote');
+  try{
+    if(!rtIdx){
+      const r = await fetch(RT_GIST+'rentals_index.json?_='+Date.now(), {cache:'no-store'});
+      if(!r.ok) throw new Error('HTTP '+r.status);
+      rtIdx = await r.json();
+      rtBuildControls();
+    }
+    await rtLoadDay(rtState.date);
+    rtRender();
+  }catch(e){
+    console.error('loadRentals failed', e);
+    if(note) note.textContent = 'Erro: '+e.message;
+  }
+}
+
+function rtBuildControls(){
+  const days = Object.keys(rtIdx.days).sort();
+  if(!days.length) return;
+  rtState.date = rtState.date || days[days.length-1];
+
+  const sel = document.getElementById('rtCity');
+  sel.innerHTML = '<option value="all">'+t('rt_all_cities')+'</option>' +
+    rtIdx.cities.map(c=>`<option value="${c}">${c}</option>`).join('');
+  sel.value = rtState.city;
+  sel.onchange = ()=>{ rtState.city = sel.value; rtFitDone = null; rtRender(); };
+
+  const inp = document.getElementById('rtDate');
+  inp.min = days[0]; inp.max = days[days.length-1]; inp.value = rtState.date;
+  inp.onchange = async ()=>{ rtState.date = inp.value; rtFitDone = null;
+                             await rtLoadDay(rtState.date); rtRender(); };
+
+  const step = async d=>{
+    const i = days.indexOf(rtState.date);
+    if(i<0) return;
+    const j = Math.min(days.length-1, Math.max(0, i+d));
+    rtState.date = days[j]; inp.value = days[j]; rtFitDone = null;
+    await rtLoadDay(days[j]); rtRender();
+  };
+  document.getElementById('rtPrev').onclick = ()=>step(-1);
+  document.getElementById('rtNext').onclick = ()=>step(1);
+
+  document.querySelectorAll('#rtPeriods .rt-per').forEach(b=>{
+    b.onclick = ()=>{
+      document.querySelectorAll('#rtPeriods .rt-per').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      rtState.period = b.dataset.p;
+      rtRender();
+    };
+  });
+
+  // подписка: две независимые кнопки-тумблера
+  document.querySelectorAll('#rtSubs .rt-sub').forEach(b=>{
+    b.onclick = ()=>{
+      const k = b.dataset.k;                    // 'sub' | 'nosub'
+      rtState[k] = !rtState[k];
+      // не даём выключить обе — иначе карта пустая и непонятно почему
+      if(!rtState.sub && !rtState.nosub){ rtState[k] = true; return; }
+      b.classList.toggle('off', !rtState[k]);
+      b.setAttribute('aria-pressed', String(rtState[k]));
+      rtRender();
+    };
+  });
+}
+
+async function rtLoadDay(date){
+  if(!date || rtDayCache[date]) return;
+  const r = await fetch(RT_GIST+'rentals_'+date+'.json?_='+Date.now(), {cache:'no-store'});
+  if(!r.ok) throw new Error('dia '+date+': HTTP '+r.status);
+  rtDayCache[date] = await r.json();
+}
+
+function rtDayTrips(){                                   // все поездки дня по городу
+  const day = rtDayCache[rtState.date];
+  if(!day) return [];
+  return rtState.city==='all'
+    ? Object.values(day.cities).flat()
+    : (day.cities[rtState.city] || []);
+}
+
+function rtTrips(){                                      // с учётом периода и подписки
+  const [from, to] = RT_PERIODS[rtState.period];
+  return rtDayTrips().filter(x=>{
+    if(x[4] < from || x[4] >= to) return false;
+    const isSub = x[9]===1;
+    return isSub ? rtState.sub : rtState.nosub;
+  });
+}
+
+function rtRender(){
+  const trips = rtTrips();
+  const th = RT_THEME[rtState.period];
+  const tab = document.getElementById('tab-rentals');
+  tab.style.setProperty('--rt-s', th.s);
+  tab.style.setProperty('--rt-e', th.e);
+  document.getElementById('rtLegS').style.background = th.s;
+  document.getElementById('rtLegE').style.background = th.e;
+  document.getElementById('rtLegend').classList.toggle('light', th.light);
+  document.getElementById('rtLegCount').textContent = trips.length + ' ' + t('rt_rides');
+
+  const days = rtIdx ? Object.keys(rtIdx.days).length : 0;
+  document.getElementById('rtNote').textContent =
+    t('rt_days_available').replace('{n}', days) + (rtIdx?.gen ? ' · '+rtIdx.gen : '');
+
+  // счётчики на кнопках подписки — по выбранному периоду, без учёта самих кнопок
+  const [pf, pto] = RT_PERIODS[rtState.period];
+  const inPeriod = rtDayTrips().filter(x=>x[4]>=pf && x[4]<pto);
+  const nSub = inPeriod.filter(x=>x[9]===1).length;
+  document.getElementById('rtSubN').textContent = nSub;
+  document.getElementById('rtNoSubN').textContent = inPeriod.length - nSub;
+
+  const n = trips.length;
+  const sum = f=>trips.reduce((a,x)=>a+f(x),0);
+  const rev = sum(x=>x[7])/100;
+  const kpis = n ? [
+    [t('rt_k_rides'), n],
+    [t('rt_k_revenue'), rev.toFixed(2).replace('.',',')+' R$'],
+    [t('rt_k_ticket'), (rev/n).toFixed(2).replace('.',',')+' R$'],
+    [t('rt_k_dur'), Math.round(sum(x=>x[5])/n)+' min'],
+    [t('rt_k_dist'), Math.round(sum(x=>x[6])/n)+' m'],
+    [t('rt_k_sub'), Math.round(100*sum(x=>x[9])/n)+'%'],
+  ] : [];
+  document.getElementById('rtKpis').innerHTML = kpis
+    .map(([k,v])=>`<div class="rt-kpi"><div class="v">${v}</div><div class="k">${k}</div></div>`)
+    .join('');
+
+  // столбцы по часам: подсвечены часы выбранного периода
+  const hh = new Array(24).fill(0);
+  rtDayTrips().forEach(x=>hh[Math.floor(x[4]/60)]++);
+  const top = Math.max(1, ...hh);
+  document.getElementById('rtBars').innerHTML = hh.map((v,h)=>{
+    const on = h*60 >= pf && h*60 < pto;
+    return `<i class="${on?'on':''}" style="height:${Math.round(100*v/top)}%" title="${String(h).padStart(2,'0')}:00 — ${v}"></i>`;
+  }).join('');
+
+  rtDrawMap(trips, th);
+}
+
+function rtHM(min){
+  return String(Math.floor(min/60)).padStart(2,'0')+':'+String(min%60).padStart(2,'0');
+}
+
+function rtCard(p){                                       // карточка одной аренды
+  const money = (p.money/100).toFixed(2).replace('.',',')+' R$';
+  return `<div class="rt-card">
+    <div class="rt-card-h">S.${p.veh}<span>${p.model||''}</span></div>
+    <div class="rt-card-r"><span>${t('rt_c_time')}</span><b>${rtHM(p.start)} → ${rtHM((p.start+p.dur)%1440)}</b></div>
+    <div class="rt-card-r"><span>${t('rt_c_dur')}</span><b>${p.dur} min · ${p.dist} m</b></div>
+    <div class="rt-card-r"><span>${t('rt_c_money')}</span><b>${money}</b></div>
+    <div class="rt-card-r"><span>${t('rt_c_sub')}</span><b>${p.sub ? t('rt_yes') : t('rt_no')}</b></div>
+    <div class="rt-card-r"><span>${t('rt_c_app')}</span><b>${p.app}</b></div>
+    <div class="rt-card-r"><span>${t('rt_c_dev')}</span><b>${p.dev||'—'}</b></div>
+    <div class="rt-card-r"><span>${t('rt_c_city')}</span><b>${p.city}</b></div>
+  </div>`;
+}
+
+async function rtDrawMap(trips, th){
+  try{ await mlLoadLibs(); }
+  catch(e){ console.error('rtDrawMap libs', e); return; }
+
+  const day = rtDayCache[rtState.date] || {};
+  const models = day.models || [];
+  const devs = day.devs || [];
+  // город кладём заранее: перебирать словарь на каждый ховер — дорого
+  const cityIdx = new Map();
+  if(rtState.city==='all'){
+    for(const [c, arr] of Object.entries(day.cities||{})) for(const x of arr) cityIdx.set(x, c);
+  }
+
+  const feat = (x, pick)=>({
+    type:'Feature',
+    geometry:{type:'Point', coordinates: pick==='s' ? [x[1]/1e5, x[0]/1e5] : [x[3]/1e5, x[2]/1e5]},
+    properties:{veh:x[10], model:models[x[11]]||'', start:x[4], dur:x[5], dist:x[6],
+                money:x[7], app:RT_APPS[x[8]]||'—', sub:x[9], dev:devs[x[12]]||'',
+                city: rtState.city==='all' ? (cityIdx.get(x)||'') : rtState.city,
+                kind: pick}
+  });
+  const fc = pick=>({type:'FeatureCollection', features: trips.map(x=>feat(x, pick))});
+
+  const paint = color=>({'circle-radius':['interpolate',['linear'],['zoom'],10,2.5,13,4.5,16,7.5],
+                         'circle-color':color,'circle-opacity':.85,
+                         'circle-stroke-width':.7,'circle-stroke-color':th.light?'#fff':'#0b0e13'});
+
+  const bindHover = id=>{
+    rtMap.on('mouseenter', id, ()=>{ rtMap.getCanvas().style.cursor='pointer'; });
+    rtMap.on('mouseleave', id, ()=>{
+      rtMap.getCanvas().style.cursor='';
+      if(rtPopup){ rtPopup.remove(); rtPopup = null; }
+    });
+    rtMap.on('mousemove', id, ev=>{
+      const f = ev.features && ev.features[0];
+      if(!f) return;
+      const html = rtCard(f.properties);
+      if(!rtPopup){
+        rtPopup = new maplibregl.Popup({closeButton:false, closeOnClick:false,
+                                        offset:10, maxWidth:'280px', className:'rt-pop'});
+        rtPopup.addTo(rtMap);
+      }
+      rtPopup.setLngLat(f.geometry.coordinates).setHTML(html);
+    });
+  };
+
+  const addLayers = ()=>{
+    if(!rtMap.getSource('rt-s')){
+      rtMap.addSource('rt-s',{type:'geojson',data:fc('s')});
+      rtMap.addSource('rt-e',{type:'geojson',data:fc('e')});
+      rtMap.addLayer({id:'rt-e',type:'circle',source:'rt-e',paint:paint(th.e)});
+      rtMap.addLayer({id:'rt-s',type:'circle',source:'rt-s',paint:paint(th.s)});
+      bindHover('rt-s'); bindHover('rt-e');
+    }else{
+      rtMap.getSource('rt-s').setData(fc('s'));
+      rtMap.getSource('rt-e').setData(fc('e'));
+      rtMap.setPaintProperty('rt-s','circle-color',th.s);
+      rtMap.setPaintProperty('rt-e','circle-color',th.e);
+      rtMap.setPaintProperty('rt-s','circle-stroke-color',th.light?'#fff':'#0b0e13');
+      rtMap.setPaintProperty('rt-e','circle-stroke-color',th.light?'#fff':'#0b0e13');
+    }
+    const key = rtState.city+'|'+rtState.date;
+    if(trips.length && rtFitDone !== key){
+      const lats = trips.flatMap(x=>[x[0]/1e5, x[2]/1e5]);
+      const lngs = trips.flatMap(x=>[x[1]/1e5, x[3]/1e5]);
+      rtMap.fitBounds([[Math.min(...lngs), Math.min(...lats)],
+                       [Math.max(...lngs), Math.max(...lats)]],
+                      {padding:48, duration:600, maxZoom:15});
+      rtFitDone = key;
+    }
+  };
+
+  if(!rtMap){
+    rtMap = new maplibregl.Map({container:'rtMap', style:RT_STYLE_URL[th.style],
+                                center:[-46.2,-23.95], zoom:10,
+                                attributionControl:{compact:true}});
+    rtMap.addControl(new maplibregl.NavigationControl({showCompass:false}), 'top-right');
+    rtStyleKey = th.style;
+    rtMap.on('load', addLayers);
+    return;
+  }
+  if(rtStyleKey !== th.style){          // сменилось время суток — меняем подложку
+    rtStyleKey = th.style;
+    if(rtPopup){ rtPopup.remove(); rtPopup = null; }
+    rtMap.once('styledata', ()=>setTimeout(addLayers, 60));
+    rtMap.setStyle(RT_STYLE_URL[th.style]);
+    return;
+  }
+  if(rtMap.isStyleLoaded()) addLayers(); else rtMap.once('load', addLayers);
+}
+
+</script>
 </body>
 </html>
