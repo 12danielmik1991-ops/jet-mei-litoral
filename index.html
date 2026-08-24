@@ -5140,7 +5140,9 @@ setTimeout(function(){
 // rentals_index.json — какие дни есть; rentals_<дата>.json — поездки всех городов.
 // Поездка ужата в массив: [slat,slng,elat,elng,start,dur,dist,money,app,sub,veh,model,dev],
 // координаты — град×1e5, start/dur — минуты BRT, money — сентаво, sub — по подписке.
-const RT_GIST = 'https://gist.githubusercontent.com/12danielmik1991-ops/534c28209ca610e6477c08b2fe75c1fb/raw/';
+// Архив по дням раздаём со своего домена: Caddy отдаёт его с CORS,
+// поэтому вкладка не зависит от токена GitHub и не ждёт кэш Gist.
+const RT_GIST = 'https://maps.jetmd.online/rentals/';
 const RT_PERIODS = {all:[0,1440], madrugada:[0,360], manha:[360,720], tarde:[720,1080], noite:[1080,1440]};
 // Тема карты идёт за временем суток: ночью тёмная подложка, днём светлая.
 const RT_THEME = {
