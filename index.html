@@ -939,7 +939,7 @@ const I18N={
     fl_th_serv:'Сервис',fl_th_bat:'Заряд ≤20%',fl_th_avail:'Доступность',
     fl_upd:'Обновлено',fl_min:'мин назад',fl_stale:'данные устарели',fl_err:'Ошибка загрузки',
     fl_of:'из',fl_of_fleet:'от флота',fl_offcluster:'(вне % кластера)',
-    fl_rented:'в аренде',fl_total_short:'всего',
+    fl_rented:'в аренде',fl_stored:'на хранении',fl_total_short:'всего',
     fl_note_santos:'Santos не входит в % кластера (логистическая база, без уличной операции).',
     m_more:'Ещё',m_nav_geral:'Обзор',m_nav_frota:'Флот',m_nav_escalas:'График',m_nav_tarefas:'Задачи',
     m_tabs:'Разделы',m_actions:'Действия',m_details:'Детали',m_close:'Закрыть',m_scroll_today:'К сегодня',
@@ -993,7 +993,7 @@ const I18N={
     fl_th_serv:'Serviço',fl_th_bat:'Bateria ≤20%',fl_th_avail:'Disponibilidade',
     fl_upd:'Atualizado',fl_min:'min atrás',fl_stale:'dados desatualizados',fl_err:'Erro ao carregar',
     fl_of:'de',fl_of_fleet:'da frota',fl_offcluster:'(fora do % do cluster)',
-    fl_rented:'alugados',fl_total_short:'no total',
+    fl_rented:'alugados',fl_stored:'armazenados',fl_total_short:'no total',
     fl_note_santos:'Santos fica fora do % do cluster (base logística, sem operação de rua).',
     m_more:'Mais',m_nav_geral:'Painel',m_nav_frota:'Frota',m_nav_escalas:'Escalas',m_nav_tarefas:'Tarefas',
     m_tabs:'Seções',m_actions:'Ações',m_details:'Detalhes',m_close:'Fechar',m_scroll_today:'Ir para hoje',
@@ -3327,10 +3327,12 @@ function renderFleet(){
   const pctCls=flPctClass(c.avail_pct);
   const pctEl=document.getElementById('flAvailPct');
   if(pctEl){pctEl.textContent=(c.avail_pct||0).toFixed(1)+'%';pctEl.className='card-val fl-pct '+pctCls;}
-  set('flAvailSub',`${c.avail||0} ${t('fl_of')} ${c.total||0}`);
+  // ТС на хранении выведены из работы: в доступности они не участвуют
+  const flBase = c.base != null ? c.base : (c.total||0);
+  set('flAvailSub',`${c.avail||0} ${t('fl_of')} ${flBase}` + ((c.stored||0) ? ` · ${c.stored} ${t('fl_stored')}` : ''));
   set('flTotal',c.total||0);
   set('flAlug',st.alugado||0);
-  set('flAlugSub',c.total?((st.alugado||0)/c.total*100).toFixed(1)+'% '+t('fl_of_fleet'):'');
+  set('flAlugSub',flBase?((st.alugado||0)/flBase*100).toFixed(1)+'% '+t('fl_of_fleet'):'');
   set('flManut',(st.manutencao||0)+(st.reparo||0));
   const bat=c.bat||{};
   set('flBat20',bat.lt20||0);
@@ -3395,7 +3397,7 @@ function renderFleet(){
     ovp.textContent=(c.avail_pct||0).toFixed(1)+'%';
     ovp.className='card-val fl-pct '+pctCls;
     const sub=document.getElementById('ovFleetSub');
-    if(sub)sub.textContent=`${st.alugado||0} ${t('fl_rented')} · ${c.total||0} ${t('fl_total_short')}`;
+    if(sub)sub.textContent=`${st.alugado||0} ${t('fl_rented')} · ${c.base != null ? c.base : (c.total||0)} ${t('fl_total_short')}`;
   }
 }
 
