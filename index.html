@@ -3290,7 +3290,7 @@ const FLEET_SLUG2CODE={praia_grande:'PG',guaruja:'GR',caraguatatuba:'KG',ilhabel
 // Цвет статуса: зелёный — рабочие, оранжевый — сервис, красный — потери.
 const FLEET_STATUS_COLOR={disponivel:'var(--accent3)',alugado:'var(--accent)',
   manutencao:'var(--accent4)',reparo:'var(--accent4)',carregando:'var(--accent4)',
-  movimentacao:'var(--accent)',conservacao:'var(--text-dim)',
+  movimentacao:'var(--accent)',conservacao:'var(--text-dim)',armazenado:'var(--text-dim)',
   alarme:'var(--accent2)',roubado:'var(--accent2)',procurado:'var(--accent2)',irrecuperavel:'var(--accent2)'};
 let fleetData=null;
 
@@ -3348,7 +3348,8 @@ function renderFleet(){
   const rows=Object.entries(d.cities||{}).map(([slug,x])=>({slug,code:FLEET_SLUG2CODE[slug]||null,...x}))
     .sort((a,b)=>{
       if(a.in_cluster_pct!==b.in_cluster_pct)return a.in_cluster_pct?-1:1; // Santos вниз
-      return b.total-a.total;
+      const ab=a.base!=null?a.base:a.total, bb=b.base!=null?b.base:b.total;
+      return bb-ab;   // сортируем по рабочему парку, без хранения
     });
   let html=`<tr><th>${t('fl_th_city')}</th><th class="fl-num">${t('fl_th_total')}</th>`+
     `<th class="fl-num">${t('fl_th_disp')}</th><th class="fl-num">${t('fl_th_alug')}</th>`+
