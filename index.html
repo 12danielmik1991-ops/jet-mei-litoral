@@ -3410,7 +3410,8 @@ function renderFleet(){
 
 async function loadAntifraud(force){
   try{
-    const url=`https://gist.githubusercontent.com/12danielmik1991-ops/e018dab17e69e1dea5e5e8aa0b48f6fb/raw/antifraud.json?_=${Date.now()}`;
+    // Раздаём со своего домена: Gist встал, когда GitHub отозвал токен.
+    const url=`https://maps.jetmd.online/antifraud.json?_=${Date.now()}`;
     const r=await fetch(url,{cache:'no-store'});
     if(!r.ok)throw new Error('HTTP '+r.status);
     afData=await r.json();
