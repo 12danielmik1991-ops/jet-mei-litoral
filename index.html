@@ -242,7 +242,8 @@
   .fl-pct.ok{color:var(--accent3)}
   .fl-pct.warn{color:var(--accent4)}
   .fl-pct.bad{color:var(--accent2)}
-  .fl-meter{position:relative;height:7px;border-radius:4px;background:var(--surface2);overflow:hidden;min-width:70px;margin-top:4px}
+  .fl-sub{opacity:.5;font-size:11px}
+.fl-meter{position:relative;height:7px;border-radius:4px;background:var(--surface2);overflow:hidden;min-width:70px;margin-top:4px}
   .fl-meter i{position:absolute;left:0;top:0;bottom:0;border-radius:4px;background:var(--accent3)}
   .fl-meter.warn i{background:var(--accent4)}
   .fl-meter.bad i{background:var(--accent2)}
@@ -3330,7 +3331,11 @@ function renderFleet(){
   // ТС на хранении выведены из работы: в доступности они не участвуют
   const flBase = c.base != null ? c.base : (c.total||0);
   set('flAvailSub',`${c.avail||0} ${t('fl_of')} ${flBase}` + ((c.stored||0) ? ` · ${c.stored} ${t('fl_stored')}` : ''));
-  set('flTotal',c.total||0);
+  set('flTotal',flBase);
+  const flTotSub=document.querySelector('[data-i18n="fl_kpi_total_sub"]');
+  if(flTotSub) flTotSub.textContent = (c.stored||0)
+    ? `${t('fl_kpi_total_sub')} · ${c.stored} ${t('fl_stored')}`
+    : t('fl_kpi_total_sub');
   set('flAlug',st.alugado||0);
   set('flAlugSub',flBase?((st.alugado||0)/flBase*100).toFixed(1)+'% '+t('fl_of_fleet'):'');
   set('flManut',(st.manutencao||0)+(st.reparo||0));
@@ -3356,7 +3361,8 @@ function renderFleet(){
     const name=x.code&&CITY_NAMES[x.code]?CITY_NAMES[x.code]:x.name;
     html+=`<tr class="${x.in_cluster_pct?'':'fl-off'}">`+
       `<td><b>${name}</b>${x.in_cluster_pct?'':` <span style="font-size:9px;opacity:.7">${t('fl_offcluster')}</span>`}</td>`+
-      `<td class="fl-num">${x.total}</td>`+
+      `<td class="fl-num">${x.base != null ? x.base : x.total}`+
+        `${(x.stored||0) ? `<span class="fl-sub"> +${x.stored}</span>` : ''}</td>`+
       `<td class="fl-num" style="color:var(--accent3)">${x.disp}</td>`+
       `<td class="fl-num" style="color:var(--accent)">${x.alug}</td>`+
       `<td class="fl-num" style="color:var(--accent4)">${serv||'—'}</td>`+
