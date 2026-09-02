@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0a0d12" media="(prefers-color-scheme: dark)">
 <meta name="theme-color" content="#f0f4f8" media="(prefers-color-scheme: light)">
 <meta name="mobile-web-app-capable" content="yes">
-<title>JET MEI Litoral</title>
+<title>JET MEI SP</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
   :root{--bg:#0a0d12;--surface:#111520;--surface2:#181e2e;--border:#1f2a40;--accent:#00e5ff;--accent2:#ff4757;--accent3:#2ed573;--accent4:#ffa502;--text:#e8edf5;--text-dim:#6b7a99;--slot-full:#0d2e1a;--slot-full-border:#2ed573;--slot-partial:#2a1e08;--slot-partial-border:#ffa502;--slot-empty:#1a0d0d;--slot-empty-border:#ff4757;--slot-none:#0f1219;--radius:6px;--shadow:0 4px 20px rgba(0,0,0,.4)}
@@ -371,7 +371,7 @@
 <div id="authOverlay">
   <div class="auth-box">
     <div class="auth-logo">⚡</div>
-    <div class="auth-title">JET MEI Litoral</div>
+    <div class="auth-title">JET MEI SP</div>
     <div class="auth-sub">SP-LITORAL · BRSPL · ADMIN</div>
     <input class="auth-input" type="password" id="authInput" placeholder="Senha / Пароль" onkeydown="if(event.key==='Enter')checkAuth()">
     <button class="auth-btn" onclick="checkAuth()">Entrar / Войти</button>
@@ -383,7 +383,7 @@
   <div class="logo">
     <div class="logo-icon">⚡</div>
     <div>
-      <div class="logo-text">JET MEI Litoral</div>
+      <div class="logo-text">JET MEI SP</div>
       <div class="logo-sub">SP-LITORAL · BRSPL</div>
     </div>
   </div>
@@ -1090,9 +1090,13 @@ function logout(){localStorage.removeItem(SESSION_KEY);location.reload();}
 }catch(e){}})();
 
 // ── DATA ─────────────────────────────────────────────
-const CITIES=['PG','GR','KG','IB','UB','MN','BR','IT','PE'];
+const CITIES=['PG','GR','KG','IB','UB','MN','BR','IT','PE','SO','SJ','CP','CJ'];
 const TASK_GOAL=45; // норма действий за смену: ≥ зелёный, < оранжевый
-const CITY_NAMES={PG:'Praia Grande',GR:'Guarujá',KG:'Caraguatatuba',IB:'Ilhabela',UB:'Ubatuba',MN:'Mongaguá',BR:'Bertioga',IT:'Itanhaém',PE:'Peruíbe'};
+const CITY_NAMES={PG:'Praia Grande',GR:'Guarujá',KG:'Caraguatatuba',IB:'Ilhabela',UB:'Ubatuba',MN:'Mongaguá',BR:'Bertioga',IT:'Itanhaém',PE:'Peruíbe',SO:'Sorocaba',SJ:'São José dos Campos',CP:'Campinas',CJ:'Campos do Jordão'};
+// Подкластеры: побережье и интерьер — один общий кластер, но разбивка нужна для группировок.
+const SUBCLUSTER={PG:'lit',GR:'lit',KG:'lit',IB:'lit',UB:'lit',MN:'lit',BR:'lit',IT:'lit',PE:'lit',SO:'int',SJ:'int',CP:'int',CJ:'int'};
+// Написания из источников, которые не совпадают с CITY_NAMES буква в букву.
+const CITY_ALIASES={'sao jose dos campos':'SJ','s jose dos campos':'SJ','sjc':'SJ','campos do jordao':'CJ','sorocaba':'SO','campinas':'CP'};
 // Глобальный резолвер: полное имя/код города → наш код (или null если НЕ наш город).
 // Фильтрует чужие города (São Paulo, Santo André, интерьер SJ/CP/SO/CJ и т.п.).
 const _NAME2CODE={};
@@ -1103,7 +1107,7 @@ function ourCity(v){
   if(!v)return null;
   if(CITIES.includes(v))return v;
   const n=String(v).normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().trim();
-  return _NAME2CODE[n]||null; // не наш город → null
+  return _NAME2CODE[n]||CITY_ALIASES[n]||null; // не наш город → null
 }
 // Город записи ЦД: приоритет city_home (где прописан MEI), затем current/cidade.
 // MEI считается нашим, если ЛИБО дом, ЛИБО место работы — один из 9 городов.
@@ -1298,7 +1302,7 @@ async function fetchBotData(){
       if(!v)return null;
       if(CITIES.includes(v))return v; // уже код
       const norm=String(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim();
-      return CITY_NAME_TO_CODE[norm]||null;
+      return CITY_NAME_TO_CODE[norm]||CITY_ALIASES[norm]||null;
     };
 
     workersRaw=dedupeWorkers(workersRaw);
