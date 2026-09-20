@@ -106,6 +106,27 @@
   .auth-input:focus{border-color:var(--accent)}
   .auth-btn{width:100%;background:var(--accent);color:#000;border:none;border-radius:var(--radius);padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Syne',sans-serif}
   .auth-error{color:var(--accent2);font-size:12px;font-family:'Space Mono',monospace;margin-top:8px;display:none}
+  /* --- итоговая таблица графика --- */
+  .esc-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow);overflow-x:auto}
+  .esc{width:100%;border-collapse:separate;border-spacing:3px;font-size:12px;min-width:720px}
+  .esc th{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;padding:4px 2px;text-align:center;font-weight:700}
+  .esc th.day span{display:block;font-size:13px;color:var(--text);font-weight:800;letter-spacing:0;margin-top:2px}
+  .esc th.wk{background:rgba(255,165,2,.08);border-radius:5px}
+  .esc td.nm{text-align:left;padding:6px 10px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;white-space:nowrap}
+  .esc td.nm b{font-size:12.5px;font-weight:700;display:block}
+  .esc td.nm i{font-style:normal;font-size:9.5px;color:var(--text-dim);font-family:'Space Mono',monospace}
+  .esc td.c{padding:0}
+  .sh{height:38px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:10.5px;font-weight:700;cursor:pointer;border:1px solid transparent;user-select:none;transition:.12s}
+  .sh:hover{filter:brightness(1.18)}
+  .sh small{font-size:8.5px;font-weight:400;opacity:.85}
+  .sh.m{background:rgba(46,213,115,.20);border-color:#2ed573;color:#2ed573}
+  .sh.t{background:rgba(255,140,26,.20);border-color:#ff8c1a;color:#ff8c1a}
+  .sh.n{background:rgba(157,101,255,.22);border-color:#9d65ff;color:#b18cff}
+  .sh.f{background:var(--surface2);border-color:var(--border);color:var(--text-dim);font-weight:400}
+  .esc tr.tot td{background:var(--surface2);border:1px solid var(--border);border-radius:5px;font-family:'Space Mono',monospace;font-size:10.5px;padding:6px 3px;text-align:center;color:var(--text-dim)}
+  .esc tr.tot td b{color:var(--text);font-size:12px}
+  .esc-legend{display:flex;gap:16px;flex-wrap:wrap;align-items:center;margin:0 0 14px;font-size:11.5px;font-family:'Space Mono',monospace;color:var(--text-dim)}
+  .esc-legend i{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-2px}
 </style>
 </head>
 <body>
@@ -148,6 +169,7 @@
   <div class="tab active" data-p="a">Вариант A · Сетка-светофор</div>
   <div class="tab" data-p="b">Вариант B · Мастер по дням</div>
   <div class="tab" data-p="c">Вариант C · Шаблон недели</div>
+  <div class="tab" data-p="tbl">Итог · таблица графика</div>
   <div class="tab" data-p="cmp">Сравнение</div>
 </div>
 
@@ -375,6 +397,32 @@
   </div>
 </div>
 
+<div class="pane" id="pane-tbl">
+  <div class="intro">
+    <h2>Итог: график недели · Praia Grande · 22–28/09</h2>
+    <p>Так выглядит результат после опроса и правок супервайзера, независимо от того, какой вариант анкеты выберем. Слева фамилия, сверху дни, клетка — смена цветом. Клик по клетке меняет смену прямо в таблице (здесь это демо, в бою — правка с уведомлением человеку в бот).</p>
+    <div class="esc-legend" style="margin-top:12px">
+      <span><i style="background:rgba(46,213,115,.35);border:1px solid #2ed573"></i>Manhã · утро 06–15</span>
+      <span><i style="background:rgba(255,140,26,.35);border:1px solid #ff8c1a"></i>Tarde · день 12–21</span>
+      <span><i style="background:rgba(157,101,255,.4);border:1px solid #9d65ff"></i>Noite · ночь 21–06</span>
+      <span><i style="background:var(--surface2);border:1px solid var(--border)"></i>Folga · выходной</span>
+    </div>
+  </div>
+
+  <div class="esc-wrap">
+    <table class="esc" id="escTable"></table>
+    <div class="sv-actions" style="margin-top:16px">
+      <div class="act main">📤 Publicar escala (33 turnos)</div>
+      <div class="act">📊 Exportar para o dashboard</div>
+      <div class="act">🔔 Avisar quem teve mudança</div>
+    </div>
+    <div class="note">
+      <b>Нижняя строка</b> — сколько человек в этот день по каждой смене; красным, если меньше плана города.
+      <b>Выходные</b> подсвечены в шапке. Если понадобится четвёртая смена (вечер 15–00), добавлю ей свой цвет — сейчас в таблице три, как ты сказал.
+    </div>
+  </div>
+</div>
+
 <!-- ================= СРАВНЕНИЕ ================= -->
 <div class="pane" id="pane-cmp">
   <div class="intro">
@@ -541,6 +589,64 @@ document.getElementById('deltaC').innerHTML = DELTA_C.map(p => `
     <div><div class="nm">${p[0]}</div><div class="dt">${p[1]}</div></div>
     <div class="rt"><span class="tag ${p[2]}">${p[2] === 'g' ? '+' : p[2] === 'y' ? 'изм.' : '!'}</span></div>
   </div>`).join('');
+
+
+/* --- итоговая таблица графика: фамилии × дни, цвет = смена --- */
+const ESC_DAYS = [['Seg','22/09',0],['Ter','23/09',0],['Qua','24/09',0],['Qui','25/09',0],
+                  ['Sex','26/09',0],['Sáb','27/09',1],['Dom','28/09',1]];
+const SH = {m:['m','06–15'], t:['t','12–21'], n:['n','21–06'], f:['f','folga']};
+const ESC_ROWS = [
+  ['Silva, José',        'PG · charger', ['m','m','m','m','m','f','f']],
+  ['Alves, Marcos',      'PG · charger', ['m','m','f','m','m','t','t']],
+  ['Pinto, Rafael',      'PG · scout',   ['t','t','t','f','t','t','f']],
+  ['Moreira, Lucas',     'PG · charger', ['t','t','t','t','f','f','m']],
+  ['Costa, Bruno',       'PG · charger', ['n','n','n','n','n','f','f']],
+  ['Ferreira, Diego',    'PG · scout',   ['f','m','m','m','m','m','t']],
+  ['Rocha, Tiago',       'PG · charger', ['n','n','f','n','n','n','f']],
+  ['Henrique, Paulo',    'PG · charger', ['m','f','m','m','t','t','t']],
+  ['Lima, André',        'PG · scout',   ['t','t','f','t','t','f','m']],
+  ['Nogueira, Felipe',   'PG · charger', ['f','n','n','n','f','n','n']],
+  ['Barbosa, Caio',      'PG · charger', ['m','m','m','f','m','m','m']],
+  ['Gomes, Vitor',       'PG · scout',   ['f','f','t','t','t','t','t']],
+];
+const PLAN = {m:6, t:5, n:3};
+
+function renderEsc(){
+  const t = document.getElementById('escTable');
+  if(!t) return;
+  let h = '<thead><tr><th style="text-align:left;padding-left:10px">Sobrenome, nome</th>' +
+    ESC_DAYS.map(d => `<th class="day${d[2] ? ' wk' : ''}">${d[0]}<span>${d[1]}</span></th>`).join('') +
+    '</tr></thead><tbody>';
+  ESC_ROWS.forEach((r, ri) => {
+    h += `<tr><td class="nm"><b>${r[0]}</b><i>${r[1]}</i></td>` +
+      r[2].map((c, ci) => {
+        const sh = SH[c];
+        return `<td class="c"><div class="sh ${sh[0]}" data-r="${ri}" data-c="${ci}">` +
+               `${c === 'f' ? '—' : sh[1]}${c === 'f' ? '' : `<small>${c === 'm' ? 'manhã' : c === 't' ? 'tarde' : 'noite'}</small>`}</div></td>`;
+      }).join('') + '</tr>';
+  });
+  // итоги по дням
+  h += '<tr class="tot"><td style="text-align:left;padding-left:10px">Total por turno</td>';
+  ESC_DAYS.forEach((d, ci) => {
+    const cnt = {m:0, t:0, n:0};
+    ESC_ROWS.forEach(r => { if(cnt[r[2][ci]] !== undefined) cnt[r[2][ci]]++; });
+    const col = k => cnt[k] >= PLAN[k] ? 'var(--text)' : '#ff4757';
+    h += `<td><b style="color:${col('m')}">${cnt.m}</b>/<b style="color:${col('t')}">${cnt.t}</b>/<b style="color:${col('n')}">${cnt.n}</b><br>` +
+         `<span style="font-size:8.5px">manhã/tarde/noite</span></td>`;
+  });
+  h += '</tr></tbody>';
+  t.innerHTML = h;
+
+  t.querySelectorAll('.sh').forEach(el => {
+    el.onclick = () => {
+      const order = ['m','t','n','f'];
+      const r = +el.dataset.r, c = +el.dataset.c;
+      ESC_ROWS[r][2][c] = order[(order.indexOf(ESC_ROWS[r][2][c]) + 1) % 4];
+      renderEsc();
+    };
+  });
+}
+renderEsc();
 
 /* --- табы --- */
 document.querySelectorAll('.tab').forEach(t => {
