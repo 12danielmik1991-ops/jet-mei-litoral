@@ -1,0 +1,508 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#0a0d12" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f0f4f8" media="(prefers-color-scheme: light)">
+<title>JET MEI · Pesquisa de disponibilidade — 3 варианта</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap');
+  :root{--bg:#0a0d12;--surface:#111520;--surface2:#181e2e;--border:#1f2a40;--accent:#00e5ff;--accent2:#ff4757;--accent3:#2ed573;--accent4:#ffa502;--text:#e8edf5;--text-dim:#6b7a99;--radius:6px;--shadow:0 4px 20px rgba(0,0,0,.4);--tg-bubble:#182533;--tg-btn:#1e2b3b}
+  html.light{--bg:#f0f4f8;--surface:#fff;--surface2:#e8edf5;--border:#d0d9e8;--accent:#0077cc;--accent2:#e03030;--accent3:#1a9e50;--accent4:#d47800;--text:#0d1117;--text-dim:#4a5568;--shadow:0 4px 20px rgba(0,0,0,.1);--tg-bubble:#e8edf5;--tg-btn:#dce4ef}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:'Syne',sans-serif;min-height:100vh}
+  header{display:flex;align-items:center;justify-content:space-between;padding:12px 24px;border-bottom:1px solid var(--border);background:var(--surface);position:sticky;top:0;z-index:200;flex-wrap:wrap;gap:8px}
+  .logo{display:flex;align-items:center;gap:10px}
+  .logo-icon{width:32px;height:32px;background:var(--accent);border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;color:#000}
+  .logo-text{font-size:16px;font-weight:800;letter-spacing:-.5px}
+  .logo-sub{font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace}
+  .icon-btn{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);color:var(--text);padding:6px 10px;font-size:11px;cursor:pointer;font-family:'Space Mono',monospace;font-weight:700}
+  .icon-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .tabs-bar{display:flex;background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;position:sticky;top:57px;z-index:190;overflow-x:auto}
+  .tab{padding:12px 18px;font-size:13px;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;color:var(--text-dim);white-space:nowrap;user-select:none}
+  .tab:hover{color:var(--text)}
+  .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .pane{display:none;padding:18px 24px 60px}
+  .pane.active{display:block}
+  .intro{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px 18px;margin-bottom:16px;box-shadow:var(--shadow)}
+  .intro h2{font-size:17px;margin-bottom:6px}
+  .intro p{font-size:13px;color:var(--text-dim);line-height:1.55}
+  .meta-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .chip{font-family:'Space Mono',monospace;font-size:10px;padding:4px 9px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim)}
+  .chip.good{color:var(--accent3);border-color:var(--accent3)}
+  .chip.warn{color:var(--accent4);border-color:var(--accent4)}
+  .chip.bad{color:var(--accent2);border-color:var(--accent2)}
+  .split{display:grid;grid-template-columns:360px 1fr;gap:18px;align-items:start}
+  @media(max-width:900px){.split{grid-template-columns:1fr}}
+  .col-title{font-size:11px;font-family:'Space Mono',monospace;color:var(--text-dim);text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px}
+  /* --- телефон --- */
+  .phone{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:12px;box-shadow:var(--shadow)}
+  .phone-top{display:flex;align-items:center;gap:8px;padding:4px 4px 10px;border-bottom:1px solid var(--border);margin-bottom:10px}
+  .phone-av{width:26px;height:26px;border-radius:50%;background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800}
+  .phone-name{font-size:12px;font-weight:700}
+  .phone-status{font-size:9px;color:var(--text-dim);font-family:'Space Mono',monospace}
+  .bubble{background:var(--tg-bubble);border-radius:12px 12px 12px 4px;padding:10px 12px;font-size:12.5px;line-height:1.5;margin-bottom:8px}
+  .bubble b{color:var(--text)}
+  .bubble .small{font-size:11px;color:var(--text-dim);display:block;margin-top:5px}
+  .kb{display:grid;gap:5px;margin-bottom:9px}
+  .kb.c3{grid-template-columns:repeat(3,1fr)}
+  .kb.c2{grid-template-columns:repeat(2,1fr)}
+  .kb.c4{grid-template-columns:28px repeat(3,1fr)}
+  .kbtn{background:var(--tg-btn);border:1px solid var(--border);border-radius:7px;padding:7px 4px;font-size:11px;text-align:center;cursor:pointer;user-select:none;font-family:'Space Mono',monospace;transition:.15s}
+  .kbtn:hover{border-color:var(--accent)}
+  .kbtn.wide{grid-column:1/-1;padding:9px;font-weight:700}
+  .kbtn.on{background:rgba(46,213,115,.16);border-color:var(--accent3);color:var(--accent3)}
+  .kbtn.maybe{background:rgba(255,165,2,.14);border-color:var(--accent4);color:var(--accent4)}
+  .kbtn.primary{background:var(--accent);color:#000;border-color:var(--accent);font-weight:800}
+  .kbtn.ghost{opacity:.55}
+  .daylab{display:flex;align-items:center;justify-content:center;font-size:10px;font-family:'Space Mono',monospace;color:var(--text-dim)}
+  .sent{font-size:10px;color:var(--accent3);font-family:'Space Mono',monospace;text-align:right;margin-top:-4px;margin-bottom:8px}
+  /* --- супервайзер --- */
+  .sv{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+  .sv h3{font-size:14px;margin-bottom:3px}
+  .sv .sub{font-size:10.5px;color:var(--text-dim);font-family:'Space Mono',monospace;margin-bottom:14px}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{padding:7px 8px;text-align:center;border-bottom:1px solid var(--border)}
+  th{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.4px;font-weight:700}
+  td.l,th.l{text-align:left}
+  .cell{border-radius:5px;padding:5px 2px;font-family:'Space Mono',monospace;font-weight:700;font-size:12px;cursor:pointer}
+  .ok{background:rgba(46,213,115,.15);color:var(--accent3)}
+  .mid{background:rgba(255,165,2,.15);color:var(--accent4)}
+  .low{background:rgba(255,71,87,.16);color:var(--accent2)}
+  .need{font-size:9px;color:var(--text-dim);display:block;font-weight:400}
+  .names{margin-top:12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:11.5px;line-height:1.7;min-height:52px}
+  .names .t{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;margin-bottom:5px}
+  .tag{display:inline-block;padding:2px 7px;border-radius:12px;font-size:10.5px;margin:2px 4px 2px 0;border:1px solid var(--border);background:var(--surface)}
+  .tag.g{border-color:var(--accent3);color:var(--accent3)}
+  .tag.y{border-color:var(--accent4);color:var(--accent4)}
+  .tag.r{border-color:var(--accent2);color:var(--accent2)}
+  .person{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:9px 10px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface2);margin-bottom:7px}
+  .person .nm{font-size:12.5px;font-weight:700}
+  .person .dt{font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace;margin-top:2px}
+  .person .rt{text-align:right;font-family:'Space Mono',monospace;font-size:11px}
+  .bar{height:26px;display:flex;border-radius:5px;overflow:hidden;border:1px solid var(--border);margin-top:4px}
+  .bar div{display:flex;align-items:center;justify-content:center;font-size:9px;font-family:'Space Mono',monospace;color:#000;font-weight:700}
+  .hours{display:grid;grid-template-columns:repeat(18,1fr);gap:2px;margin-top:6px}
+  .hr{height:34px;border-radius:3px;display:flex;align-items:flex-end;justify-content:center;font-size:8px;font-family:'Space Mono',monospace;padding-bottom:2px;color:var(--text-dim)}
+  .sv-actions{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .act{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 12px;font-size:11.5px;cursor:pointer;font-weight:700}
+  .act.main{background:var(--accent);color:#000;border-color:var(--accent)}
+  .act:hover{border-color:var(--accent)}
+  .note{font-size:11.5px;color:var(--text-dim);line-height:1.6;margin-top:12px;padding-top:12px;border-top:1px dashed var(--border)}
+  .note b{color:var(--text)}
+  .cmp{width:100%;border-collapse:collapse;font-size:12.5px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+  .cmp th,.cmp td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+  .cmp td:first-child{font-family:'Space Mono',monospace;font-size:10.5px;color:var(--text-dim);text-transform:uppercase;width:190px}
+  .flow{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:10px;font-size:11.5px;font-family:'Space Mono',monospace;color:var(--text-dim)}
+  .flow span{background:var(--surface2);border:1px solid var(--border);padding:6px 10px;border-radius:20px}
+  .flow i{color:var(--accent);font-style:normal}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <div class="logo-icon">JM</div>
+    <div>
+      <div class="logo-text">JET MEI · Escala semanal</div>
+      <div class="logo-sub">Pesquisa de disponibilidade — прототип, 3 варианта</div>
+    </div>
+  </div>
+  <div style="display:flex;gap:7px">
+    <button class="icon-btn" onclick="document.documentElement.classList.toggle('light')">☀ / ☾</button>
+    <a class="icon-btn" href="./" style="text-decoration:none">← Дашборд</a>
+  </div>
+</header>
+
+<div class="tabs-bar">
+  <div class="tab active" data-p="a">Вариант A · Сетка-светофор</div>
+  <div class="tab" data-p="b">Вариант B · Мастер по дням</div>
+  <div class="tab" data-p="c">Вариант C · Шаблон недели</div>
+  <div class="tab" data-p="cmp">Сравнение</div>
+</div>
+
+<!-- ================= A ================= -->
+<div class="pane active" id="pane-a">
+  <div class="intro">
+    <h2>A · Сетка-светофор: одно сообщение, один экран</h2>
+    <p>В воскресенье в 18:00 каждому MEI приходит <b>одно</b> сообщение с сеткой «7 дней × 3 смены». Тап по клетке переключает: пусто → <b style="color:var(--accent4)">posso</b> (могу, если нужно) → <b style="color:var(--accent3)">garantido</b> (точно выйду). Внизу — сдвиг старта на час и цель по заменам. Отправка одной кнопкой.</p>
+    <div class="meta-row">
+      <span class="chip good">~8 тапов</span>
+      <span class="chip good">1 сообщение, не теряется в переписке</span>
+      <span class="chip warn">время — только смена ± 1 час</span>
+      <span class="chip">замены — одна цифра на неделю</span>
+    </div>
+  </div>
+
+  <div class="split">
+    <div>
+      <div class="col-title">📱 Что видит MEI</div>
+      <div class="phone">
+        <div class="phone-top">
+          <div class="phone-av">JM</div>
+          <div><div class="phone-name">MEI JET bot</div><div class="phone-status">domingo, 18:00</div></div>
+        </div>
+        <div class="bubble">
+          <b>📅 Escala 22–28/09 · Praia Grande</b><br>
+          Marque os turnos em que você consegue trabalhar.
+          <span class="small">1 toque = <b style="color:#ffa502">posso</b> · 2 toques = <b style="color:#2ed573">garantido</b> · 3 = limpar</span>
+        </div>
+        <div class="kb c4" id="gridA"></div>
+        <div class="bubble">⏰ Prefere começar mais tarde? O turno inteiro desloca junto.</div>
+        <div class="kb c3">
+          <div class="kbtn on" data-grp="shift">no horário</div>
+          <div class="kbtn" data-grp="shift">+1 hora</div>
+          <div class="kbtn" data-grp="shift">−1 hora</div>
+        </div>
+        <div class="bubble">🔋 Quantas trocas de bateria você pretende fazer nesta semana?</div>
+        <div class="kb c4" style="grid-template-columns:repeat(4,1fr)">
+          <div class="kbtn" data-grp="meta">até 100</div>
+          <div class="kbtn on" data-grp="meta">150</div>
+          <div class="kbtn" data-grp="meta">200</div>
+          <div class="kbtn" data-grp="meta">250+</div>
+        </div>
+        <div class="kb"><div class="kbtn wide primary">✅ Enviar disponibilidade</div></div>
+        <div class="sent">✓ Recebido às 18:04</div>
+      </div>
+    </div>
+
+    <div>
+      <div class="col-title">🖥 Что видит супервайзер (и ты)</div>
+      <div class="sv">
+        <h3>Disponibilidade · Praia Grande · 22–28/09</h3>
+        <div class="sub">ответили 31 из 39 · обновлено вс 21:40</div>
+        <table>
+          <thead><tr><th class="l">Turno</th><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th><th>Dom</th></tr></thead>
+          <tbody id="tblA"></tbody>
+        </table>
+        <div class="names" id="namesA">
+          <div class="t">Нажми на клетку — покажу людей</div>
+          <span style="color:var(--text-dim);font-size:11.5px">Зелёный — «garantido», жёлтый — «posso», под числом — сколько нужно по плану.</span>
+        </div>
+        <div class="sv-actions">
+          <div class="act main">⚡ Gerar escala dos garantidos</div>
+          <div class="act">📨 Cobrar os 8 que não responderam</div>
+          <div class="act">🔁 Puxar «posso» para os buracos</div>
+        </div>
+        <div class="note">
+          <b>Как читается:</b> ячейка 🟢 5 / план 6 — не хватает одного, но есть двое в «posso» — супервайзер пишет им лично.
+          <b>Замены:</b> заявлено 4 650 при плане 5 200 — дефицит 550 виден сразу, до начала недели.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= B ================= -->
+<div class="pane" id="pane-b">
+  <div class="intro">
+    <h2>B · Мастер по дням: бот спрашивает, человек отвечает</h2>
+    <p>Бот ведёт диалог по каждому дню: работаешь? → какая смена? → во сколько удобно начать? → сколько замен планируешь. Есть кнопка «повторить для всех дней», чтобы не проходить семь кругов. Данные самые точные — вплоть до желаемого часа старта и цели по заменам на каждый день.</p>
+    <div class="meta-row">
+      <span class="chip warn">~15–20 тапов (или 3 с «повторить»)</span>
+      <span class="chip good">точное время старта, по дню</span>
+      <span class="chip good">замены по дням, а не «на неделю»</span>
+      <span class="chip bad">длинный диалог — часть людей бросит на середине</span>
+    </div>
+  </div>
+
+  <div class="split">
+    <div>
+      <div class="col-title">📱 Что видит MEI</div>
+      <div class="phone">
+        <div class="phone-top">
+          <div class="phone-av">JM</div>
+          <div><div class="phone-name">MEI JET bot</div><div class="phone-status">domingo, 18:00 · passo 2 de 7</div></div>
+        </div>
+        <div class="bubble">
+          <b>📅 Escala 22–28/09</b><br>Vou perguntar dia a dia. Leva 1 minuto.
+        </div>
+        <div class="bubble"><b>Segunda, 22/09</b> — você trabalha?</div>
+        <div class="kb c2">
+          <div class="kbtn on">✅ Sim</div><div class="kbtn ghost">❌ Folga</div>
+        </div>
+        <div class="bubble">Qual turno na segunda?</div>
+        <div class="kb c3">
+          <div class="kbtn on" data-grp="tb">🌅 06–15</div>
+          <div class="kbtn" data-grp="tb">☀️ 12–21</div>
+          <div class="kbtn" data-grp="tb">🌆 15–00</div>
+        </div>
+        <div class="bubble">A que horas você prefere começar?
+          <span class="small">o turno continua com 9 horas</span></div>
+        <div class="kb c3">
+          <div class="kbtn" data-grp="hb">06:00</div>
+          <div class="kbtn on" data-grp="hb">07:00</div>
+          <div class="kbtn" data-grp="hb">08:00</div>
+        </div>
+        <div class="bubble">🔋 Meta de trocas na segunda?</div>
+        <div class="kb c4" style="grid-template-columns:repeat(4,1fr)">
+          <div class="kbtn" data-grp="mb">15</div>
+          <div class="kbtn on" data-grp="mb">25</div>
+          <div class="kbtn" data-grp="mb">35</div>
+          <div class="kbtn" data-grp="mb">45+</div>
+        </div>
+        <div class="kb c2">
+          <div class="kbtn primary">→ Terça</div>
+          <div class="kbtn">📋 Repetir p/ semana</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="col-title">🖥 Что видит супервайзер (и ты)</div>
+      <div class="sv">
+        <h3>Disponibilidade detalhada · Praia Grande · seg 22/09</h3>
+        <div class="sub">покрытие по часам — видно провалы, а не только «смены»</div>
+        <div class="hours" id="hoursB"></div>
+        <div style="font-size:10.5px;color:var(--text-dim);font-family:'Space Mono',monospace;margin-top:7px">
+          06:00 ──────── 12:00 ──────── 18:00 ──────── 24:00 · высота = сколько человек на линии
+        </div>
+        <div style="margin-top:16px" id="peopleB"></div>
+        <div class="sv-actions">
+          <div class="act main">⚡ Montar escala</div>
+          <div class="act">✏️ Ajustar horário de alguém</div>
+          <div class="act">💬 Negociar 2 vagas das 15h</div>
+        </div>
+        <div class="note">
+          <b>Что даёт:</b> видно, что с 15:00 до 18:00 на линии всего двое — провал закрывается сдвигом чужой смены на час,
+          а не поиском нового человека. <b>Цена:</b> длинный диалог, часть людей не дойдёт до конца — нужен «повторить для всех дней».
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= C ================= -->
+<div class="pane" id="pane-c">
+  <div class="intro">
+    <h2>C · Шаблон недели: подтверди или поменяй</h2>
+    <p>Бот не спрашивает с нуля, а показывает <b>привычную неделю человека</b> (по факту последних 4 недель) и просит подтвердить. Кто работает стабильно — жмёт одну кнопку. Кто хочет поменять — правит только те дни, что нужно. Супервайзер видит не «кто что выбрал», а <b>что изменилось</b> против обычного.</p>
+    <div class="meta-row">
+      <span class="chip good">1 тап для 70% людей</span>
+      <span class="chip good">самый высокий отклик</span>
+      <span class="chip warn">новичкам шаблона нет — им показываем вариант A</span>
+      <span class="chip">данные те же, что в A</span>
+    </div>
+  </div>
+
+  <div class="split">
+    <div>
+      <div class="col-title">📱 Что видит MEI</div>
+      <div class="phone">
+        <div class="phone-top">
+          <div class="phone-av">JM</div>
+          <div><div class="phone-name">MEI JET bot</div><div class="phone-status">domingo, 18:00</div></div>
+        </div>
+        <div class="bubble">
+          <b>📅 Sua semana de costume</b><br>
+          Seg, Ter, Qua, Qui, Sex — 🌅 06:00–15:00<br>
+          Sáb — 🌆 15:00–00:00<br>
+          Dom — folga<br>
+          🔋 média de trocas: <b>28 por dia</b>
+          <span class="small">Confirma para 22–28/09?</span>
+        </div>
+        <div class="kb">
+          <div class="kbtn wide primary">✅ Confirmo tudo</div>
+        </div>
+        <div class="kb c2">
+          <div class="kbtn">✏️ Alterar alguns dias</div>
+          <div class="kbtn">🏖 Semana de folga</div>
+        </div>
+        <div class="bubble" style="margin-top:4px">Se marcar «Alterar», abro a grade já preenchida — você muda só o que precisa:</div>
+        <div class="kb c4" id="gridC"></div>
+        <div class="kb c2">
+          <div class="kbtn">⏰ Começar 1h depois</div>
+          <div class="kbtn primary">✅ Salvar</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="col-title">🖥 Что видит супервайзер (и ты)</div>
+      <div class="sv">
+        <h3>Mudanças da semana · Praia Grande · 22–28/09</h3>
+        <div class="sub">39 MEI · 26 подтвердили шаблон · 7 изменили · 6 молчат</div>
+
+        <div class="bar">
+          <div style="width:67%;background:#2ed573">26 confirmaram</div>
+          <div style="width:18%;background:#ffa502">7 mudaram</div>
+          <div style="width:15%;background:#ff4757">6 sem resposta</div>
+        </div>
+
+        <div style="margin-top:16px" id="deltaC"></div>
+
+        <div class="sv-actions">
+          <div class="act main">⚡ Escala pronta (33 pessoas)</div>
+          <div class="act">📨 Cobrar 6 silenciosos</div>
+          <div class="act">📉 Ver buracos da semana</div>
+        </div>
+        <div class="note">
+          <b>Главное отличие:</b> супервайзер читает не 39 анкет, а 13 строк — только отклонения от привычного.
+          <b>Риск:</b> шаблон «залипает» — если человек молча перестал выходить по субботам, система будет предлагать субботу, пока он сам не изменит.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================= СРАВНЕНИЕ ================= -->
+<div class="pane" id="pane-cmp">
+  <div class="intro">
+    <h2>Сравнение и как это встаёт в текущий бот</h2>
+    <p>Сейчас цикл идёт «сверху вниз»: мы планируем смены в воскресенье и публикуем их в понедельник по FCFS. Опрос доступности разворачивает первый шаг — сначала спрашиваем людей, потом планируем под них.</p>
+    <div class="flow">
+      <span>Вс 18:00 · опрос MEI</span><i>→</i>
+      <span>Вс 21:00 · сводка супервайзеру</span><i>→</i>
+      <span>Вс 22:00 · правки и договорённости</span><i>→</i>
+      <span>Пн 08:00 · публикация смен <b>(как сейчас)</b></span><i>→</i>
+      <span>D-1 · подтверждение <b>(как сейчас)</b></span>
+    </div>
+  </div>
+
+  <table class="cmp">
+    <tr><th></th><th>A · Сетка</th><th>B · Мастер</th><th>C · Шаблон</th></tr>
+    <tr><td>Тапов у MEI</td><td>~8</td><td>15–20 (3 с «повторить»)</td><td>1 у постоянных, ~6 у остальных</td></tr>
+    <tr><td>Ожидаемый отклик</td><td>высокий</td><td>средний — длинный диалог</td><td>самый высокий</td></tr>
+    <tr><td>Точность по времени</td><td>смена ± 1 час</td><td>конкретный час старта по дню</td><td>смена ± 1 час</td></tr>
+    <tr><td>Замены (АКБ)</td><td>цифра на неделю</td><td>цифра на каждый день</td><td>из истории, правится</td></tr>
+    <tr><td>Работа супервайзера</td><td>читает матрицу 3×7</td><td>читает таймлайн + карточки</td><td>читает только отклонения</td></tr>
+    <tr><td>Новички без истории</td><td>работает сразу</td><td>работает сразу</td><td>нужен запасной экран (A)</td></tr>
+    <tr><td>Что в БД</td><td>availability(day, turno, level, shift_h)</td><td>+ start_hour, meta_trocas по дню</td><td>+ template(mei_id), diff</td></tr>
+    <tr><td>Срок разработки</td><td>~2 дня</td><td>~4 дня</td><td>~3 дня (нужна история 4 недель)</td></tr>
+  </table>
+
+  <div class="intro" style="margin-top:18px">
+    <h2>Что общего во всех трёх</h2>
+    <p>
+      • Рассылка вс 18:00, напоминание молчащим вс 20:30, закрытие опроса пн 07:00.<br>
+      • Ответ уходит в БД и в <b>gist schedule.json</b> — дашборд показывает сводку на этой же вкладке.<br>
+      • Супервайзер получает сводку <b>по своему городу</b>, ты — по всем 13.<br>
+      • «Posso» (могу, если нужно) — отдельный уровень: это резерв под дыры, а не обещание.<br>
+      • Ответ не создаёт смену. Смены по-прежнему создаёт супервайзер/бот в понедельник — опрос только даёт основание.
+    </p>
+  </div>
+</div>
+
+<script>
+const DAYS = ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'];
+const TURNOS = [['🌅','06–15'],['☀️','12–21'],['🌆','15–00']];
+
+/* --- сетка варианта A: кликабельная, три состояния --- */
+function buildGrid(el, preset){
+  el.innerHTML = '';
+  el.style.gridTemplateColumns = '30px repeat(3,1fr)';
+  el.insertAdjacentHTML('beforeend', '<div class="daylab"></div>' +
+    TURNOS.map(t => `<div class="daylab">${t[0]} ${t[1]}</div>`).join(''));
+  DAYS.forEach((d, di) => {
+    el.insertAdjacentHTML('beforeend', `<div class="daylab">${d}</div>`);
+    TURNOS.forEach((t, ti) => {
+      const st = preset ? (preset[di] === ti ? 2 : 0) : 0;
+      const b = document.createElement('div');
+      b.className = 'kbtn' + (st === 2 ? ' on' : '');
+      b.textContent = st === 2 ? '✓' : '·';
+      b.dataset.st = st;
+      b.onclick = () => {
+        let s = (+b.dataset.st + 1) % 3;
+        b.dataset.st = s;
+        b.className = 'kbtn' + (s === 1 ? ' maybe' : s === 2 ? ' on' : '');
+        b.textContent = s === 1 ? '~' : s === 2 ? '✓' : '·';
+      };
+      el.appendChild(b);
+    });
+  });
+}
+buildGrid(document.getElementById('gridA'), null);
+buildGrid(document.getElementById('gridC'), [0,0,0,0,0,2,-1]);
+
+/* --- группы кнопок с одним выбором --- */
+document.querySelectorAll('[data-grp]').forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll(`[data-grp="${b.dataset.grp}"]`).forEach(x => x.classList.remove('on'));
+    b.classList.add('on');
+  };
+});
+
+/* --- таблица варианта A --- */
+const DATA_A = [
+  {t:'🌅 06–15', v:[[9,6],[8,6],[7,6],[9,6],[11,7],[12,8],[10,8]], p:[[2],[3],[4],[2],[1],[0],[1]]},
+  {t:'☀️ 12–21', v:[[6,6],[5,6],[4,6],[6,6],[8,7],[9,9],[8,9]], p:[[3],[3],[5],[3],[2],[3],[2]]},
+  {t:'🌆 15–00', v:[[4,5],[3,5],[3,5],[4,5],[6,6],[7,8],[6,8]], p:[[2],[4],[3],[3],[3],[2],[3]]},
+];
+const NAMES = ['José S.','Marcos A.','Rafael P.','Lucas M.','Bruno C.','Diego F.','Tiago R.','Paulo H.','André L.','Felipe N.','Caio B.','Vitor G.'];
+const tbl = document.getElementById('tblA');
+DATA_A.forEach((row, ri) => {
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td class="l" style="font-family:'Space Mono',monospace;font-size:11px">${row.t}</td>` +
+    row.v.map((c, ci) => {
+      const [have, need] = c;
+      const cls = have >= need ? 'ok' : (have >= need - 1 ? 'mid' : 'low');
+      return `<td><div class="cell ${cls}" data-r="${ri}" data-c="${ci}">${have}<span class="need">план ${need}</span></div></td>`;
+    }).join('');
+  tbl.appendChild(tr);
+});
+document.querySelectorAll('#tblA .cell').forEach(c => {
+  c.onclick = () => {
+    const ri = +c.dataset.r, ci = +c.dataset.c;
+    const [have, need] = DATA_A[ri].v[ci];
+    const maybe = DATA_A[ri].p[ci][0];
+    const g = NAMES.slice(0, Math.min(have, 8)).map(n => `<span class="tag g">${n}</span>`).join('');
+    const y = NAMES.slice(8, 8 + maybe).map(n => `<span class="tag y">${n} · posso</span>`).join('');
+    document.getElementById('namesA').innerHTML =
+      `<div class="t">${DATA_A[ri].t} · ${DAYS[ci]} — garantido ${have}, план ${need}, резерв ${maybe}</div>${g}${y}` +
+      (have < need ? `<div style="margin-top:7px;color:var(--accent2);font-size:11px">Не хватает ${need - have}. Резерв «posso»: ${maybe} — написать им.</div>` : '');
+  };
+});
+
+/* --- почасовое покрытие, вариант B --- */
+const COVER = [3,5,8,9,9,9,8,7,6,5,4,2,2,3,5,6,5,3];
+const hoursEl = document.getElementById('hoursB');
+const maxC = Math.max(...COVER);
+COVER.forEach((n, i) => {
+  const h = 6 + i;
+  const col = n >= 7 ? '#2ed573' : n >= 4 ? '#ffa502' : '#ff4757';
+  hoursEl.insertAdjacentHTML('beforeend',
+    `<div class="hr" style="background:linear-gradient(to top, ${col} ${Math.round(n / maxC * 100)}%, transparent ${Math.round(n / maxC * 100)}%)" title="${h}:00 — ${n} чел.">${h}</div>`);
+});
+
+/* --- карточки людей, вариант B --- */
+const PEOPLE_B = [
+  ['José Silva', '🌅 quer começar 07:00', '25 trocas', 'g'],
+  ['Marcos Alves', '🌅 06:00 padrão', '30 trocas', 'g'],
+  ['Rafael Pinto', '☀️ 12:00 · só seg e qua', '20 trocas', 'y'],
+  ['Lucas Moreira', '🌆 quer 16:00 em vez de 15:00', '35 trocas', 'y'],
+  ['Bruno Costa', '❌ folga na segunda', '—', 'r'],
+];
+document.getElementById('peopleB').innerHTML = PEOPLE_B.map(p => `
+  <div class="person">
+    <div><div class="nm">${p[0]}</div><div class="dt">${p[1]}</div></div>
+    <div class="rt"><span class="tag ${p[3]}">${p[2]}</span></div>
+  </div>`).join('');
+
+/* --- дельты, вариант C --- */
+const DELTA_C = [
+  ['Rafael Pinto', 'обычно Seg–Sex 🌅 · на этой неделе <b>без quarta</b>', 'y'],
+  ['Lucas Moreira', 'просит сдвиг <b>15:00 → 16:00</b> всю неделю', 'y'],
+  ['Diego Ferreira', 'добавил <b>domingo 🌆</b> (обычно выходной)', 'g'],
+  ['Tiago Rocha', 'снизил замены <b>30 → 15</b> (машина в ремонте)', 'y'],
+  ['Paulo Henrique', '<b>semana de folga</b> — уезжает', 'r'],
+  ['André Lima', 'не ответил · обычно Seg–Sáb 🌅', 'r'],
+];
+document.getElementById('deltaC').innerHTML = DELTA_C.map(p => `
+  <div class="person">
+    <div><div class="nm">${p[0]}</div><div class="dt">${p[1]}</div></div>
+    <div class="rt"><span class="tag ${p[2]}">${p[2] === 'g' ? '+' : p[2] === 'y' ? 'изм.' : '!'}</span></div>
+  </div>`).join('');
+
+/* --- табы --- */
+document.querySelectorAll('.tab').forEach(t => {
+  t.onclick = () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.pane').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('pane-' + t.dataset.p).classList.add('active');
+  };
+});
+</script>
+</body>
+</html>
