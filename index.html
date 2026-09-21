@@ -44,6 +44,30 @@
   .tab{display:flex;align-items:center;gap:7px;padding:12px 20px;font-size:13px;font-weight:700;cursor:pointer;border-bottom:2px solid transparent;color:var(--text-dim);transition:all .2s;white-space:nowrap;user-select:none}
   .tab:hover{color:var(--text)}
   .tab.active{color:var(--accent);border-bottom-color:var(--accent)}
+  /* --- Grade da semana: фамилии × дни (v0.19) --- */
+  .grade-wrap{padding:0 24px 18px}
+  .grade-box{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);overflow-x:auto}
+  .grade-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+  .grade-head h3{font-size:14px;font-weight:800}
+  .grade-sub{font-size:10px;color:var(--text-dim);font-family:'Space Mono',monospace}
+  .grade{border-collapse:separate;border-spacing:3px;width:100%;min-width:700px;font-size:12px}
+  .grade th{font-family:'Space Mono',monospace;font-size:10px;color:var(--text-dim);text-transform:uppercase;padding:3px 2px;text-align:center}
+  .grade th span{display:block;font-size:12.5px;color:var(--text);font-weight:800;margin-top:2px}
+  .grade th.wknd{background:rgba(255,165,2,.08);border-radius:5px}
+  .grade td.who{text-align:left;padding:5px 9px;background:var(--surface2);border:1px solid var(--border);border-radius:5px;white-space:nowrap;max-width:210px;overflow:hidden;text-overflow:ellipsis}
+  .grade td.who b{font-size:12px;font-weight:700;display:block}
+  .grade td.who i{font-style:normal;font-size:9px;color:var(--text-dim);font-family:'Space Mono',monospace}
+  .gcell{height:34px;border-radius:5px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:10px;font-weight:700;border:1px solid transparent}
+  .gcell small{font-size:8px;font-weight:400;opacity:.8}
+  .g-m{background:rgba(46,213,115,.20);border-color:#2ed573;color:#2ed573}
+  .g-t{background:rgba(255,140,26,.20);border-color:#ff8c1a;color:#ff8c1a}
+  .g-n{background:rgba(157,101,255,.22);border-color:#9d65ff;color:#b18cff}
+  .g-x{background:var(--surface2);border-color:var(--border);color:var(--text-dim);font-weight:400}
+  .g-maybe{opacity:.55;border-style:dashed}
+  .grade tr.gtot td{background:var(--surface2);border:1px solid var(--border);border-radius:5px;font-family:'Space Mono',monospace;font-size:10px;padding:5px 2px;text-align:center;color:var(--text-dim)}
+  .grade-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:10.5px;font-family:'Space Mono',monospace;color:var(--text-dim);margin-top:10px}
+  .grade-legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+  .grade-empty{padding:26px;text-align:center;color:var(--text-dim);font-size:12.5px}
   .tab-content{display:none}
   .tab-content.active{display:block}
   .status-bar{padding:6px 24px;font-size:10px;font-family:'Space Mono',monospace;color:var(--text-dim);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px}
@@ -782,7 +806,27 @@
     <div class="card"><div class="card-label" data-i18n="sch_noshow">Faltaram</div><div class="card-val red" id="schNoShow">—</div><div class="card-sub" data-i18n="sch_noshow_sub">aceitaram e não saíram</div></div>
     <div class="card"><div class="card-label" data-i18n="sch_acts">Ações na semana</div><div class="card-val orange" id="schActs">—</div><div class="card-sub" id="schActsSub"></div></div>
   </div>
-  <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:0 24px 10px">
+  <div class="grade-wrap">
+  <div class="grade-box">
+    <div class="grade-head">
+      <h3>📋 Grade da semana</h3>
+      <span class="grade-sub" id="gradeWeek">—</span>
+      <span style="flex:1"></span>
+      <button class="icon-btn" id="gradeModeBtn" onclick="gradeToggleMode()">🙋 Desejados</button>
+      <button class="icon-btn" onclick="loadAvailability(true)">⟳</button>
+    </div>
+    <div id="gradeBody"><div class="grade-empty">Carregando…</div></div>
+    <div class="grade-legend">
+      <span><i style="background:rgba(46,213,115,.35);border:1px solid #2ed573"></i>manhã 06–15</span>
+      <span><i style="background:rgba(255,140,26,.35);border:1px solid #ff8c1a"></i>dia 12–21</span>
+      <span><i style="background:rgba(157,101,255,.4);border:1px solid #9d65ff"></i>noite 15–00</span>
+      <span><i style="background:var(--surface2);border:1px solid var(--border)"></i>folga</span>
+      <span>пунктир — «posso» (резерв)</span>
+    </div>
+  </div>
+</div>
+
+<div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:0 24px 10px">
     <button class="icon-btn" onclick="schShiftWeek(-1)" data-i18n="sch_prevweek">◀ semana ant.</button>
     <span id="schWeekNav" style="font-family:'Space Mono',monospace;font-size:12px;font-weight:700;color:var(--accent)"></span>
     <button class="icon-btn" onclick="schShiftWeek(1)" data-i18n="sch_nextweek">próx. semana ▶</button>
@@ -2490,8 +2534,9 @@ function schShiftWeek(dir){
   schWeekStart.setDate(schWeekStart.getDate()+dir*7);
   schOpenSlotId=null;
   renderSchedule();
+  renderGrade();
 }
-function schThisWeek(){schWeekStart=schMonday(new Date());schOpenSlotId=null;renderSchedule();}
+function schThisWeek(){schWeekStart=schMonday(new Date());schOpenSlotId=null;renderSchedule();renderGrade();}
 function schToggleOnlyIssues(){
   schOnlyIssues=!schOnlyIssues;
   renderSchedule();
@@ -2504,6 +2549,135 @@ function schTipoIcon(tipo){return tipo==='CHARGER'?'🔋':(tipo==='LOGISTICA'?'�
 // Слот, созданный из недельного плана /escala, помечается ролью создателя.
 function schOrigin(slot){return slot.created_by_role==='schedule'?'📅':'';}
 
+
+// ══════════════════════════════════════════════════════════════════════
+//  GRADE DA SEMANA (v0.19): таблица «фамилии × дни».
+//  Два режима: желаемые смены из опроса (availability.json, бот спрашивает
+//  в воскресенье 21:00) и фактически назначенные (слоты недели).
+// ══════════════════════════════════════════════════════════════════════
+let availRaw=null;               // availability.json
+let gradeMode='want';            // want | fact
+
+const GRADE_TURNOS=[['m','06–15','manhã'],['t','12–21','dia'],['n','15–00','noite']];
+// Окно смены → код цвета. Ночную 21–06 красим как noite.
+function gradeWinToCode(w){
+  if(!w)return null;
+  if(w.indexOf('06–15')>=0)return 'm';
+  if(w.indexOf('12–21')>=0)return 't';
+  if(w.indexOf('15–00')>=0||w.indexOf('21–06')>=0)return 'n';
+  return null;
+}
+
+async function loadAvailability(force){
+  try{
+    const url=`https://gist.githubusercontent.com/12danielmik1991-ops/54c012a98e6d8f34986afca9d76f3539/raw/availability.json?_=${Date.now()}`;
+    const r=await fetch(url,{cache:'no-store'});
+    if(r.ok)availRaw=await r.json();
+  }catch(e){console.warn('loadAvailability failed:',e.message);}
+  renderGrade();
+}
+
+function gradeToggleMode(){
+  gradeMode=gradeMode==='want'?'fact':'want';
+  const b=document.getElementById('gradeModeBtn');
+  if(b)b.textContent=gradeMode==='want'?'🙋 Desejados':'📌 Escalados';
+  renderGrade();
+}
+
+// Факт: собираем из слотов недели (у слота есть дата, окно и исполнитель)
+function gradeFactRows(){
+  const start=schWeekStart||schMonday(new Date());
+  const days=[...Array(7)].map((_,i)=>{const d=new Date(start);d.setDate(d.getDate()+i);return schIso(d);});
+  const byPerson={};
+  (typeof slotsRaw!=='undefined'?slotsRaw:[]).forEach(sl=>{
+    const dia=(sl.data||sl.date||'').slice(0,10);
+    const idx=days.indexOf(dia);
+    if(idx<0)return;
+    const nome=sl.aceito_por||sl.taken_by_name||sl.worker_name;
+    if(!nome)return;
+    const code=gradeWinToCode(typeof schWindow==='function'?schWindow(sl):'');
+    if(!code)return;
+    byPerson[nome]=byPerson[nome]||{nome:nome,cidade:sl.cidade||'',cells:{}};
+    byPerson[nome].cells[idx]={code:code,level:2};
+  });
+  return Object.values(byPerson).sort((a,b)=>a.nome.localeCompare(b.nome));
+}
+
+// Желания: ответы опроса
+function gradeWantRows(){
+  if(!availRaw||!Array.isArray(availRaw.answers))return [];
+  return availRaw.answers.map(a=>{
+    const cells={};
+    Object.keys(a.grid||{}).forEach(k=>{
+      const di=+k, turnos=a.grid[k]||{};
+      let best=null;
+      GRADE_TURNOS.forEach(([code])=>{
+        const lvl=turnos[code]||0;
+        if(lvl && (!best || lvl>best.level))best={code:code,level:lvl};
+      });
+      if(best)cells[di]=best;
+    });
+    return {nome:a.nome||String(a.tg_id),cidade:a.cidade||'',hora:a.hora_pref,
+            meta:a.meta_trocas,enviado:a.enviado,cells:cells};
+  }).sort((a,b)=>(a.nome||'').localeCompare(b.nome||''));
+}
+
+function renderGrade(){
+  const box=document.getElementById('gradeBody');
+  if(!box)return;
+  const start=schWeekStart||schMonday(new Date());
+  const dows=schDow();
+  const rows=gradeMode==='want'?gradeWantRows():gradeFactRows();
+
+  const wl=document.getElementById('gradeWeek');
+  if(wl){
+    const end=new Date(start); end.setDate(end.getDate()+6);
+    const fmt=d=>`${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}`;
+    const extra=gradeMode==='want'&&availRaw
+      ? ` · responderam ${rows.filter(r=>r.enviado).length} de ${rows.length}` : '';
+    wl.textContent=`${fmt(start)} — ${fmt(end)}${extra}`;
+  }
+
+  if(!rows.length){
+    box.innerHTML=`<div class="grade-empty">${gradeMode==='want'
+      ? 'Ainda não há respostas da pesquisa desta semana.'
+      : 'Nenhum turno atribuído nesta semana.'}</div>`;
+    return;
+  }
+
+  let h='<table class="grade"><thead><tr><th style="text-align:left;padding-left:9px">MEI</th>';
+  for(let i=0;i<7;i++){
+    const d=new Date(start); d.setDate(d.getDate()+i);
+    const wknd=i>=5?' class="wknd"':'';
+    h+=`<th${wknd}>${dows[i]}<span>${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}</span></th>`;
+  }
+  h+='</tr></thead><tbody>';
+
+  rows.forEach(r=>{
+    const sub=[r.cidade,r.hora&&r.hora!=='on'?(r.hora==='plus1'?'+1h':'−1h'):'',
+               r.meta?`🔋${r.meta}`:''].filter(Boolean).join(' · ');
+    h+=`<tr><td class="who"><b>${r.nome}</b><i>${sub||'&nbsp;'}</i></td>`;
+    for(let i=0;i<7;i++){
+      const c=r.cells[i];
+      if(!c){h+='<td><div class="gcell g-x">—</div></td>';continue;}
+      const meta=GRADE_TURNOS.find(x=>x[0]===c.code)||GRADE_TURNOS[0];
+      const maybe=c.level===1?' g-maybe':'';
+      h+=`<td><div class="gcell g-${c.code}${maybe}">${meta[1]}<small>${meta[2]}${c.level===1?' · posso':''}</small></div></td>`;
+    }
+    h+='</tr>';
+  });
+
+  // итоги по дням
+  h+='<tr class="gtot"><td style="text-align:left;padding-left:9px">Total</td>';
+  for(let i=0;i<7;i++){
+    const cnt={m:0,t:0,n:0};
+    rows.forEach(r=>{const c=r.cells[i]; if(c&&c.level===2)cnt[c.code]=(cnt[c.code]||0)+1;});
+    h+=`<td>${cnt.m}/${cnt.t}/${cnt.n}<br><span style="font-size:8px">m/d/n</span></td>`;
+  }
+  h+='</tr></tbody></table>';
+  box.innerHTML=h;
+}
+
 async function loadSchedule(force){
   // Основа вкладки — slots.json (грузится в fetchBotData). schedule.json нужен
   // лишь как источник ставок недельного плана, поэтому его сбой не критичен.
@@ -2513,6 +2687,7 @@ async function loadSchedule(force){
     if(r.ok){const data=await r.json();schedRaw=data.schedule||[];}
   }catch(e){console.warn('loadSchedule (plano) failed:',e.message);}
   renderSchedule();
+  loadAvailability();
 }
 
 // Окно смены. В выгрузке времени нет отдельным полем — бот пишет его в
