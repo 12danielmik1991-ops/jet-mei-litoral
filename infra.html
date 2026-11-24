@@ -132,6 +132,8 @@ td.cflags{text-align:left;font-size:12px;white-space:normal;min-width:240px}
     <span><svg class="sw" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" rx="2" fill="#1f8a4c" stroke="#c27a06" stroke-width="2" stroke-dasharray="3 2"/></svg>адрес приблизительный</span>
     <span><svg class="sw" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="none" stroke="#c8372d" stroke-width="2" stroke-dasharray="3 2"/></svg>нужно поставить (место не выбрано)</span>
     <span><svg class="sw" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="#c27a06"/></svg>город: точек хватает, нет железа/АКБ</span>
+    <span><svg class="sw" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="#1f8a4c" stroke="#c27a06" stroke-width="2"/></svg>город без плана по шкафам: цвет по доступности (≥80% / ≥60% / ниже)</span>
+    <span><svg class="sw" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="#8a958f"/></svg>нет живых данных</span>
     <span><svg class="sw" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" fill="#1f8a4c" fill-opacity=".2" stroke="#1f8a4c" stroke-width="1.5"/></svg>зона использования (Urent)</span>
     <span><svg class="sw" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" fill="none" stroke="#2a6fdb" stroke-width="1.5" stroke-dasharray="3 2"/></svg>зона аренды</span>
     <span id="zsrc"></span>
@@ -191,7 +193,7 @@ const PT = {
  'Полки (места) в каждом шкафу/стенде':'Prateleiras (vagas) em cada armário/rack','Полки':'Prateleiras','Поставить':'Instalar',
  'Приблизительные точки на карте':'Pontos aproximados no mapa','Реестр и сводная не сходятся':'Registro e planilha não batem',
  'Ремонт (причина в Urent)':'Reparo (motivo no Urent)','Ремонт':'Reparo','С 0% заряда':'Com 0% de carga','С 0%':'Com 0%',
- 'СЦ / мастерская':'CS / oficina','на СЦ':'no CS','Charger · замены АКБ':'Charger · troca de baterias','Scout · перемещения':'Scout · movimentações','Мониторы парковок':'Monitores de vagas',
+ 'СЦ / мастерская':'CS / oficina','на СЦ':'no CS','Работает · в доступе':'Funcionando · disponível','город без плана по шкафам: цвет по доступности (≥80% / ≥60% / ниже)':'cidade sem plano de armários: cor pela disponibilidade (≥80% / ≥60% / abaixo)','нет живых данных':'sem dados ao vivo','Charger · замены АКБ':'Charger · troca de baterias','Scout · перемещения':'Scout · movimentações','Мониторы парковок':'Monitores de vagas',
  'Charger: людей / замен':'Charger: pessoas / trocas','Scout: людей / перем.':'Scout: pessoas / movim.','Charger: людей':'Charger: pessoas','Scout: людей':'Scout: pessoas',
  'Charger на смене':'Charger em turno','Scout на смене':'Scout em turno','перемещений за смену':'movimentações no turno','перемещений':'movimentações',
  'люди':'pessoas','нажми — маршрут по точкам на карте':'toque — rota ponto a ponto no mapa','последнее':'última ação','пока ничего':'nada ainda',
@@ -303,7 +305,7 @@ $('#kpis').innerHTML = [
 const map = L.map('map', {zoomControl:true}).setView([-23.6, -46.2], 8);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'© OpenStreetMap'}).addTo(map);
 const layers = {BRSPL:L.layerGroup().addTo(map), BRSPC:L.layerGroup().addTo(map), BRSP:L.layerGroup().addTo(map), BRX:L.layerGroup().addTo(map)};
-const unitMk = {};
+const unitMk = {}, cityMk = {};
 const zoneLayer = L.layerGroup().addTo(map);
 const ZST = {USE:{color:'#1f8a4c', weight:1.5, fillColor:'#1f8a4c', fillOpacity:.13},
              RENT:{color:'#2a6fdb', weight:1.5, dashArray:'5 4', fill:false},
@@ -358,7 +360,7 @@ D.cities.forEach(c => {
  const needN = (g.cab||0) + (g.std||0) + (g.pts && !(g.cab||g.std) ? g.pts : 0);
  const ready = (c.cab_ready||0) + (c.std_ready||0);
  // город: подпись + цветная точка состояния
- L.circleMarker([c.lat, c.lon], {radius:6, color:'#fff', weight:1.5, fillColor:COL[s], fillOpacity:.95})
+ cityMk[c.city] = L.circleMarker([c.lat, c.lon], {radius:6, color:'#fff', weight:1.5, fillColor:COL[s], fillOpacity:.95})
   .bindTooltip(c.city, {permanent:true, direction:'right', className:'lbl', offset:[6,0]})
   .on('click', () => show(c.city)).addTo(lay);
  // «нужно поставить»
@@ -393,7 +395,9 @@ function show(city, unitId, fromMap){
  const verdict = {bad:'Не хватает зарядных точек', warn:'Точек хватает, не хватает железа/АКБ', ok:'Всё по плану', na: c.sc ? 'Сервисный центр' : c.noplan ? 'Плана по шкафам нет — только живые данные' : 'Город не открыт'}[s];
  $('#card').innerHTML = `<h3>${c.city}</h3>
  <div class="meta">${c.branch === 'BRX' ? ((c.uf || c.region || '') + (UFN[c.uf || c.region] ? ' · ' + UFN[c.uf || c.region] : '')) : c.branch}${c.sup && c.sup!=='—' ? ' · отв. ' + c.sup : ''}${c.fleet ? ` · самокатов ${c.fleet}${c.fleet_plan ? ' → ' + c.fleet_plan + ' к 01.12' : ''}` : ''}</div>
- <div><span class="pill" style="color:${COL[s]}">${verdict}</span></div>
+ ${(() => { const lx = s === 'na' ? cityLive(c.city) : null;
+   if (lx && lx.fleet > 0) return `<div><span class="pill" style="color:${liveColor(lx)}">Работает · в доступе ${Math.round(100 * lx.available / lx.fleet)}%</span>${c.sc ? ' <span class="pill" style="color:' + COL.na + '">Сервисный центр</span>' : ''}</div>`;
+   return `<div><span class="pill" style="color:${COL[s]}">${verdict}</span></div>`; })()}
  ${liveCity(c.city)}
  ${(g.cab||g.std||ready) ? `<div class="need"><b>Поставить:</b> ${g.cab?`шкафов ещё ${g.cab}`:''}${g.cab&&g.std?', ':''}${g.std?`стендов ещё ${g.std}`:''}${!g.cab&&!g.std?'новых не нужно':''}${ready?`<br>Готовы, но не установлены: шкафов ${c.cab_ready||0}, стендов ${c.std_ready||0}`:''}<br><span class="note">Место под них не выбрано — спросить у ответственного.</span></div>` : ''}
  ${c.fleet != null ? `<h2 style="margin-top:12px">Парк и ремонт</h2><div class="g2">
@@ -501,7 +505,7 @@ function addLiveCities(d){
   if (x.lat == null) return;
   const c = {city:name, branch:x.branch || 'BRX', uf:x.uf, noplan:true, sc:false, unopened:false, lat:x.lat, lon:x.lon, units:[], dyn:true};
   C[name] = c; D.cities.push(c);
-  L.circleMarker([c.lat, c.lon], {radius:6, color:'#fff', weight:1.5, fillColor:COL.na, fillOpacity:.95})
+  cityMk[c.city] = L.circleMarker([c.lat, c.lon], {radius:6, color:'#fff', weight:1.5, fillColor:COL.na, fillOpacity:.95})
    .bindTooltip(c.city, {permanent:true, direction:'right', className:'lbl', offset:[6,0]})
    .on('click', () => show(c.city)).addTo(layers[c.branch] || layers.BRX); });
 }
@@ -516,8 +520,16 @@ function showRoute(w){
     html:`<div style="width:20px;height:20px;border-radius:50%;background:${col};color:#fff;font:600 10px/20px var(--f-mono);text-align:center;border:1px solid #fff">${i + 1}</div>`}), zIndexOffset:600})
    [HOVER ? 'bindTooltip' : 'bindPopup'](`#${i + 1} · ${hm(e[2])} · ${r.one}${e[3] ? ' · ' + esc(e[3]) : ''}`).addTo(RT); });
 }
+// Город без плана по шкафам (регионы, СЦ, «не открытые» в сводной), но с живым парком — работает:
+// цвет точки по доступности: ≥80% зелёный, ≥60% оранжевый, ниже — красный.
+function liveColor(x){ const a = x.fleet ? x.available / x.fleet : 0; return a >= .8 ? COL.ok : a >= .6 ? COL.warn : COL.bad; }
+function paintCities(d){
+ Object.entries(d.cities).forEach(([n, x]) => { const c = C[liveName(n)], mk = cityMk[liveName(n)];
+  if (!c || !mk || !(x.fleet > 0) || status(c) !== 'na') return;
+  mk.setStyle({fillColor: liveColor(x)}); });
+}
 function drawLive(d){
- LD = d; addLiveCities(d); Object.values(LL).forEach(l => l.clearLayers());
+ LD = d; addLiveCities(d); paintCities(d); Object.values(LL).forEach(l => l.clearLayers());
  ['nosignal','zero','alarm'].forEach(k => (d.points[k] || []).forEach(p => { if (p[1] == null) return;
   L.circleMarker([p[1], p[2]], {renderer:cv, radius:k === 'alarm' ? 6 : 4, color:'#fff', weight:1, fillColor:LV[k].c, fillOpacity:.9})
    [HOVER ? 'bindTooltip' : 'bindPopup'](`${p[0]} · ${esc(p[3])} · ${LV[k].t}${p[4] ? ' · ' + (SUBRU[p[4]] || p[4]) : ''}`).addTo(LL[k]); }));
