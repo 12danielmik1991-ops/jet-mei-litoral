@@ -105,6 +105,9 @@ tbody tr[data-c]{cursor:pointer} tbody tr[data-c]:hover{background:var(--bg)}
 .cab{border:1px solid var(--line);border-radius:6px;padding:6px 8px;margin-top:6px;font-size:13px}
 .cab .g2{font-size:12px}
 header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.cicico{width:26px;height:26px;vertical-align:-7px;margin-right:6px;color:var(--ink)}
+td.cbad{color:var(--bad);font-weight:600} td.cwarn{color:var(--warn);font-weight:600}
+td.cflags{text-align:left;font-size:12px;white-space:normal;min-width:240px}
 .lng{display:flex;border:1px solid var(--line);border-radius:20px;overflow:hidden}
 .lng button{font:600 12px var(--f-body);border:0;background:var(--panel);color:var(--ink);padding:4px 12px;cursor:pointer}
 .lng button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
@@ -140,6 +143,11 @@ header{display:flex;justify-content:space-between;align-items:flex-start;gap:12p
   <h2>Сейчас по городам</h2><div class="hscroll">← листай таблицу вбок →</div>
   <div class="tbl"><table id="ltbl"></table></div>
   <p class="note" id="lnote"></p>
+ </section>
+ <section id="secCic">
+  <h2><svg class="cicico" viewBox="0 0 32 32" aria-hidden="true"><circle cx="12" cy="6" r="3.6" fill="currentColor"/><path d="M5.5 27v-8.5c0-3.6 2.9-6.5 6.5-6.5s6.5 2.9 6.5 6.5V27" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/><path d="M8 17.5l5.5 3.2M16.5 17l2.5 2.2" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><rect x="18.5" y="13" width="9" height="15" rx="2" fill="var(--panel)" stroke="var(--accent)" stroke-width="2"/><rect x="21" y="10.8" width="4" height="2.4" rx=".8" fill="var(--accent)"/><path d="M23.6 15.6l-2.6 5h2.4l-1 4.8 3.2-6h-2.5l1-3.8z" fill="var(--accent)"/></svg>Базы логистики · циклаж АКБ</h2><div class="hscroll">← листай таблицу вбок →</div>
+  <div class="tbl"><table id="ctbl"><tbody><tr><td>загрузка…</td></tr></tbody></table></div>
+  <p class="note" id="cnote"></p>
  </section>
  <section>
   <h2>Что ещё доставить, по городам</h2><div class="hscroll">← листай таблицу вбок →</div>
@@ -183,7 +191,7 @@ const PT = {
  'Полки (места) в каждом шкафу/стенде':'Prateleiras (vagas) em cada armário/rack','Полки':'Prateleiras','Поставить':'Instalar',
  'Приблизительные точки на карте':'Pontos aproximados no mapa','Реестр и сводная не сходятся':'Registro e planilha não batem',
  'Ремонт (причина в Urent)':'Reparo (motivo no Urent)','Ремонт':'Reparo','С 0% заряда':'Com 0% de carga','С 0%':'Com 0%',
- 'СЦ / мастерская':'CS / oficina','на СЦ':'no CS','Регионы · MG, DF, MS':'Regiões · MG, DF, MS','Регионы':'Regiões','Плана по шкафам нет — только живые данные':'Sem plano de armários — só dados ao vivo','листай таблицу вбок':'deslize a tabela para o lado','СЦ Santos':'CS Santos','Santos · oficina (СЦ)':'Santos · oficina (CS)','СЦ':'CS',
+ 'СЦ / мастерская':'CS / oficina','на СЦ':'no CS','Регионы':'Regiões','Плана по шкафам нет — только живые данные':'Sem plano de armários — só dados ao vivo','листай таблицу вбок':'deslize a tabela para o lado','СЦ Santos':'CS Santos','Santos · oficina (СЦ)':'Santos · oficina (CS)','СЦ':'CS',
  'Самокатов в городе':'Patinetes na cidade','Самокатов сейчас':'Patinetes agora','Свободных АКБ (рабочих) / брак':'Baterias livres (boas) / defeito',
  'Свободных АКБ':'Baterias livres','Сейф с ключом':'Cofre com a chave','Сейчас по городам':'Agora por cidade','Сейчас':'Agora',
  'Сервисный центр':'Centro de serviço','Срез':'Dados de','Старые подсчёты АКБ':'Contagens de baterias antigas','Статус':'Status',
@@ -230,7 +238,14 @@ const PT = {
  '3 полки × 63 = 189 мест; стоит 176 зарядок, не хватает 13 зарядок и 66 наконечников; трёхфаза 220 В':'3 prateleiras × 63 = 189 vagas; 176 carregadores instalados, faltam 13 carregadores e 66 ponteiras; trifásico 220 V',
  'мастерская АКБ/ТС; инженер Thiago. Не путать с офисом филиала (Av. Senador Feijó 686) и шкафом SP03':'oficina de baterias/patinetes; engenheiro Thiago. Não confundir com o escritório da filial (Av. Senador Feijó 686) nem com o armário SP03',
  'второй шкаф Ilhabela (по раскладу 14.11 подключено 2); в реестре Armarios LATAM его нет — номер шкафа уточнить':'segundo armário de Ilhabela (pela contagem de 14.11 há 2 ligados); não consta no registro Armarios LATAM — confirmar o número',
- 'Ошибка':'Erro','данные':'dados'
+ 'Ошибка':'Erro','данные':'dados',
+ 'Базы логистики · циклаж АКБ':'Bases de logística · ciclagem de baterias','База':'Base','Пересчёт':'Contagem','Склад':'Estoque',
+ 'разряж.':'descarreg.','на стенде':'no stand','заряж.':'carregadas','готовы':'prontas','в полях':'em campo','по боту':'pelo bot',
+ 'итог / норма':'total / norma','короба':'caixas','провода реаним.':'cabos reanim.','тестеры':'testadores','Отметки':'Alertas',
+ 'ещё ни одного пересчёта':'ainda nenhuma contagem','назад':'atrás','загрузка…':'carregando…','без расхождений':'sem divergências',
+ 'Пересчёт базы делает работник циклажа на смене (бот, роль Ciclagem):':'A contagem da base é feita pelo trabalhador de ciclagem no turno (bot, função Ciclagem):',
+ 'склад = разряженные + на стенде + заряженные; «в полях» сверяется с тем, что чарджеры на смене ввели в Inventário inicial; итог (склад + поля) и оборудование — с нормой базы (/ciclagem_norma), а без нормы — с прошлым пересчётом. Красное — недостача.':'estoque = descarregadas + no stand + carregadas; «em campo» é conferido com o que os chargers em turno informaram no Inventário inicial; total (estoque + campo) e equipamentos — com a norma da base (/ciclagem_norma) ou, sem norma, com a contagem anterior. Vermelho = falta.',
+ 'Данные циклажа недоступны':'Dados de ciclagem indisponíveis','ч':'h','мин':'min','дн':'d'
 };
 let LANG = 'pt'; try { LANG = localStorage.getItem('jet_lang') || 'pt'; } catch (e) {}
 const CYR = 'А-Яа-яЁё';
@@ -368,7 +383,7 @@ function show(city, unitId, fromMap){
  const c = C[city]; if (!c) return; curCity = city; curUnit = unitId; const g = gaps(c), s = status(c), ready = (c.cab_ready||0)+(c.std_ready||0);
  const verdict = {bad:'Не хватает зарядных точек', warn:'Точек хватает, не хватает железа/АКБ', ok:'Всё по плану', na: c.sc ? 'Сервисный центр' : c.noplan ? 'Плана по шкафам нет — только живые данные' : 'Город не открыт'}[s];
  $('#card').innerHTML = `<h3>${c.city}</h3>
- <div class="meta">${c.branch}${c.sup && c.sup!=='—' ? ' · отв. ' + c.sup : ''}${c.fleet ? ` · самокатов ${c.fleet}${c.fleet_plan ? ' → ' + c.fleet_plan + ' к 01.12' : ''}` : ''}</div>
+ <div class="meta">${c.branch === 'BRX' ? ((c.uf || c.region || '') + (UFN[c.uf || c.region] ? ' · ' + UFN[c.uf || c.region] : '')) : c.branch}${c.sup && c.sup!=='—' ? ' · отв. ' + c.sup : ''}${c.fleet ? ` · самокатов ${c.fleet}${c.fleet_plan ? ' → ' + c.fleet_plan + ' к 01.12' : ''}` : ''}</div>
  <div><span class="pill" style="color:${COL[s]}">${verdict}</span></div>
  ${liveCity(c.city)}
  ${(g.cab||g.std||ready) ? `<div class="need"><b>Поставить:</b> ${g.cab?`шкафов ещё ${g.cab}`:''}${g.cab&&g.std?', ':''}${g.std?`стендов ещё ${g.std}`:''}${!g.cab&&!g.std?'новых не нужно':''}${ready?`<br>Готовы, но не установлены: шкафов ${c.cab_ready||0}, стендов ${c.std_ready||0}`:''}<br><span class="note">Место под них не выбрано — спросить у ответственного.</span></div>` : ''}
@@ -464,8 +479,20 @@ function liveCity(city){
  ${cabs.length ? cabs.map(b => `<div class="cab"><b>${esc(b.base || b.city)}</b> <span class="note">${esc(b.by)} · ${when(b.at)}</span><div class="g2">${CABF.map(([k,t]) => `<div>${t}</div><div class="n">${v(b[k])}</div>`).join('')}</div></div>`).join('')
    : '<div class="note">Ответа ещё нет. Опрос уходит супервайзерам в 08:00 и 21:00.</div>'}`;
 }
+const UFN = {SP:'São Paulo', MG:'Minas Gerais', DF:'Distrito Federal', AL:'Alagoas', RS:'Rio Grande do Sul', PR:'Paraná', ES:'Espírito Santo',
+  BA:'Bahia', PA:'Pará', RN:'Rio Grande do Norte', PE:'Pernambuco', SC:'Santa Catarina', MS:'Mato Grosso do Sul', SE:'Sergipe', CE:'Ceará', RJ:'Rio de Janeiro'};
+function addLiveCities(d){
+ Object.entries(d.cities).forEach(([n, x]) => { const name = liveName(n);
+  if (C[name]) { if (!C[name].uf && x.uf) C[name].uf = x.uf; return; }
+  if (x.lat == null) return;
+  const c = {city:name, branch:x.branch || 'BRX', uf:x.uf, noplan:true, sc:false, unopened:false, lat:x.lat, lon:x.lon, units:[], dyn:true};
+  C[name] = c; D.cities.push(c);
+  L.circleMarker([c.lat, c.lon], {radius:6, color:'#fff', weight:1.5, fillColor:COL.na, fillOpacity:.95})
+   .bindTooltip(c.city, {permanent:true, direction:'right', className:'lbl', offset:[6,0]})
+   .on('click', () => show(c.city)).addTo(layers[c.branch] || layers.BRX); });
+}
 function drawLive(d){
- LD = d; Object.values(LL).forEach(l => l.clearLayers());
+ LD = d; addLiveCities(d); Object.values(LL).forEach(l => l.clearLayers());
  ['nosignal','zero','alarm'].forEach(k => (d.points[k] || []).forEach(p => { if (p[1] == null) return;
   L.circleMarker([p[1], p[2]], {renderer:cv, radius:k === 'alarm' ? 6 : 4, color:'#fff', weight:1, fillColor:LV[k].c, fillOpacity:.9})
    [HOVER ? 'bindTooltip' : 'bindPopup'](`${p[0]} · ${esc(p[3])} · ${LV[k].t}${p[4] ? ' · ' + (SUBRU[p[4]] || p[4]) : ''}`).addTo(LL[k]); }));
@@ -487,11 +514,13 @@ function drawLive(d){
  const cabSum = (n, k) => { const xs = cabsOf(liveName(n)).map(b => b[k]).filter(x => x != null); return xs.length ? xs.reduce((a,b) => a + b, 0) : null; };
  const lastAt = n => { const bs = cabsOf(liveName(n)); return bs.length ? bs.map(b => b.at).sort().pop() : null; };
  let h = '<thead><tr><th>Город</th><th>Парк</th><th>0%</th><th>Тревога</th><th>Без связи</th><th>В движ. >1 ч</th><th>Ремонт</th><th>На СЦ</th><th>Людей / замен</th><th>АКБ заряж. / всего</th><th>АКБ в ремонт</th><th>Кабели реаним.</th><th>Тестеры</th><th>Коробы</th><th>Опрос</th></tr></thead><tbody>';
- const GRP = [['BRSPL','Литорал · BRSPL'],['BRSP','Интерьер · BRSP'],['BRSPC','Капитал · BRSPC'],['BRX','Регионы · MG, DF, MS']];
+ const ufs = [...new Set(Object.values(d.cities).filter(x => x.branch === 'BRX').map(x => x.uf || '—'))].sort();
+ const GRP = [['BRSPL','Литорал · BRSPL'],['BRSP','Интерьер · BRSP'],['BRSPC','Капитал · BRSPC']].concat(ufs.map(u => ['BRX:' + u, u + (UFN[u] ? ' · ' + UFN[u] : '')]));
  const rowOf = n => { const x = d.cities[n], at = lastAt(n);
   return `<tr data-c="${liveName(n)}"><td>${n}</td><td>${x.fleet}</td><td>${x.zero}</td><td class="${x.alarm?'gap':''}">${x.alarm}</td><td>${x.nosignal}</td><td class="${x.moving?'gap':''}">${x.moving}</td><td>${v(x.repair)}</td><td>${v(x.sc)}</td><td>${x.crew||0} / ${x.crew_tasks||0}</td>
    <td>${v(cabSum(n,'akb_charged'))} / ${v(cabSum(n,'akb_total'))}</td><td>${v(cabSum(n,'akb_repair'))}</td><td>${v(cabSum(n,'cables'))}</td><td>${v(cabSum(n,'testers'))}</td><td>${v(cabSum(n,'boxes'))}</td><td class="f">${when(at)}</td></tr>`; };
- h += GRP.map(([br, t]) => { const ns = Object.keys(d.cities).filter(n => (d.cities[n].branch || 'BRSPL') === br);
+ const inGrp = (x, br) => br.startsWith('BRX:') ? x.branch === 'BRX' && (x.uf || '—') === br.slice(4) : (x.branch || 'BRSPL') === br;
+ h += GRP.map(([br, t]) => { const ns = Object.keys(d.cities).filter(n => inGrp(d.cities[n], br)).sort((a,b) => d.cities[b].fleet - d.cities[a].fleet);
   return ns.length ? `<tr class="grp"><td colspan="15">${t}</td></tr>` + ns.map(rowOf).join('') : ''; }).join('') + '</tbody>';
  $('#ltbl').innerHTML = h;
  $('#lnote').textContent = 'В движении: ТС ни разу не стояло на месте за последний час и прошло больше 1 км. 0%: на связи и заряд меньше 1%. Люди: активные смены Jet Crew (замены АКБ); точка человека — место его последней замены (живого GPS у Jet Crew нет). Клик по строке — карточка города.';
@@ -503,6 +532,35 @@ async function loadLive(){
  catch (e) { if (!LD) $('#livestamp').textContent = 'Живые данные недоступны: ' + e.message; }
 }
 window.__drawLive = drawLive;
+// ── Циклаж: пересчёты баз логистики из бота (Gist ciclagem.json) ──
+const CIC_URL = 'https://gist.githubusercontent.com/12danielmik1991-ops/54c012a98e6d8f34986afca9d76f3539/raw/ciclagem.json';
+const CIC_CITY = {PG:'Praia Grande',GR:'Guarujá',KG:'Caraguatatuba',IB:'Ilhabela',UB:'Ubatuba',BR:'Bertioga',IT:'Itanhaém',MN:'Mongaguá',PE:'Peruíbe',SJ:'São José dos Campos',CP:'Campinas',SO:'Sorocaba',CJ:'Campos do Jordão',RP:'Ribeirão Pires'};
+const cicNf = x => x == null ? '—' : Number(x).toLocaleString('pt-BR');
+const cicAgo = iso => { const m = Math.round((Date.now() - new Date(iso)) / 60000); return m < 60 ? m + ' мин назад' : m < 1440 ? Math.round(m/60) + ' ч назад' : Math.round(m/1440) + ' дн назад'; };
+function drawCic(d){
+ const B = (d.bases || []).slice().sort((a,b) => (CIC_CITY[a.cidade]||a.cidade).localeCompare(CIC_CITY[b.cidade]||b.cidade));
+ const head = '<thead><tr><th>База</th><th>Пересчёт</th><th>Склад</th><th>разряж.</th><th>на стенде</th><th>заряж.</th><th>готовы</th><th>в полях</th><th>по боту</th><th>итог / норма</th><th>короба</th><th>провода реаним.</th><th>тестеры</th><th>Отметки</th></tr></thead>';
+ if (!B.length) { $('#ctbl').innerHTML = head + '<tbody><tr><td colspan="14">ещё ни одного пересчёта</td></tr></tbody>'; }
+ else $('#ctbl').innerHTML = head + '<tbody>' + B.map(b => {
+  const n = b.norma || {}, tot = (b.akb_estoque||0) + (b.akb_campo||0);
+  const parts = (b.akb_descarregadas||0) + (b.akb_carregando||0) + (b.akb_carregadas||0);
+  const eq = k => { const short = n[k] != null && b[k] < n[k]; return `<td class="${short?'cbad':''}">${cicNf(b[k])}${n[k]!=null?` / ${cicNf(n[k])}`:''}</td>`; };
+  const campoBad = b.campo_bot != null && Math.abs(b.akb_campo - b.campo_bot) > Math.max(3, Math.round(.15*Math.max(b.campo_bot,1)));
+  const totCls = n.akb_total != null ? (tot < n.akb_total ? 'cbad' : '') : '';
+  const fl = (b.flags || []);
+  return `<tr><td><b>${CIC_CITY[b.cidade]||b.cidade}</b></td><td class="f">${cicAgo(b.ts)}${b.nome?' · '+b.nome:''}</td>`
+   + `<td class="${parts!==b.akb_estoque?'cwarn':''}">${cicNf(b.akb_estoque)}</td><td>${cicNf(b.akb_descarregadas)}</td><td>${cicNf(b.akb_carregando)}</td><td>${cicNf(b.akb_carregadas)}</td>`
+   + `<td class="${b.akb_prontas>b.akb_carregadas?'cwarn':''}"><b>${cicNf(b.akb_prontas)}</b></td><td class="${campoBad?'cwarn':''}">${cicNf(b.akb_campo)}</td><td class="f">${cicNf(b.campo_bot)}</td>`
+   + `<td class="${totCls}"><b>${cicNf(tot)}</b>${n.akb_total!=null?' / '+cicNf(n.akb_total):''}</td>${eq('caixas')}${eq('cabos_reanim')}${eq('testadores')}`
+   + `<td class="cflags">${fl.length ? fl.join('<br>') : '✅ без расхождений'}</td></tr>`;
+ }).join('') + '</tbody>';
+ $('#cnote').textContent = 'Пересчёт базы делает работник циклажа на смене (бот, роль Ciclagem): склад = разряженные + на стенде + заряженные; «в полях» сверяется с тем, что чарджеры на смене ввели в Inventário inicial; итог (склад + поля) и оборудование — с нормой базы (/ciclagem_norma), а без нормы — с прошлым пересчётом. Красное — недостача.';
+}
+async function loadCic(){
+ try { const r = await fetch(CIC_URL + '?_=' + Date.now(), {cache:'no-store'}); if (!r.ok) throw new Error('HTTP ' + r.status); drawCic(await r.json()); }
+ catch (e) { $('#ctbl').innerHTML = '<tbody><tr><td>Данные циклажа недоступны: ' + e.message + '</td></tr></tbody>'; }
+}
+loadCic(); setInterval(loadCic, 300000);
 loadLive(); setInterval(loadLive, 120000);
 show('Guarujá');
 </script>
