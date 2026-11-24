@@ -979,6 +979,11 @@
 <div class="tab-content" id="tab-rentals">
   <div class="rt-bar">
     <select id="rtCity" aria-label="Cidade"></select>
+    <span id="rtBrKeyBox" hidden style="display:none;gap:6px;align-items:center">
+      <input id="rtBrKey" type="password" placeholder="🇧🇷 chave / ключ" autocomplete="off"
+        style="background:var(--card,#171b21);color:inherit;border:1px solid var(--border,#2a2f38);border-radius:8px;padding:7px 10px;font:inherit;width:170px">
+      <button class="rt-tg" id="rtBrKeyOk">OK</button><span id="rtBrKeyMsg" class="rt-muted"></span>
+    </span>
     <div class="rt-nav">
       <button id="rtPrev" title="Dia anterior">‹</button>
       <input type="date" id="rtDate">
@@ -5502,10 +5507,19 @@ function rtBuildControls(){
   rtState.date = rtState.date || today;
 
   const sel = document.getElementById('rtCity');
-  sel.innerHTML = '<option value="all">'+t('rt_all_cities')+'</option>' +
-    rtIdx.cities.map(c=>`<option value="${c}">${c}</option>`).join('');
-  sel.value = rtState.city;
-  sel.onchange = ()=>{ rtState.city = sel.value; rtFitDone = null; rtSel = null; rtRender(); };
+  rtFillCities();
+  sel.onchange = async ()=>{
+    if(sel.value==='__brkey'){ rtShowKeyBox(true); sel.value = rtState.city; return; }
+    rtState.city = sel.value; rtFitDone = null; rtSel = null;
+    try{ await rtLoadDay(rtState.date); }catch(e){ console.error(e); }
+    rtRender();
+  };
+  document.getElementById('rtBrKeyOk').onclick = async ()=>{
+    const k = document.getElementById('rtBrKey').value.trim();
+    const ok = await rtBrInit(k);
+    document.getElementById('rtBrKeyMsg').textContent = ok ? '' : '✕';
+    if(ok){ try{ localStorage.setItem('rt_br_key', k); }catch(e){} rtShowKeyBox(false); rtFillCities(); }
+  };
 
   const inp = document.getElementById('rtDate');
   inp.min = days[0]; inp.max = days[days.length-1]; inp.value = rtState.date;
@@ -5554,6 +5568,17 @@ function rtBuildControls(){
 async function rtLoadDay(date, force){
   if(!date) return;
   const live = date === rtTodayBRT();
+  if(rtIsBr()){
+    const ck = date+'|'+rtState.city;
+    if(rtBrCache[ck] && !(live && force)) return;
+    const f = rtState.city.slice(3);
+    const r = await fetch(rtBrBase+date+'/'+f+'.json?_='+Date.now(), {cache:'no-store'});
+    const js = r.ok ? await r.json() : {trips:[], models:[], devs:[], city:f};
+    rtBrCache[ck] = {d:date, models:js.models||[], devs:js.devs||[], pk:[], src:js.src,
+                     cities:{[rtState.city]: js.trips||[]}};
+    if(live && rtBrIdx) rtLiveAt = rtBrIdx.gen ? rtBrIdx.gen.slice(11) : '';
+    return;
+  }
   if(rtDayCache[date] && !(live && force)) return;
   const url = live ? RT_LIVE+'?_='+Date.now()
                    : RT_GIST+'rentals_'+date+'.json?_='+Date.now();
@@ -5570,13 +5595,54 @@ function rtAutoRefresh(){
   rtTimer = setInterval(async ()=>{
     const tabOpen = document.getElementById('tab-rentals')?.classList.contains('active');
     if(!tabOpen || rtState.date !== rtTodayBRT()) return;
-    try{ await rtLoadParks(); await rtLoadDay(rtState.date, true); rtRender(); }
+    try{ await rtLoadParks(); if(rtIsBr()) await rtBrInit(rtBrKeyVal); await rtLoadDay(rtState.date, true); rtRender(); }
     catch(e){ console.error('rt auto-refresh', e); }
   }, 120000);
 }
 
+// ── Бразилия целиком (с 24.11.2026): /root/vtc/br/br_live.py, крон */5 ──
+// Файлы лежат по секретному пути maps.jetmd.online/brx/<ключ>/ — ключа нет в репозитории
+// (репо публичное), дашборд спрашивает его один раз и хранит у зрителя.
+// Город Бразилии в rtState.city = 'br:<slug>'.
+let rtBrIdx = null, rtBrBase = '', rtBrKeyVal = '', rtBrCache = {}, rtBrNames = {};
+function rtIsBr(){ return String(rtState.city).startsWith('br:'); }
+function rtDay(){ return rtIsBr() ? rtBrCache[rtState.date+'|'+rtState.city] : rtDayCache[rtState.date]; }
+function rtShowKeyBox(on){ const b = document.getElementById('rtBrKeyBox'); b.hidden = !on; b.style.display = on?'inline-flex':'none'; if(on) document.getElementById('rtBrKey').focus(); }
+async function rtBrInit(key){
+  if(!key) return false;
+  try{
+    const base = 'https://maps.jetmd.online/brx/'+encodeURIComponent(key)+'/';
+    const r = await fetch(base+'index.json?_='+Date.now(), {cache:'no-store'});
+    if(!r.ok) return false;
+    rtBrIdx = await r.json(); rtBrBase = base; rtBrKeyVal = key;
+    rtBrNames = {};
+    for(const day of Object.values(rtBrIdx.days||{})) for(const [c,v] of Object.entries(day)) rtBrNames['br:'+v.f] = c;
+    return true;
+  }catch(e){ console.error('rtBrInit', e); return false; }
+}
+function rtFillCities(){
+  const sel = document.getElementById('rtCity');
+  const sp = new Set(rtIdx.cities);
+  let h = '<option value="all">'+t('rt_all_cities')+'</option><optgroup label="SP">' +
+    rtIdx.cities.map(c=>`<option value="${c}">${c}</option>`).join('') + '</optgroup>';
+  if(rtBrIdx){
+    const today = (rtBrIdx.days||{})[rtState.date] || {};
+    const br = Object.entries(rtBrNames).filter(([v,c])=>!sp.has(c))
+      .sort((a,b)=>((today[b[1]]||{}).n||0)-((today[a[1]]||{}).n||0) || a[1].localeCompare(b[1]));
+    h += `<optgroup label="🇧🇷 Brasil · ${br.length}">` +
+      br.map(([v,c])=>`<option value="${v}">${c}${(today[c]||{}).src==='g'?' · gojet':''}</option>`).join('') + '</optgroup>';
+  }else{
+    h += '<option value="__brkey">🇧🇷 Brasil… 🔑</option>';
+  }
+  sel.innerHTML = h;
+  sel.value = rtState.city;
+}
+// ключ, сохранённый раньше, поднимаем при старте вкладки
+(async ()=>{ let k=''; try{ k = localStorage.getItem('rt_br_key')||''; }catch(e){}
+  if(k && await rtBrInit(k) && rtIdx) rtFillCities(); })();
+
 function rtDayTrips(){                                   // все поездки дня по городу
-  const day = rtDayCache[rtState.date];
+  const day = rtDay();
   if(!day) return [];
   return rtState.city==='all'
     ? Object.values(day.cities).flat()
@@ -5759,7 +5825,7 @@ function rtInitParkControls(){
 
 // Статистика по парковкам для текущего фильтра: старты/финиши и деньги.
 function rtParkStats(trips){
-  const day = rtDayCache[rtState.date] || {};
+  const day = rtDay() || {};
   const pk = day.pk || [];
   const st = new Map();
   const get = id=>{ let o = st.get(id); if(!o){ o={s:0,sm:0,e:0,em:0}; st.set(id,o); } return o; };
@@ -5816,7 +5882,7 @@ function rtRenderParkPanel(trips, ps){
   const m = rtPkMeta.get(rtSel.id);
   if(!m){ card.innerHTML = ''; return; }
   const o = ps.st.get(m.id) || {s:0,sm:0,e:0,em:0};
-  const day = rtDayCache[rtState.date] || {};
+  const day = rtDay() || {};
   const pk = day.pk || [];
   const nm = i=> i>=0 && pk[i] ? (rtPkMeta.get(pk[i])?.name || '—') : rtx('off');
   const group = (filt, idx)=>{
@@ -5873,7 +5939,7 @@ async function rtDrawMap(trips, th){
   try{ await mlLoadLibs(); }
   catch(e){ console.error('rtDrawMap libs', e); return; }
 
-  const day = rtDayCache[rtState.date] || {};
+  const day = rtDay() || {};
   const models = day.models || [];
   const devs = day.devs || [];
   const cityIdx = new Map();
@@ -5888,7 +5954,7 @@ async function rtDrawMap(trips, th){
     geometry:{type:'Point', coordinates: pick==='s' ? [x[1]/1e5, x[0]/1e5] : [x[3]/1e5, x[2]/1e5]},
     properties:{i, veh:x[10], model:models[x[11]]||'', start:x[4], dur:x[5], dist:x[6],
                 money:x[7], app:RT_APPS[x[8]]||'—', sub:x[9], dev:devs[x[12]]||'',
-                city: rtState.city==='all' ? (cityIdx.get(x)||'') : rtState.city,
+                city: rtState.city==='all' ? (cityIdx.get(x)||'') : (rtBrNames[rtState.city]||rtState.city),
                 kind: pick}
   });
   const fc = pick=>({type:'FeatureCollection', features: trips.map((x,i)=>feat(x, i, pick))});
