@@ -272,6 +272,26 @@
   .fl-meter.warn i{background:var(--accent4)}
   .fl-meter.bad i{background:var(--accent2)}
   .fl-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:12px}
+  /* ── Frota: блок jet-operation (24.11.2026) ── */
+  .jo-head{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .jo-scope{display:inline-flex;gap:6px}
+  .jo-scope button{border:1px solid var(--border);background:var(--surface2);color:inherit;border-radius:999px;padding:5px 12px;cursor:pointer;font:inherit;font-size:12px}
+  .jo-scope button.on{border-color:var(--accent);color:var(--accent);font-weight:700}
+  .jo-meta{font-size:11px;color:var(--text-dim);font-family:'Space Mono',monospace}
+  .jo-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-bottom:12px}
+  .jo-kpi{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:9px 11px}
+  .jo-kpi .v{font-size:20px;font-weight:800;font-family:'Space Mono',monospace}
+  .jo-kpi .k{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-top:2px}
+  .jo-kpi .s{font-size:11px;color:var(--text-dim);margin-top:2px}
+  .fl-table tr.jo-row{cursor:pointer}
+  .fl-table tr.jo-open td{background:var(--surface2)}
+  .jo-spark td{padding:10px 12px 14px}
+  .jo-spark svg{width:100%;height:120px;display:block}
+  .jo-leg{display:flex;flex-wrap:wrap;gap:16px;font-size:11px;color:var(--text-dim);margin-bottom:4px}
+  .jo-leg i{display:inline-block;width:10px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+  .fl-table th.jo-sort{cursor:pointer}
+  .fl-table th.jo-sort.on{color:var(--accent)}
+  @media(max-width:900px){.jo-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
   .fl-chip{display:flex;align-items:center;gap:6px;background:var(--surface2);border:1px solid var(--border);
     border-radius:8px;padding:6px 10px;font-size:11px;font-weight:700}
   .fl-chip b{font-family:'Space Mono',monospace;font-size:13px}
@@ -597,6 +617,18 @@
     </div>
   </div>
 
+  <div class="an-panel" style="margin:0 24px 14px" id="joPanel">
+    <div class="jo-head">
+      <div class="an-title" style="margin:0" id="joTitle">📡 Operacional online · jet-operation</div>
+      <div class="jo-scope" id="joScope"></div>
+      <div class="jo-meta" id="joMeta">—</div>
+    </div>
+    <div class="jo-kpis" id="joKpis"></div>
+    <div class="fl-wrap"><table class="fl-table" id="joTable"></table></div>
+    <div class="fl-note" id="joNote"></div>
+  </div>
+
+  <div class="an-title" style="margin:6px 24px 8px;opacity:.7" id="flUrentTitle">Urent</div>
   <div class="ov-kpis">
     <div class="card"><div class="card-label" data-i18n="fl_kpi_avail">🛴 Disponibilidade</div><div class="card-val green" id="flAvailPct">—</div><div class="card-sub" id="flAvailSub"></div></div>
     <div class="card"><div class="card-label" data-i18n="fl_kpi_total">Frota total</div><div class="card-val cyan" id="flTotal">—</div><div class="card-sub" data-i18n="fl_kpi_total_sub">no cluster</div></div>
@@ -1624,6 +1656,7 @@ function switchTab(tab){
   if(tab==='fleet'&&typeof loadFleet==='function'){
     // Срез живёт 3 минуты — при каждом заходе тянем заново, иначе показываем протухшее.
     try{ fleetData?renderFleet():null; loadFleet(); }catch(e){console.error('switchTab→fleet failed',e);}
+    try{ joData?joRender():null; joLoad(); }catch(e){console.error('switchTab→jetop failed',e);}
   }
   if(tab==='antifraud'&&typeof loadAntifraud==='function'){
     try{ afData?renderAntifraud():loadAntifraud(); }catch(e){console.error('switchTab→antifraud failed',e);}
@@ -3601,6 +3634,129 @@ async function loadFleet(force){
 }
 
 function flPctClass(p){return p>=90?'ok':(p>=80?'warn':'bad');}
+
+// ── jet-operation: операционный онлайн по городам (24.11.2026) ──────────
+// Сборщик /root/vtc/jetop/jetop_cities.py (крон */5): /api/summary + мониторы 24 ч.
+// Доступность как на странице jet-operation: (available + rented) / fleet.
+// НЗ = low_charge платформы (по % заряда), не статус Urent.
+// SP — открытый файл; вся Бразилия — по ключу аренд Бразилии (тот же, что во вкладке Aluguéis).
+const JO_SP_URL='https://maps.jetmd.online/jetop_cities.json';
+const JO_TX={
+  ru:{title:'📡 Операционный онлайн · jet-operation',sp:'SP',br:'🇧🇷 Бразилия',avail:'Доступность',nz:'НЗ',nz_sub:'низкий заряд',
+      charge:'Ср. заряд',empty:'Пустые мониторы 24ч',offline:'Не на связи',offpark:'Вне парковки',maint:'Треб. ремонта',
+      city:'Город',fleet:'Парк',disp:'Свободны',rent:'В аренде',idle:'Простой 48ч',
+      upd:'jet-operation',stale:'данные платформы устарели',click:'Нажми на город — график доступности и НЗ за сегодня.',
+      key:'для Бразилии нужен ключ (введи его во вкладке «Аренды»)',urent:'Urent (старый срез, литораль)'},
+  pt:{title:'📡 Operacional online · jet-operation',sp:'SP',br:'🇧🇷 Brasil',avail:'Disponibilidade',nz:'Bateria baixa',nz_sub:'carga baixa',
+      charge:'Carga média',empty:'Monitores vazios 24h',offline:'Sem conexão',offpark:'Fora do estac.',maint:'Manutenção',
+      city:'Cidade',fleet:'Frota',disp:'Livres',rent:'Alugados',idle:'Parados 48h',
+      upd:'jet-operation',stale:'dados da plataforma desatualizados',click:'Clique na cidade — gráfico de disponibilidade e bateria baixa de hoje.',
+      key:'para o Brasil é preciso a chave (insira na aba «Aluguéis»)',urent:'Urent (recorte antigo, litoral)'}};
+function jx(k){return (JO_TX[lang]||JO_TX.pt)[k];}
+let joData=null, joScope='sp', joOpen=null, joSort='fleet';
+function joKey(){ try{ return localStorage.getItem('rt_br_key')||''; }catch(e){ return ''; } }
+function joEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch])); }
+
+async function joLoad(){
+  try{
+    const k=joKey();
+    const url = joScope==='br' && k ? 'https://maps.jetmd.online/brx/'+encodeURIComponent(k)+'/jetop_cities.json' : JO_SP_URL;
+    const r=await fetch(url+'?_='+Date.now(),{cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    joData=await r.json();
+    joRender();
+  }catch(e){
+    console.error('joLoad',e);
+    const el=document.getElementById('joTable');
+    if(el) el.innerHTML=`<tr><td class="mon-empty">jet-operation: ${joEsc(e.message)}</td></tr>`;
+  }
+}
+
+function joSpark(h){
+  // h: [[HH:MM, доступность %, НЗ, парк], ...] — точки каждые 5 минут за сегодня
+  if(!h||h.length<2) return `<div class="jo-meta">${lang==='ru'?'история копится с 24.11 — график появится через 10 минут':'histórico desde 24/11 — o gráfico aparece em 10 minutos'}</div>`;
+  const W=1000,H=120,P=6;
+  const mins=h.map(p=>{const q=p[0].split(':');return +q[0]*60 + +q[1];});
+  const x=m=>P+(W-2*P)*m/1440;
+  const yA=v=>H-P-(H-2*P)*Math.max(0,Math.min(100,v))/100;
+  const maxN=Math.max(1,...h.map(p=>p[2]));
+  const yN=v=>H-P-(H-2*P)*v/maxN;
+  const line=(f,i)=>h.map((p,j)=>(j?'L':'M')+x(mins[j]).toFixed(1)+','+f(p[i]).toFixed(1)).join('');
+  const grid=[0,360,720,1080,1440].map(m=>`<line x1="${x(m)}" x2="${x(m)}" y1="${P}" y2="${H-P}" stroke="var(--border)" stroke-dasharray="3 4" vector-effect="non-scaling-stroke"/>`).join('');
+  const last=h[h.length-1];
+  const minA=Math.min(...h.map(p=>p[1]));
+  return `<div class="jo-leg"><span><i style="background:var(--accent3)"></i>${jx('avail')}: ${last[1]}% (min ${minA}%)</span>`+
+    `<span><i style="background:var(--accent4)"></i>${jx('nz')}: ${last[2]} (max ${maxN})</span>`+
+    `<span>00 · 06 · 12 · 18 · 24 BRT</span></div>`+
+    `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${grid}`+
+    `<path d="${line(yA,1)}" fill="none" stroke="var(--accent3)" stroke-width="2.2" vector-effect="non-scaling-stroke"/>`+
+    `<path d="${line(yN,2)}" fill="none" stroke="var(--accent4)" stroke-width="1.6" vector-effect="non-scaling-stroke"/></svg>`;
+}
+
+function joRender(){
+  const d=joData; if(!d) return;
+  document.getElementById('joTitle').textContent=jx('title');
+  const ut=document.getElementById('flUrentTitle'); if(ut) ut.textContent=jx('urent');
+  const hasKey=!!joKey();
+  const sc=document.getElementById('joScope');
+  sc.innerHTML=`<button data-s="sp" class="${joScope==='sp'?'on':''}">${jx('sp')}</button>`+
+    `<button data-s="br" class="${joScope==='br'?'on':''}" ${hasKey?'':`title="${jx('key')}"`}>${jx('br')}${hasKey?'':' 🔑'}</button>`;
+  sc.querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    if(b.dataset.s==='br'&&!hasKey){ document.getElementById('joNote').textContent=jx('key'); return; }
+    joScope=b.dataset.s; joOpen=null; joLoad();
+  });
+  document.getElementById('joMeta').innerHTML=`${jx('upd')} ${joEsc(d.upd||'—')} BRT`+(d.stale?` · <span class="fl-stale">⚠️ ${jx('stale')}</span>`:'');
+
+  const cs=d.cities||[];
+  // Santos — логистическая база без уличной операции: в общий % не входит (как в блоке Urent)
+  const csK=cs.filter(x=>x.name!=='Santos');
+  const sum=k=>csK.reduce((a,x)=>a+(x[k]||0),0);
+  const fleet=sum('fleet'), av=sum('available')+sum('rented'), nz=sum('low_charge');
+  const ch=csK.filter(x=>x.charge_avg!=null);
+  const chW=ch.reduce((a,x)=>a+x.fleet,0);
+  const chAvg=chW?ch.reduce((a,x)=>a+x.charge_avg*x.fleet,0)/chW:0;
+  const e24=csK.filter(x=>x.empty24!=null), e24Avg=e24.length?e24.reduce((a,x)=>a+x.empty24,0)/e24.length:null;
+  const ap=fleet?100*av/fleet:0;
+  const k=(v,kk,sub,cls)=>`<div class="jo-kpi"><div class="v ${cls||''}">${v}</div><div class="k">${kk}</div>${sub?`<div class="s">${sub}</div>`:''}</div>`;
+  document.getElementById('joKpis').innerHTML=
+    k(ap.toFixed(1)+'%',jx('avail'),`${av} / ${fleet}`,'fl-pct '+flPctClass(ap))+
+    k(nz,jx('nz'),(fleet?(100*nz/fleet).toFixed(1):0)+'% · '+jx('nz_sub'))+
+    k(chAvg.toFixed(0)+'%',jx('charge'))+
+    k(e24Avg==null?'—':e24Avg.toFixed(0)+'%',jx('empty'))+
+    k(sum('not_connected'),jx('offline'))+
+    k(sum('off_parking'),jx('offpark'));
+
+  const cols=[['fleet',jx('fleet')],['avail_pct',jx('avail')],['available',jx('disp')],['rented',jx('rent')],
+    ['low_charge',jx('nz')],['charge_avg',jx('charge')],['maint_required',jx('maint')],['not_connected',jx('offline')],
+    ['off_parking',jx('offpark')],['idle_48h',jx('idle')],['empty24',jx('empty')]];
+  // доступность и заряд сортируем по возрастанию (худшие сверху), остальное — по убыванию
+  const asc = joSort==='avail_pct' || joSort==='charge_avg';
+  const rows=[...cs].sort((a,b)=>asc?((a[joSort]??999)-(b[joSort]??999)):((b[joSort]||0)-(a[joSort]||0)));
+  let html=`<tr><th>${jx('city')}</th>`+cols.map(([c,l])=>`<th class="fl-num jo-sort ${joSort===c?'on':''}" data-c="${c}">${l}</th>`).join('')+'</tr>';
+  rows.forEach(x=>{
+    const cls=flPctClass(x.avail_pct);
+    const open=joOpen===x.id;
+    html+=`<tr class="jo-row ${open?'jo-open':''}" data-id="${joEsc(x.id)}"><td><b>${joEsc(x.name)}</b> <span class="fl-sub">${joEsc(x.vendor)}</span></td>`+
+      `<td class="fl-num">${x.fleet}</td>`+
+      `<td><span class="fl-pct ${cls}">${x.avail_pct.toFixed(1)}%</span><div class="fl-meter ${cls}"><i style="width:${Math.min(100,x.avail_pct)}%"></i></div></td>`+
+      `<td class="fl-num" style="color:var(--accent3)">${x.available}</td>`+
+      `<td class="fl-num" style="color:var(--accent)">${x.rented}</td>`+
+      `<td class="fl-num" style="color:var(--accent4)">${x.low_charge}<span class="fl-sub"> ${x.nz_pct}%</span></td>`+
+      `<td class="fl-num">${x.charge_avg==null?'—':x.charge_avg.toFixed(0)+'%'}</td>`+
+      `<td class="fl-num">${x.maint_required||'—'}</td>`+
+      `<td class="fl-num">${x.not_connected||'—'}</td>`+
+      `<td class="fl-num">${x.off_parking||'—'}</td>`+
+      `<td class="fl-num">${x.idle_48h||'—'}</td>`+
+      `<td class="fl-num">${x.empty24==null?'—':x.empty24.toFixed(0)+'%'}<span class="fl-sub"> ${x.monitors?x.empty_monitors+'/'+x.monitors:''}</span></td></tr>`;
+    if(open) html+=`<tr class="jo-spark"><td colspan="${cols.length+1}">${joSpark((d.hist||{})[x.id])}</td></tr>`;
+  });
+  const tbl=document.getElementById('joTable');
+  tbl.innerHTML=html;
+  tbl.querySelectorAll('th.jo-sort').forEach(th=>th.onclick=()=>{ joSort=th.dataset.c; joRender(); });
+  tbl.querySelectorAll('tr.jo-row').forEach(tr=>tr.onclick=()=>{ joOpen = joOpen===tr.dataset.id?null:tr.dataset.id; joRender(); });
+  document.getElementById('joNote').textContent=jx('click');
+}
+
 
 function renderFleet(){
   const d=fleetData;
