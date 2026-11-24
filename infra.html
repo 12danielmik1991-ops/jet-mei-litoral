@@ -99,7 +99,7 @@ tbody tr[data-c]{cursor:pointer} tbody tr[data-c]:hover{background:var(--bg)}
 }
 .pin{width:26px;height:26px;border-radius:50%;background:#fff;border:2px solid #1f6fdb;text-align:center;line-height:22px;font-size:14px;box-shadow:0 1px 3px #0005}
 .live .kpi b{font-size:20px}
-.kpi.lz b{color:#e08a00}.kpi.la b{color:var(--bad)}.kpi.ln b{color:var(--na)}.kpi.lm b{color:#7b3fd1}.kpi.lc b{color:#1f6fdb}
+.kpi.lz b{color:#e08a00}.kpi.la b{color:var(--bad)}.kpi.ln b{color:var(--na)}.kpi.lm b{color:#7b3fd1}.kpi.lc b{color:#1f8a4c}.kpi.ls b{color:#d93025}
 .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:4px;vertical-align:-1px}
 .bar .sep{width:1px;height:20px;background:var(--line);margin:0 4px}
 .cab{border:1px solid var(--line);border-radius:6px;padding:6px 8px;margin-top:6px;font-size:13px}
@@ -191,7 +191,15 @@ const PT = {
  'Полки (места) в каждом шкафу/стенде':'Prateleiras (vagas) em cada armário/rack','Полки':'Prateleiras','Поставить':'Instalar',
  'Приблизительные точки на карте':'Pontos aproximados no mapa','Реестр и сводная не сходятся':'Registro e planilha não batem',
  'Ремонт (причина в Urent)':'Reparo (motivo no Urent)','Ремонт':'Reparo','С 0% заряда':'Com 0% de carga','С 0%':'Com 0%',
- 'СЦ / мастерская':'CS / oficina','на СЦ':'no CS','Регионы':'Regiões','Плана по шкафам нет — только живые данные':'Sem plano de armários — só dados ao vivo','листай таблицу вбок':'deslize a tabela para o lado','СЦ Santos':'CS Santos','Santos · oficina (СЦ)':'Santos · oficina (CS)','СЦ':'CS',
+ 'СЦ / мастерская':'CS / oficina','на СЦ':'no CS','Charger · замены АКБ':'Charger · troca de baterias','Scout · перемещения':'Scout · movimentações','Мониторы парковок':'Monitores de vagas',
+ 'Charger: людей / замен':'Charger: pessoas / trocas','Scout: людей / перем.':'Scout: pessoas / movim.','Charger: людей':'Charger: pessoas','Scout: людей':'Scout: pessoas',
+ 'Charger на смене':'Charger em turno','Scout на смене':'Scout em turno','перемещений за смену':'movimentações no turno','перемещений':'movimentações',
+ 'люди':'pessoas','нажми — маршрут по точкам на карте':'toque — rota ponto a ponto no mapa','последнее':'última ação','пока ничего':'nada ainda',
+ 'замена АКБ':'troca de bateria','перемещение':'movimentação','откуда → куда':'de onde → para onde','стоит':'há','обновление: парк — 5 мин, люди — 10 мин':'atualização: frota — 5 min, pessoas — 10 min',
+ 'Люди: Charger — замены АКБ (зелёные), Scout — перемещения (красные).':'Pessoas: Charger — troca de baterias (verde), Scout — movimentações (vermelho).',
+ 'Где город есть в Urent — данные Urent плюс те, кто работает через GoJet; город только на GoJet — только GoJet.':'Cidade no Urent — dados do Urent mais quem trabalha pelo GoJet; cidade só no GoJet — só GoJet.',
+ 'Точка человека — место последнего действия (живого GPS нет); нажми на человека — маршрут по точкам.':'O ponto da pessoa é o local da última ação (sem GPS ao vivo); toque na pessoa para ver a rota.',
+ 'Мониторы парковок — пока только литораль.':'Monitores de vagas — por enquanto só o litoral.','Регионы':'Regiões','Плана по шкафам нет — только живые данные':'Sem plano de armários — só dados ao vivo','листай таблицу вбок':'deslize a tabela para o lado','СЦ Santos':'CS Santos','Santos · oficina (СЦ)':'Santos · oficina (CS)','СЦ':'CS',
  'Самокатов в городе':'Patinetes na cidade','Самокатов сейчас':'Patinetes agora','Свободных АКБ (рабочих) / брак':'Baterias livres (boas) / defeito',
  'Свободных АКБ':'Baterias livres','Сейф с ключом':'Cofre com a chave','Сейчас по городам':'Agora por cidade','Сейчас':'Agora',
  'Сервисный центр':'Centro de serviço','Срез':'Dados de','Старые подсчёты АКБ':'Contagens de baterias antigas','Статус':'Status',
@@ -362,8 +370,9 @@ D.cities.forEach(c => {
 });
 
 /* ---------- фильтры ---------- */
-const LV = {alarm:{t:'Тревога', c:'#c8372d', on:true}, moving:{t:'В движении >1 ч', c:'#7b3fd1', on:true}, crew:{t:'Замены АКБ: люди', c:'#1f6fdb', on:true},
-            zero:{t:'0%', c:'#e08a00', on:false}, nosignal:{t:'Без связи', c:'#6f7c76', on:false}};
+const LV = {crew:{t:'Charger · замены АКБ', c:'#1f8a4c', on:true}, scout:{t:'Scout · перемещения', c:'#d93025', on:true},
+            alarm:{t:'Тревога', c:'#a0157a', on:true}, moving:{t:'В движении >1 ч', c:'#7b3fd1', on:true},
+            mon:{t:'Мониторы парковок', c:'#2a6fdb', on:false}, zero:{t:'0%', c:'#e08a00', on:false}, nosignal:{t:'Без связи', c:'#6f7c76', on:false}};
 const F = [['all','Все'],['BRSPL','Литорал'],['BRSPC','Капитал'],['BRSP','Интерьер'],['BRX','Регионы']];
 $('#bar').innerHTML = F.map(([k,t]) => `<button data-f="${k}" aria-pressed="${k==='all'}">${t}</button>`).join('') + '<button id="zbtn" aria-pressed="true">Зоны</button><span class="sep"></span>' + Object.entries(LV).map(([k,o]) => `<button data-l="${k}" aria-pressed="${o.on}"><span class="dot" style="background:${o.c}"></span>${o.t}</button>`).join('') + '<span class="note" style="margin-left:6px">Наведи или нажми на точку — инфа по ней; по городу — справа</span>';
 $('#bar').onclick = e => { const b = e.target.closest('button'); if (!b) return;
@@ -457,9 +466,13 @@ const cabRows = u => { const b = cabOf(u); if (!b) return '';
 function cityLive(city){ if (!LD) return null; const k = Object.keys(LD.cities).find(x => liveName(x) === city); return k ? {name:k, ...LD.cities[k]} : null; }
 function cabsOf(city){ return LD ? Object.values(LD.cabinets || {}).filter(b => liveName(b.city) === city) : []; }
 const perHour = w => w.per_hour != null ? w.per_hour.toLocaleString('ru-RU') : '—';
-const crewTip = w => `<b>${esc(w.name)}</b> · ${esc(w.city)}<br>смена с ${hm(w.started)} (${v(w.hours)} ч)${w.car ? ' · на машине' : ''}<br>
- замен за смену: <b>${w.tasks}</b><br>за последний час: <b>${v(w.tasks_1h)}</b><br>средняя выработка: <b>${perHour(w)}</b> замен/ч<br>
- ${w.last ? `последняя замена ${hm(w.last[2])} (${ago(w.last[2])})` : 'ещё ни одной замены'}`;
+const ROLE = {charger:{t:'Charger · замены АКБ', act:'замен', one:'замена АКБ', ico:'🔋'}, scout:{t:'Scout · перемещения', act:'перемещений', one:'перемещение', ico:'🛴'}};
+const roleOf = w => ROLE[w.role] || ROLE.charger;
+const crewTip = w => { const r = roleOf(w); return `<b>${esc(w.name)}</b> · ${esc(w.city)}<br><span style="color:${LV[w.role === 'scout' ? 'scout' : 'crew'].c};font-weight:600">${r.t}</span> · ${esc(w.src || '')}<br>
+ смена с ${hm(w.started)} (${v(w.hours)} ч)${w.car ? ' · на машине' : ''}<br>
+ ${r.act} за смену: <b>${w.tasks}</b><br>за последний час: <b>${v(w.tasks_1h)}</b><br>средняя выработка: <b>${perHour(w)}</b> ${r.act}/ч<br>
+ ${w.last ? `последнее: ${hm(w.last[2])} (${ago(w.last[2])})${w.last[3] ? ' · ' + esc(w.last[3]) : ''}` : 'пока ничего'}
+ ${w.trail && w.trail.length ? '<br><span style="color:#5d6b66;font-size:11px">нажми — маршрут по точкам на карте</span>' : ''}`; };
 function liveCity(city){
  const x = cityLive(city); if (!x) return LD ? '' : '<div class="note" style="margin-top:8px">живые данные не загрузились</div>';
  const ppl = (LD.crew || []).filter(w => w.city === x.name);
@@ -472,9 +485,10 @@ function liveCity(city){
   <div><span class="dot" style="background:${LV.moving.c}"></span>В движении больше часа</div><div class="n ${x.moving?'gap':''}">${v(x.moving)}</div>
   <div>Ремонт (причина в Urent)</div><div class="n">${v(x.repair)}</div>
   <div>На СЦ (JetRadar)</div><div class="n">${v(x.sc)}</div>
-  <div><span class="dot" style="background:${LV.crew.c}"></span>На смене по заменам АКБ</div><div class="n"><b>${x.crew || 0}</b></div><div class="sub2">замен за смену ${x.crew_tasks || 0}</div>
+  <div><span class="dot" style="background:${LV.crew.c}"></span>Charger на смене</div><div class="n"><b>${x.crew || 0}</b></div><div class="sub2">замен за смену ${x.crew_tasks || 0}</div>
+  <div><span class="dot" style="background:${LV.scout.c}"></span>Scout на смене</div><div class="n"><b>${x.scouts || 0}</b></div><div class="sub2">перемещений за смену ${x.scouts_tasks || 0} · люди: ${esc(x.people_src || '')}</div>
  </div>
- ${ppl.length ? '<div style="margin-top:4px;font-size:12px">' + ppl.map(w => `👷 ${esc(w.name)} · замен ${w.tasks} · за час ${v(w.tasks_1h)} · ${perHour(w)}/ч`).join('<br>') + '</div>' : ''}
+ ${ppl.length ? '<div style="margin-top:4px;font-size:12px">' + ppl.map(w => `<span style="color:${LV[w.role === 'scout' ? 'scout' : 'crew'].c}">${roleOf(w).ico}</span> ${esc(w.name)} · ${roleOf(w).act} ${w.tasks} · за час ${v(w.tasks_1h)} · ${perHour(w)}/ч <span class="f">${esc(w.src || '')}</span>`).join('<br>') + '</div>' : ''}
  <h2 style="margin-top:12px">Шкафы и базы — опрос супервайзеров</h2>
  ${cabs.length ? cabs.map(b => `<div class="cab"><b>${esc(b.base || b.city)}</b> <span class="note">${esc(b.by)} · ${when(b.at)}</span><div class="g2">${CABF.map(([k,t]) => `<div>${t}</div><div class="n">${v(b[k])}</div>`).join('')}</div></div>`).join('')
    : '<div class="note">Ответа ещё нет. Опрос уходит супервайзерам в 08:00 и 21:00.</div>'}`;
@@ -491,6 +505,17 @@ function addLiveCities(d){
    .bindTooltip(c.city, {permanent:true, direction:'right', className:'lbl', offset:[6,0]})
    .on('click', () => show(c.city)).addTo(layers[c.branch] || layers.BRX); });
 }
+const RT = L.layerGroup().addTo(map);
+function showRoute(w){
+ RT.clearLayers(); const col = LV[w.role === 'scout' ? 'scout' : 'crew'].c, r = roleOf(w), ev = w.trail || [];
+ if (ev.length > 1) L.polyline(ev.map(e => [e[0], e[1]]), {color:col, weight:4, opacity:.9}).addTo(RT);
+ ev.forEach((e, i) => {
+  if (e[4] != null && e[5] != null) L.polyline([[e[4], e[5]], [e[0], e[1]]], {color:col, weight:2, dashArray:'2 5'}).addTo(RT)
+   .bindTooltip(`${e[3] || ''}: откуда → куда`);
+  L.marker([e[0], e[1]], {icon:L.divIcon({className:'', iconSize:[20,20], iconAnchor:[10,10],
+    html:`<div style="width:20px;height:20px;border-radius:50%;background:${col};color:#fff;font:600 10px/20px var(--f-mono);text-align:center;border:1px solid #fff">${i + 1}</div>`}), zIndexOffset:600})
+   [HOVER ? 'bindTooltip' : 'bindPopup'](`#${i + 1} · ${hm(e[2])} · ${r.one}${e[3] ? ' · ' + esc(e[3]) : ''}`).addTo(RT); });
+}
 function drawLive(d){
  LD = d; addLiveCities(d); Object.values(LL).forEach(l => l.clearLayers());
  ['nosignal','zero','alarm'].forEach(k => (d.points[k] || []).forEach(p => { if (p[1] == null) return;
@@ -500,30 +525,35 @@ function drawLive(d){
   if (tr.length > 1) L.polyline(tr, {color:LV.moving.c, weight:3, opacity:.7}).addTo(LL.moving);
   L.circleMarker([p[1], p[2]], {radius:7, color:'#fff', weight:1.5, fillColor:LV.moving.c, fillOpacity:1})
    [HOVER ? 'bindTooltip' : 'bindPopup'](`${p[0]} · ${esc(p[3])}<br>в движении ${p[6]} мин, путь ${p[5]} км${p[4] ? ' · ' + (SUBRU[p[4]] || p[4]) : ''}`).addTo(LL.moving); });
- (d.crew || []).forEach(w => { if (!w.last) return; const tr = (w.trail || []).map(t => [t[0], t[1]]);
-  if (tr.length > 1) L.polyline(tr, {color:LV.crew.c, weight:2, dashArray:'4 4', opacity:.8}).addTo(LL.crew);
-  const mk = L.marker([w.last[0], w.last[1]], {icon:L.divIcon({className:'', iconSize:[26,26], iconAnchor:[13,13], html:'<div class="pin">👷</div>'}), zIndexOffset:500})
-   .bindPopup(crewTip(w)); if (HOVER) mk.bindTooltip(crewTip(w), {className:'tipbox', direction:'auto'}); mk.addTo(LL.crew); });
+ (d.crew || []).forEach(w => { if (!w.last) return; const k = w.role === 'scout' ? 'scout' : 'crew', col = LV[k].c;
+  const tr = (w.trail || []).map(t => [t[0], t[1]]);
+  if (tr.length > 1) L.polyline(tr, {color:col, weight:2, dashArray:'4 4', opacity:.55}).addTo(LL[k]);
+  const mk = L.marker([w.last[0], w.last[1]], {icon:L.divIcon({className:'', iconSize:[26,26], iconAnchor:[13,13], html:`<div class="pin" style="border-color:${col}">${roleOf(w).ico}</div>`}), zIndexOffset:500})
+   .bindPopup(crewTip(w)).on('popupopen', () => showRoute(w)).on('popupclose', () => RT.clearLayers());
+  if (HOVER) mk.bindTooltip(crewTip(w), {className:'tipbox', direction:'auto'}); mk.addTo(LL[k]); });
+ (d.monitors || []).forEach(m => { const [la, lo, city, name, cap, fact] = m; const col = !fact ? '#c8372d' : fact < cap ? '#e08a00' : '#1f8a4c';
+  L.circleMarker([la, lo], {radius:5 + Math.min(6, (cap || 0) / 4), color:'#2a6fdb', weight:2, fillColor:col, fillOpacity:.85})
+   [HOVER ? 'bindTooltip' : 'bindPopup'](`🅿️ ${esc(name || '')}<br>${esc(city || '')} · стоит <b>${v(fact)}</b> из ${v(cap)}`).addTo(LL.mon); });
  const T = k => Object.values(d.cities).reduce((a,c) => a + (c[k] || 0), 0);
  $('#livek').innerHTML = [['Парк в работе', T('fleet'), `в доступе ${T('available')}`, ''], ['С 0%', T('zero'), 'на связи, заряд <1%', 'lz'],
   ['В тревоге', T('alarm'), 'Urent: отработка тревоги', 'la'], ['Без связи', T('nosignal'), 'трекер молчит', 'ln'], ['В движении >1 ч', T('moving'), 'ни разу не встал за час', 'lm'],
-  ['Ремонт', T('repair'), `на СЦ ${T('sc')}`, ''], ['Замены АКБ: людей', T('crew'), `замен за смену ${T('crew_tasks')}`, 'lc']]
+  ['Ремонт', T('repair'), `на СЦ ${T('sc')}`, ''], ['Charger: людей', T('crew'), `замен за смену ${T('crew_tasks')}`, 'lc'], ['Scout: людей', T('scouts'), `перемещений ${T('scouts_tasks')}`, 'ls']]
   .map(([t,b,s,cl]) => `<div class="kpi ${cl}"><span>${t}</span><b>${b}</b><div class="note">${s}</div></div>`).join('');
  const age = Math.round((Date.now() - new Date(d.generated_at)) / 60000);
- $('#livestamp').innerHTML = `Сейчас: ${d.stamp_brt} BRT${age > 15 ? ` <b style="color:var(--bad)">· данные устарели на ${age} мин</b>` : ''} · парк ${(d.fleet_src || []).join('/')}, люди — Jet Crew (gojet), шкафы — опрос супервайзеров 08:00/21:00 · обновление каждые 5 мин`;
+ $('#livestamp').innerHTML = `Сейчас: ${d.stamp_brt} BRT${age > 15 ? ` <b style="color:var(--bad)">· данные устарели на ${age} мин</b>` : ''} · парк ${(d.fleet_src || []).join('/')}, люди — Jet Crew (gojet), шкафы — опрос супервайзеров 08:00/21:00 · обновление: парк — 5 мин, люди — 10 мин`;
  const cabSum = (n, k) => { const xs = cabsOf(liveName(n)).map(b => b[k]).filter(x => x != null); return xs.length ? xs.reduce((a,b) => a + b, 0) : null; };
  const lastAt = n => { const bs = cabsOf(liveName(n)); return bs.length ? bs.map(b => b.at).sort().pop() : null; };
- let h = '<thead><tr><th>Город</th><th>Парк</th><th>0%</th><th>Тревога</th><th>Без связи</th><th>В движ. >1 ч</th><th>Ремонт</th><th>На СЦ</th><th>Людей / замен</th><th>АКБ заряж. / всего</th><th>АКБ в ремонт</th><th>Кабели реаним.</th><th>Тестеры</th><th>Коробы</th><th>Опрос</th></tr></thead><tbody>';
+ let h = '<thead><tr><th>Город</th><th>Парк</th><th>0%</th><th>Тревога</th><th>Без связи</th><th>В движ. >1 ч</th><th>Ремонт</th><th>На СЦ</th><th>Charger: людей / замен</th><th>Scout: людей / перем.</th><th>АКБ заряж. / всего</th><th>АКБ в ремонт</th><th>Кабели реаним.</th><th>Тестеры</th><th>Коробы</th><th>Опрос</th></tr></thead><tbody>';
  const ufs = [...new Set(Object.values(d.cities).filter(x => x.branch === 'BRX').map(x => x.uf || '—'))].sort();
  const GRP = [['BRSPL','Литорал · BRSPL'],['BRSP','Интерьер · BRSP'],['BRSPC','Капитал · BRSPC']].concat(ufs.map(u => ['BRX:' + u, u + (UFN[u] ? ' · ' + UFN[u] : '')]));
  const rowOf = n => { const x = d.cities[n], at = lastAt(n);
-  return `<tr data-c="${liveName(n)}"><td>${n}</td><td>${x.fleet}</td><td>${x.zero}</td><td class="${x.alarm?'gap':''}">${x.alarm}</td><td>${x.nosignal}</td><td class="${x.moving?'gap':''}">${x.moving}</td><td>${v(x.repair)}</td><td>${v(x.sc)}</td><td>${x.crew||0} / ${x.crew_tasks||0}</td>
+  return `<tr data-c="${liveName(n)}"><td>${n}</td><td>${x.fleet}</td><td>${x.zero}</td><td class="${x.alarm?'gap':''}">${x.alarm}</td><td>${x.nosignal}</td><td class="${x.moving?'gap':''}">${x.moving}</td><td>${v(x.repair)}</td><td>${v(x.sc)}</td><td>${x.crew||0} / ${x.crew_tasks||0}</td><td>${x.scouts||0} / ${x.scouts_tasks||0}</td>
    <td>${v(cabSum(n,'akb_charged'))} / ${v(cabSum(n,'akb_total'))}</td><td>${v(cabSum(n,'akb_repair'))}</td><td>${v(cabSum(n,'cables'))}</td><td>${v(cabSum(n,'testers'))}</td><td>${v(cabSum(n,'boxes'))}</td><td class="f">${when(at)}</td></tr>`; };
  const inGrp = (x, br) => br.startsWith('BRX:') ? x.branch === 'BRX' && (x.uf || '—') === br.slice(4) : (x.branch || 'BRSPL') === br;
  h += GRP.map(([br, t]) => { const ns = Object.keys(d.cities).filter(n => inGrp(d.cities[n], br)).sort((a,b) => d.cities[b].fleet - d.cities[a].fleet);
-  return ns.length ? `<tr class="grp"><td colspan="15">${t}</td></tr>` + ns.map(rowOf).join('') : ''; }).join('') + '</tbody>';
+  return ns.length ? `<tr class="grp"><td colspan="16">${t}</td></tr>` + ns.map(rowOf).join('') : ''; }).join('') + '</tbody>';
  $('#ltbl').innerHTML = h;
- $('#lnote').textContent = 'В движении: ТС ни разу не стояло на месте за последний час и прошло больше 1 км. 0%: на связи и заряд меньше 1%. Люди: активные смены Jet Crew (замены АКБ); точка человека — место его последней замены (живого GPS у Jet Crew нет). Клик по строке — карточка города.';
+ $('#lnote').textContent = 'В движении: ТС ни разу не стояло на месте за последний час и прошло больше 1 км. 0%: на связи и заряд меньше 1%. Люди: Charger — замены АКБ (зелёные), Scout — перемещения (красные). Где город есть в Urent — данные Urent плюс те, кто работает через GoJet; город только на GoJet — только GoJet. Точка человека — место последнего действия (живого GPS нет); нажми на человека — маршрут по точкам. Мониторы парковок — пока только литораль. Клик по строке — карточка города.';
  if (curCity) show(curCity, curUnit, true);
 }
 $('#ltbl').onclick = e => { const t = e.target.closest('tr[data-c]'); if (t && C[t.dataset.c]) { show(t.dataset.c); window.scrollTo({top:0, behavior:'smooth'}); } };
@@ -561,7 +591,7 @@ async function loadCic(){
  catch (e) { $('#ctbl').innerHTML = '<tbody><tr><td>Данные циклажа недоступны: ' + e.message + '</td></tr></tbody>'; }
 }
 loadCic(); setInterval(loadCic, 300000);
-loadLive(); setInterval(loadLive, 120000);
+loadLive(); setInterval(loadLive, 300000);  // раз в 5 мин: сервер обновляет парк раз в 5 мин, людей — раз в 10
 show('Guarujá');
 </script>
 </body>
