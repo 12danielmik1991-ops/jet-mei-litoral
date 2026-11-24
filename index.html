@@ -878,6 +878,52 @@
 .rt-sub b{font-variant-numeric:tabular-nums;opacity:.75;font-weight:600}
 .rt-sub.off{opacity:.42;text-decoration:line-through}
 .rt-sub:focus-visible{outline:2px solid var(--rt-s);outline-offset:2px}
+.rt-layers{display:inline-flex;flex-wrap:wrap;gap:6px;align-items:center}
+.rt-tg{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border,#2a2f38);
+  background:var(--card,#171b21);color:inherit;border-radius:999px;padding:7px 13px;
+  cursor:pointer;font:inherit;font-size:13px}
+.rt-tg[aria-pressed=true]{border-color:#7a5cff;color:#9a83ff;font-weight:600}
+.rt-tg:focus-visible{outline:2px solid #7a5cff;outline-offset:2px}
+#rtMonBlock{background:var(--card,#171b21);color:inherit;border:1px solid var(--border,#2a2f38);
+  border-radius:8px;padding:6px 8px;font:inherit;font-size:13px}
+#rtMonBlock[hidden]{display:none}
+.rt-hint{position:absolute;right:12px;bottom:12px;z-index:2;font-size:11.5px;
+  background:rgba(20,24,30,.78);color:#fff;border-radius:8px;padding:5px 9px;max-width:60%}
+.rt-hint.light{background:rgba(255,255,255,.9);color:#1a1f26;box-shadow:0 1px 6px rgba(0,0,0,.16)}
+.rt-pkwrap{display:grid;grid-template-columns:minmax(260px,360px) 1fr;gap:12px;margin:0 24px 12px}
+.rt-box{background:var(--card,#171b21);border:1px solid var(--border,#2a2f38);border-radius:12px;padding:13px 15px;min-width:0}
+.rt-box h4{margin:0 0 9px;font-size:12px;text-transform:uppercase;letter-spacing:.08em;opacity:.55;font-weight:600}
+.rt-pkc-h{font-weight:700;font-size:15px;line-height:1.3}
+.rt-pkc-sub{font-size:12px;opacity:.6;margin:2px 0 10px}
+.rt-pkc-g{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.rt-pkc-g>div{border:1px solid var(--border,#2a2f38);border-radius:9px;padding:8px 10px}
+.rt-pkc-g .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.rt-pkc-g .k{font-size:10.5px;opacity:.6;text-transform:uppercase;letter-spacing:.06em}
+.rt-pkc-g .m{font-size:12.5px;font-variant-numeric:tabular-nums;opacity:.85}
+.rt-dirs{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.rt-dirs button{border:1px solid var(--border,#2a2f38);background:transparent;color:inherit;
+  border-radius:999px;padding:5px 11px;cursor:pointer;font:inherit;font-size:12.5px}
+.rt-dirs button.on{border-color:var(--rt-s);color:var(--rt-s);font-weight:600}
+.rt-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.rt-chip{font-size:12px;border:1px solid var(--border,#2a2f38);border-radius:7px;padding:3px 7px;opacity:.75}
+.rt-chip.on{border-color:#12b76a;color:#12b76a;opacity:1;font-weight:600}
+.rt-top{font-size:12.5px;margin:0;padding:0;list-style:none}
+.rt-top li{display:flex;justify-content:space-between;gap:10px;padding:3px 0;border-bottom:1px dashed var(--border,#2a2f38)}
+.rt-top li span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rt-top li b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.rt-tbl-w{overflow-x:auto}
+.rt-tbl{width:100%;border-collapse:collapse;font-size:12.5px}
+.rt-tbl th{text-align:right;font-weight:600;opacity:.6;font-size:11px;text-transform:uppercase;
+  letter-spacing:.05em;padding:5px 7px;border-bottom:1px solid var(--border,#2a2f38);cursor:pointer;white-space:nowrap}
+.rt-tbl th:first-child,.rt-tbl td:first-child{text-align:left}
+.rt-tbl th.on{opacity:1;color:var(--rt-s)}
+.rt-tbl td{padding:5px 7px;text-align:right;font-variant-numeric:tabular-nums;border-bottom:1px solid var(--border,#2a2f38);white-space:nowrap}
+.rt-tbl td:first-child{max-width:260px;overflow:hidden;text-overflow:ellipsis}
+.rt-tbl tr{cursor:pointer}
+.rt-tbl tbody tr:hover td{background:rgba(127,127,127,.08)}
+.rt-tbl tr.sel td{background:rgba(122,92,255,.14)}
+.rt-muted{opacity:.6;font-size:12px}
+@media(max-width:900px){.rt-pkwrap{grid-template-columns:1fr;margin:0 16px 12px}}
 .rt-key{width:9px;height:9px;border-radius:2px;background:var(--rt-s);display:inline-block;
   transform:rotate(45deg)}
 .rt-key.nk{background:transparent;border:1.5px solid var(--rt-e)}
@@ -950,6 +996,11 @@
       <button class="rt-sub" data-k="sub" aria-pressed="true"><i class="rt-key"></i><span data-i18n="rt_with_sub">Assinatura</span> <b id="rtSubN">0</b></button>
       <button class="rt-sub" data-k="nosub" aria-pressed="true"><i class="rt-key nk"></i><span data-i18n="rt_no_sub">Avulso</span> <b id="rtNoSubN">0</b></button>
     </div>
+    <div class="rt-layers">
+      <button class="rt-tg" id="rtPkBtn" aria-pressed="false">🅿️ <span id="rtPkLbl">Estacionamentos</span></button>
+      <button class="rt-tg" id="rtMonBtn" aria-pressed="false">🎯 <span id="rtMonLbl">Monitores</span></button>
+      <select id="rtMonBlock" hidden aria-label="Bloco do monitor"></select>
+    </div>
     <div class="rt-note" id="rtNote"></div>
   </div>
 
@@ -962,6 +1013,12 @@
       <span><i class="rt-dot" id="rtLegE"></i><span data-i18n="rt_end">fim</span></span>
       <span id="rtLegCount"></span>
     </div>
+    <div class="rt-hint" id="rtHint"></div>
+  </div>
+
+  <div class="rt-pkwrap">
+    <div class="rt-box" id="rtPkCard"></div>
+    <div class="rt-box"><h4 id="rtTopH">Estacionamentos</h4><div class="rt-tbl-w" id="rtPkTable"></div></div>
   </div>
 
   <div class="rt-hours">
@@ -5424,8 +5481,11 @@ async function loadRentals(){
       const r = await fetch(RT_GIST+'rentals_index.json?_='+Date.now(), {cache:'no-store'});
       if(!r.ok) throw new Error('HTTP '+r.status);
       rtIdx = await r.json();
+      await rtLoadParks();
       rtBuildControls();
+      rtInitParkControls();
     }
+    await rtLoadParks();
     await rtLoadDay(rtState.date);
     rtRender();
   }catch(e){
@@ -5445,18 +5505,18 @@ function rtBuildControls(){
   sel.innerHTML = '<option value="all">'+t('rt_all_cities')+'</option>' +
     rtIdx.cities.map(c=>`<option value="${c}">${c}</option>`).join('');
   sel.value = rtState.city;
-  sel.onchange = ()=>{ rtState.city = sel.value; rtFitDone = null; rtRender(); };
+  sel.onchange = ()=>{ rtState.city = sel.value; rtFitDone = null; rtSel = null; rtRender(); };
 
   const inp = document.getElementById('rtDate');
   inp.min = days[0]; inp.max = days[days.length-1]; inp.value = rtState.date;
-  inp.onchange = async ()=>{ rtState.date = inp.value; rtFitDone = null;
+  inp.onchange = async ()=>{ rtState.date = inp.value; rtFitDone = null; rtSel = null;
                              await rtLoadDay(rtState.date); rtRender(); };
 
   const step = async d=>{
     const i = days.indexOf(rtState.date);
     if(i<0) return;
     const j = Math.min(days.length-1, Math.max(0, i+d));
-    rtState.date = days[j]; inp.value = days[j]; rtFitDone = null;
+    rtState.date = days[j]; inp.value = days[j]; rtFitDone = null; rtSel = null;
     await rtLoadDay(days[j]); rtRender();
   };
   document.getElementById('rtPrev').onclick = ()=>step(-1);
@@ -5510,7 +5570,7 @@ function rtAutoRefresh(){
   rtTimer = setInterval(async ()=>{
     const tabOpen = document.getElementById('tab-rentals')?.classList.contains('active');
     if(!tabOpen || rtState.date !== rtTodayBRT()) return;
-    try{ await rtLoadDay(rtState.date, true); rtRender(); }
+    try{ await rtLoadParks(); await rtLoadDay(rtState.date, true); rtRender(); }
     catch(e){ console.error('rt auto-refresh', e); }
   }, 120000);
 }
@@ -5582,6 +5642,10 @@ function rtRender(){
     return `<i class="${on?'on':''}" style="height:${Math.round(100*v/top)}%" title="${String(h).padStart(2,'0')}:00 — ${v}"></i>`;
   }).join('');
 
+  const ps = rtParkStats(trips);
+  rtCur.ps = ps;
+  if(rtInitParkControls.sync) rtInitParkControls.sync();
+  rtRenderParkPanel(trips, ps);
   rtDrawMap(trips, th);
 }
 
@@ -5603,6 +5667,208 @@ function rtCard(p){                                       // карточка о
   </div>`;
 }
 
+// ── Aluguéis: парковки, мониторы, маршруты (24.11.2026) ─────────────
+// parkings.json собирает /root/vtc/rt_parks.py (крон */15) из jet-operation:
+//   cities[город] = {active: ключ активного блока, parks: [[id, имя, lat, lng, {блок: цель}, ТС сейчас]]}
+// В поездке x[13]/x[14] — индекс парковки старта/финиша в day.pk (−1 = вне парковки).
+// Зона аренды Urent и парковка jet-operation — один и тот же id, поэтому привязка точная.
+// Маршрут — прямая «старт → финиш»: GPS-трека нет ни в Urent, ни в gojet.
+const RT_PARKS_URL = RT_GIST + 'parkings.json';
+const RT_BLOCK_KEYS = ['m','n','sm','sn','f'];
+const RT_TX = {
+  ru:{pk:'Парковки', mon:'Мониторы', auto:'авто', top:'Парковки за период',
+      th_name:'Парковка', th_s:'Стартов', th_sm:'R$ стартов', th_e:'Финишей', th_em:'R$ финишей', th_tg:'Цель',
+      starts:'Стартов', ends:'Финишей', ticket:'ср. чек', both:'⇄ Всё', ins:'↘ Приехали сюда', outs:'↗ Уехали отсюда',
+      to:'Куда уезжают', from:'Откуда приезжают', off:'вне парковки', bikes:'ТС сейчас',
+      pick:'Нажми на парковку на карте или в таблице — покажу, откуда приезжают и куда уезжают самокаты и сколько денег она дала.',
+      hint_trip:'Нажми на точку — линия покажет, куда уехал самокат', hint_pk:'Нажми на парковку — линии приездов и отъездов',
+      line:'прямая старт → финиш (GPS-трека в системе нет)', covered:'{s}% стартов и {e}% финишей — на парковках',
+      no_mon:'не в мониторе', tg:'цель', removed:'удалена', empty:'Нет поездок с этой парковки в выбранный период.',
+      warn_money:'Деньги стартов и финишей — одни и те же поездки; не складывать.', clear:'✕ сбросить',
+      bshort:{m:'Утро',n:'Вечер',sm:'Пт утро',sn:'Пт вечер',f:'Выходные'},
+      blocks:{m:'☀️ Утро будни', n:'🌙 Вечер будни', sm:'🌄 Утро пятницы', sn:'🌇 Вечер пятницы', f:'🎉 Выходные'}},
+  pt:{pk:'Estacionamentos', mon:'Monitores', auto:'auto', top:'Estacionamentos no período',
+      th_name:'Estacionamento', th_s:'Inícios', th_sm:'R$ inícios', th_e:'Fins', th_em:'R$ fins', th_tg:'Meta',
+      starts:'Inícios', ends:'Fins', ticket:'ticket', both:'⇄ Tudo', ins:'↘ Chegaram aqui', outs:'↗ Saíram daqui',
+      to:'Para onde vão', from:'De onde vêm', off:'fora de estacionamento', bikes:'Patinetes agora',
+      pick:'Clique num estacionamento no mapa ou na tabela — mostro de onde chegam e para onde vão os patinetes e quanto ele rendeu.',
+      hint_trip:'Clique num ponto — a linha mostra para onde o patinete foi', hint_pk:'Clique num estacionamento — linhas de chegada e saída',
+      line:'linha reta início → fim (o sistema não tem trajeto GPS)', covered:'{s}% dos inícios e {e}% dos fins — em estacionamentos',
+      no_mon:'fora do monitor', tg:'meta', removed:'removido', empty:'Nenhum aluguel neste estacionamento no período.',
+      warn_money:'Receita de início e de fim são as mesmas viagens; não somar.', clear:'✕ limpar',
+      bshort:{m:'Manhã',n:'Noite',sm:'Sex manhã',sn:'Sex noite',f:'Folga'},
+      blocks:{m:'☀️ Manhã (seg–qui)', n:'🌙 Noite (seg–qui)', sm:'🌄 Manhã sexta', sn:'🌇 Noite sexta', f:'🎉 Folga / fim de semana'}},
+};
+function rtx(k){ return (RT_TX[lang]||RT_TX.pt)[k]; }
+function rtMoney(c){ return (c/100).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2})+' R$'; }
+function rtEsc(s){ return String(s==null?'':s).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch])); }
+
+let rtParks = null, rtParksAt = 0, rtPkMeta = new Map();
+let rtSel = null;              // {k:'trip', x} | {k:'park', id, dir:'both'|'in'|'out'}
+let rtPkSort = 'sm';
+let rtCur = {trips:[], stats:new Map(), pk:[]};
+
+async function rtLoadParks(force){
+  if(rtParks && !force && Date.now()-rtParksAt < 10*60000) return;
+  try{
+    const r = await fetch(RT_PARKS_URL+'?_='+Date.now(), {cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    rtParks = await r.json(); rtParksAt = Date.now();
+    rtPkMeta = new Map();
+    for(const [city, c] of Object.entries(rtParks.cities||{}))
+      for(const p of c.parks) rtPkMeta.set(p[0], {id:p[0], name:p[1], lat:p[2], lng:p[3], tg:p[4]||{}, bikes:p[5], city});
+  }catch(e){ console.error('rtLoadParks', e); }
+}
+
+// Блок монитора, который действует в выбранные день и период.
+// Будни: утро до «tarde», вечер с «tarde» (по журналу jet-operation noite активен уже в 14:50).
+function rtAutoBlock(){
+  const dow = new Date(rtState.date+'T12:00:00Z').getUTCDay();
+  if(dow===0 || dow===6) return 'f';
+  const p = rtState.period;
+  if(p==='all' && rtState.date===rtTodayBRT() && rtParks){
+    const c = rtState.city==='all' ? Object.values(rtParks.cities)[0] : rtParks.cities[rtState.city];
+    if(c && c.active) return c.active;
+  }
+  const night = p==='tarde' || p==='noite';
+  return dow===5 ? (night?'sn':'sm') : (night?'n':'m');
+}
+function rtBlock(){ return rtState.block==='auto' ? rtAutoBlock() : rtState.block; }
+
+function rtInitParkControls(){
+  const pkB = document.getElementById('rtPkBtn'), monB = document.getElementById('rtMonBtn');
+  const sel = document.getElementById('rtMonBlock');
+  if(rtState.showPk===undefined){ rtState.showPk = true; rtState.showMon = false; rtState.block = 'auto'; }
+  const sync = ()=>{
+    pkB.setAttribute('aria-pressed', String(rtState.showPk));
+    monB.setAttribute('aria-pressed', String(rtState.showMon));
+    sel.hidden = !rtState.showMon;
+    document.getElementById('rtPkLbl').textContent = rtx('pk');
+    document.getElementById('rtMonLbl').textContent = rtx('mon');
+    const bl = rtx('blocks');
+    sel.innerHTML = `<option value="auto">${rtx('auto')}: ${bl[rtAutoBlock()]}</option>` +
+      RT_BLOCK_KEYS.map(k=>`<option value="${k}">${bl[k]}</option>`).join('');
+    sel.value = rtState.block;
+  };
+  pkB.onclick = ()=>{ rtState.showPk = !rtState.showPk; if(!rtState.showPk && rtSel?.k==='park') rtSel=null; sync(); rtRender(); };
+  monB.onclick = ()=>{ rtState.showMon = !rtState.showMon; sync(); rtRender(); };
+  sel.onchange = ()=>{ rtState.block = sel.value; rtRender(); };
+  rtInitParkControls.sync = sync;
+  sync();
+}
+
+// Статистика по парковкам для текущего фильтра: старты/финиши и деньги.
+function rtParkStats(trips){
+  const day = rtDayCache[rtState.date] || {};
+  const pk = day.pk || [];
+  const st = new Map();
+  const get = id=>{ let o = st.get(id); if(!o){ o={s:0,sm:0,e:0,em:0}; st.set(id,o); } return o; };
+  let ns=0, ne=0;
+  for(const x of trips){
+    const a = x.length>13 && x[13]>=0 ? pk[x[13]] : null;
+    const b = x.length>14 && x[14]>=0 ? pk[x[14]] : null;
+    if(a){ const o=get(a); o.s++; o.sm+=x[7]; ns++; }
+    if(b){ const o=get(b); o.e++; o.em+=x[7]; ne++; }
+  }
+  return {st, pk, ns, ne};
+}
+
+function rtCityParks(){
+  if(!rtParks) return [];
+  const cs = rtState.city==='all' ? Object.keys(rtParks.cities) : [rtState.city];
+  const out = [];
+  for(const c of cs) for(const p of (rtParks.cities[c]?.parks||[])) out.push(rtPkMeta.get(p[0]));
+  return out.filter(Boolean);
+}
+
+function rtRenderParkPanel(trips, ps){
+  const card = document.getElementById('rtPkCard'), tbl = document.getElementById('rtPkTable');
+  document.getElementById('rtTopH').textContent = rtx('top');
+  const blk = rtBlock();
+  const n = trips.length || 1;
+  const cover = rtx('covered').replace('{s}', Math.round(100*ps.ns/n)).replace('{e}', Math.round(100*ps.ne/n));
+
+  // таблица: все парковки с поездками в периоде + мониторные при включённых мониторах
+  const rows = [];
+  for(const [id,o] of ps.st){ const m = rtPkMeta.get(id); if(m) rows.push({m,...o}); }
+  if(rtState.showMon) for(const m of rtCityParks()) if(m.tg[blk] && !ps.st.has(m.id)) rows.push({m,s:0,sm:0,e:0,em:0});
+  rows.sort((a,b)=> rtPkSort==='tg' ? (b.m.tg[blk]||0)-(a.m.tg[blk]||0) : b[rtPkSort]-a[rtPkSort]);
+  const cols = [['sm',rtx('th_sm')],['s',rtx('th_s')],['em',rtx('th_em')],['e',rtx('th_e')]];
+  if(rtState.showMon) cols.push(['tg',rtx('th_tg')]);
+  const top = rows.slice(0, 25);
+  tbl.innerHTML = `<div class="rt-muted" style="margin-bottom:6px">${cover}</div>
+    <table class="rt-tbl"><thead><tr><th>${rtx('th_name')}</th>${cols.map(([k,l])=>`<th data-k="${k}" class="${rtPkSort===k?'on':''}">${l}</th>`).join('')}</tr></thead>
+    <tbody>${top.map(r=>`<tr data-id="${r.m.id}" class="${rtSel?.k==='park'&&rtSel.id===r.m.id?'sel':''}">
+      <td title="${rtEsc(r.m.name)}">${rtEsc(r.m.name)}${rtState.city==='all'?` <span class="rt-muted">· ${rtEsc(r.m.city)}</span>`:''}</td>
+      <td>${r.sm?rtMoney(r.sm):'—'}</td><td>${r.s||'—'}</td><td>${r.em?rtMoney(r.em):'—'}</td><td>${r.e||'—'}</td>
+      ${rtState.showMon?`<td>${r.m.tg[blk]||'—'}</td>`:''}</tr>`).join('')}</tbody></table>`;
+  tbl.querySelectorAll('th[data-k]').forEach(th=>th.onclick=()=>{ rtPkSort = th.dataset.k; rtRender(); });
+  tbl.querySelectorAll('tbody tr').forEach(tr=>tr.onclick=()=>{
+    const m = rtPkMeta.get(tr.dataset.id);
+    rtSel = {k:'park', id:tr.dataset.id, dir:'both'};
+    if(!rtState.showPk){ rtState.showPk = true; rtInitParkControls.sync && rtInitParkControls.sync(); }
+    rtRender();
+    if(m && rtMap) rtMap.flyTo({center:[m.lng,m.lat], zoom:Math.max(rtMap.getZoom(),14.5), duration:600});
+  });
+
+  // карточка выбранной парковки
+  if(rtSel?.k!=='park'){ card.innerHTML = `<h4>${rtx('pk')}</h4><div class="rt-muted">${rtx('pick')}</div>`; return; }
+  const m = rtPkMeta.get(rtSel.id);
+  if(!m){ card.innerHTML = ''; return; }
+  const o = ps.st.get(m.id) || {s:0,sm:0,e:0,em:0};
+  const day = rtDayCache[rtState.date] || {};
+  const pk = day.pk || [];
+  const nm = i=> i>=0 && pk[i] ? (rtPkMeta.get(pk[i])?.name || '—') : rtx('off');
+  const group = (filt, idx)=>{
+    const g = new Map();
+    for(const x of trips) if(filt(x)){ const k = nm(x[idx]); const v = g.get(k)||[0,0]; v[0]++; v[1]+=x[7]; g.set(k,v); }
+    return [...g.entries()].sort((a,b)=>b[1][0]-a[1][0]).slice(0,6);
+  };
+  const me = pk.indexOf(m.id);
+  const outs = me<0 ? [] : group(x=>x[13]===me, 14);
+  const ins  = me<0 ? [] : group(x=>x[14]===me, 13);
+  const li = arr=> arr.length ? arr.map(([k,[c,mo]])=>`<li><span title="${rtEsc(k)}">${rtEsc(k)}</span><b>${c} · ${rtMoney(mo)}</b></li>`).join('') : `<li><span class="rt-muted">—</span></li>`;
+  const bl = rtx('blocks');
+  const chips = RT_BLOCK_KEYS.map(k=>`<span class="rt-chip ${k===blk&&m.tg[k]?'on':''}" title="${rtEsc(bl[k])}">${rtx('bshort')[k]} · ${m.tg[k]||'—'}</span>`).join('');
+  card.innerHTML = `
+    <div style="display:flex;justify-content:space-between;gap:8px;align-items:flex-start">
+      <div class="rt-pkc-h">${rtEsc(m.name)}</div>
+      <button class="rt-tg" id="rtPkClear" style="padding:4px 10px;font-size:12px">${rtx('clear')}</button></div>
+    <div class="rt-pkc-sub">${rtEsc(m.city)}${m.bikes==null?' · '+rtx('removed'):(rtState.date===rtTodayBRT()?' · '+rtx('bikes')+': '+m.bikes:'')}</div>
+    <div class="rt-pkc-g">
+      <div><div class="k">${rtx('starts')}</div><div class="v">${o.s}</div><div class="m">${rtMoney(o.sm)}${o.s?' · '+rtx('ticket')+' '+rtMoney(Math.round(o.sm/o.s)):''}</div></div>
+      <div><div class="k">${rtx('ends')}</div><div class="v">${o.e}</div><div class="m">${rtMoney(o.em)}${o.e?' · '+rtx('ticket')+' '+rtMoney(Math.round(o.em/o.e)):''}</div></div>
+    </div>
+    <div class="rt-chips">${chips}</div>
+    <div class="rt-dirs">${['both','in','out'].map(d=>`<button data-d="${d}" class="${rtSel.dir===d?'on':''}">${rtx(d==='both'?'both':d==='in'?'ins':'outs')}</button>`).join('')}</div>
+    ${o.s||o.e ? `<h4>${rtx('to')}</h4><ul class="rt-top">${li(outs)}</ul>
+    <h4 style="margin-top:10px">${rtx('from')}</h4><ul class="rt-top">${li(ins)}</ul>
+    <div class="rt-muted" style="margin-top:8px">${rtx('warn_money')}</div>` : `<div class="rt-muted">${rtx('empty')}</div>`}`;
+  card.querySelector('#rtPkClear').onclick = ()=>{ rtSel = null; rtRender(); };
+  card.querySelectorAll('.rt-dirs button').forEach(b=>b.onclick=()=>{ rtSel.dir = b.dataset.d; rtRender(); });
+}
+
+// Линии выделения: одна поездка или все приезды/отъезды парковки.
+function rtSelLines(trips, ps){
+  const F = [];
+  const L = (a,b,kind)=>F.push({type:'Feature', properties:{kind},
+    geometry:{type:'LineString', coordinates:[a,b]}});
+  if(rtSel?.k==='trip'){
+    const x = rtSel.x;
+    L([x[1]/1e5,x[0]/1e5],[x[3]/1e5,x[2]/1e5],'trip');
+  }else if(rtSel?.k==='park'){
+    const m = rtPkMeta.get(rtSel.id), me = ps.pk.indexOf(rtSel.id);
+    if(m && me>=0){
+      const c = [m.lng, m.lat];
+      for(const x of trips){
+        if(rtSel.dir!=='in'  && x[13]===me) L(c,[x[3]/1e5,x[2]/1e5],'out');
+        if(rtSel.dir!=='out' && x[14]===me) L([x[1]/1e5,x[0]/1e5],c,'in');
+      }
+    }
+  }
+  return {type:'FeatureCollection', features:F};
+}
+
 async function rtDrawMap(trips, th){
   try{ await mlLoadLibs(); }
   catch(e){ console.error('rtDrawMap libs', e); return; }
@@ -5610,25 +5876,40 @@ async function rtDrawMap(trips, th){
   const day = rtDayCache[rtState.date] || {};
   const models = day.models || [];
   const devs = day.devs || [];
-  // город кладём заранее: перебирать словарь на каждый ховер — дорого
   const cityIdx = new Map();
   if(rtState.city==='all'){
     for(const [c, arr] of Object.entries(day.cities||{})) for(const x of arr) cityIdx.set(x, c);
   }
+  rtCur.trips = trips;
+  const ps = rtCur.ps;
 
-  const feat = (x, pick)=>({
+  const feat = (x, i, pick)=>({
     type:'Feature',
     geometry:{type:'Point', coordinates: pick==='s' ? [x[1]/1e5, x[0]/1e5] : [x[3]/1e5, x[2]/1e5]},
-    properties:{veh:x[10], model:models[x[11]]||'', start:x[4], dur:x[5], dist:x[6],
+    properties:{i, veh:x[10], model:models[x[11]]||'', start:x[4], dur:x[5], dist:x[6],
                 money:x[7], app:RT_APPS[x[8]]||'—', sub:x[9], dev:devs[x[12]]||'',
                 city: rtState.city==='all' ? (cityIdx.get(x)||'') : rtState.city,
                 kind: pick}
   });
-  const fc = pick=>({type:'FeatureCollection', features: trips.map(x=>feat(x, pick))});
+  const fc = pick=>({type:'FeatureCollection', features: trips.map((x,i)=>feat(x, i, pick))});
 
+  // парковки: размер — по числу стартов+финишей в периоде
+  const blk = rtBlock();
+  const parks = rtCityParks();
+  const pkFC = {type:'FeatureCollection', features: (rtState.showPk||rtState.showMon) ? parks.filter(m=>{
+      const o = ps.st.get(m.id);
+      return (rtState.showPk && (o || m.bikes!=null)) || (rtState.showMon && m.tg[blk]);
+    }).map(m=>{
+      const o = ps.st.get(m.id) || {s:0,e:0,sm:0,em:0};
+      return {type:'Feature', geometry:{type:'Point', coordinates:[m.lng, m.lat]},
+        properties:{id:m.id, n:o.s+o.e, s:o.s, e:o.e, tg:m.tg[blk]||0, sel: rtSel?.k==='park'&&rtSel.id===m.id ? 1:0}};
+    }) : []};
+
+  const dimmed = !!rtSel;
   const paint = color=>({'circle-radius':['interpolate',['linear'],['zoom'],10,2.5,13,4.5,16,7.5],
-                         'circle-color':color,'circle-opacity':.85,
+                         'circle-color':color,'circle-opacity':dimmed?.22:.85,
                          'circle-stroke-width':.7,'circle-stroke-color':th.light?'#fff':'#0b0e13'});
+  const ink = th.light ? '#1f2430' : '#eef1f6';
 
   const bindHover = id=>{
     rtMap.on('mouseenter', id, ()=>{ rtMap.getCanvas().style.cursor='pointer'; });
@@ -5639,30 +5920,99 @@ async function rtDrawMap(trips, th){
     rtMap.on('mousemove', id, ev=>{
       const f = ev.features && ev.features[0];
       if(!f) return;
-      const html = rtCard(f.properties);
+      let html;
+      if(id==='rt-pk' || id==='rt-mon'){
+        const m = rtPkMeta.get(f.properties.id); if(!m) return;
+        const o = rtCur.ps.st.get(m.id) || {s:0,sm:0,e:0,em:0};
+        const tg = m.tg[rtBlock()];
+        html = `<div class="rt-card"><div class="rt-card-h">${rtEsc(m.name)}</div>
+          <div class="rt-card-r"><span>${rtx('starts')}</span><b>${o.s} · ${rtMoney(o.sm)}</b></div>
+          <div class="rt-card-r"><span>${rtx('ends')}</span><b>${o.e} · ${rtMoney(o.em)}</b></div>
+          <div class="rt-card-r"><span>${rtx('mon')}</span><b>${tg?'🛴 '+tg:rtx('no_mon')}</b></div></div>`;
+      }else{
+        html = rtCard(f.properties);
+      }
       if(!rtPopup){
         rtPopup = new maplibregl.Popup({closeButton:false, closeOnClick:false,
-                                        offset:10, maxWidth:'280px', className:'rt-pop'});
+                                        offset:10, maxWidth:'300px', className:'rt-pop'});
         rtPopup.addTo(rtMap);
       }
       rtPopup.setLngLat(f.geometry.coordinates).setHTML(html);
     });
   };
 
+  const onClick = ev=>{
+    const L = ['rt-mon','rt-pk','rt-s','rt-e'].filter(l=>rtMap.getLayer(l));
+    const hits = rtMap.queryRenderedFeatures(ev.point, {layers:L});
+    const pkHit = hits.find(f=>f.layer.id==='rt-pk' || f.layer.id==='rt-mon');
+    const trHit = hits.find(f=>f.layer.id==='rt-s' || f.layer.id==='rt-e');
+    if(pkHit){
+      const id = pkHit.properties.id;
+      rtSel = (rtSel?.k==='park' && rtSel.id===id) ? null : {k:'park', id, dir:'both'};
+    }else if(trHit){
+      const x = rtCur.trips[trHit.properties.i];
+      rtSel = (rtSel?.k==='trip' && rtSel.x===x) ? null : {k:'trip', x};
+    }else{
+      rtSel = null;
+    }
+    rtRender();
+  };
+
   const addLayers = ()=>{
+    const lines = rtSelLines(trips, ps);
     if(!rtMap.getSource('rt-s')){
       rtMap.addSource('rt-s',{type:'geojson',data:fc('s')});
       rtMap.addSource('rt-e',{type:'geojson',data:fc('e')});
+      rtMap.addSource('rt-ln',{type:'geojson',data:lines});
+      rtMap.addSource('rt-pk',{type:'geojson',data:pkFC});
       rtMap.addLayer({id:'rt-e',type:'circle',source:'rt-e',paint:paint(th.e)});
       rtMap.addLayer({id:'rt-s',type:'circle',source:'rt-s',paint:paint(th.s)});
-      bindHover('rt-s'); bindHover('rt-e');
+      rtMap.addLayer({id:'rt-ln',type:'line',source:'rt-ln',layout:{'line-cap':'round'},
+        paint:{'line-width':['match',['get','kind'],'trip',3.5,1.6],
+               'line-color':['match',['get','kind'],'in',th.e,'out',th.s,'#7a5cff'],
+               'line-opacity':['match',['get','kind'],'trip',.95,.55]}});
+      rtMap.addLayer({id:'rt-pk',type:'circle',source:'rt-pk',
+        filter: rtState.showPk ? ['all'] : ['==',['get','id'],'__none__'],
+        paint:{'circle-radius':['interpolate',['linear'],['zoom'],
+                                10,['+',2,['*',['sqrt',['get','n']],.7]],
+                                14,['+',4,['*',['sqrt',['get','n']],1.6]],
+                                17,['+',7,['*',['sqrt',['get','n']],2.2]]],
+               'circle-color':['case',['==',['get','sel'],1],'#7a5cff',['>',['get','n'],0],th.light?'#3b4252':'#cfd6e4','rgba(0,0,0,0)'],
+               'circle-opacity':.55,
+               'circle-stroke-width':['case',['==',['get','sel'],1],3,1.2],
+               'circle-stroke-color':['case',['==',['get','sel'],1],'#7a5cff',ink]}});
+      rtMap.addLayer({id:'rt-mon',type:'circle',source:'rt-pk',
+        filter: rtState.showMon ? ['>',['get','tg'],0] : ['==',['get','id'],'__none__'],
+        paint:{'circle-radius':['interpolate',['linear'],['zoom'],10,4,14,8,17,13],
+               'circle-color':'rgba(0,0,0,0)','circle-stroke-width':2.5,'circle-stroke-color':'#12b76a'}});
+      rtMap.addLayer({id:'rt-mon-lab',type:'symbol',source:'rt-pk',
+        filter: rtState.showMon ? ['>',['get','tg'],0] : ['==',['get','id'],'__none__'],
+        minzoom:12,
+        layout:{'text-field':['to-string',['get','tg']],'text-font':['Open Sans Bold'],
+                'text-size':11,'text-offset':[0,-1.5],'text-allow-overlap':false},
+        paint:{'text-color':'#12b76a','text-halo-color':th.light?'#fff':'#0b0e13','text-halo-width':1.6}});
+      if(!rtMap._rtBound){
+        ['rt-s','rt-e','rt-pk','rt-mon'].forEach(bindHover);
+        rtMap.on('click', onClick);
+        rtMap._rtBound = true;
+      }
     }else{
       rtMap.getSource('rt-s').setData(fc('s'));
       rtMap.getSource('rt-e').setData(fc('e'));
-      rtMap.setPaintProperty('rt-s','circle-color',th.s);
-      rtMap.setPaintProperty('rt-e','circle-color',th.e);
-      rtMap.setPaintProperty('rt-s','circle-stroke-color',th.light?'#fff':'#0b0e13');
-      rtMap.setPaintProperty('rt-e','circle-stroke-color',th.light?'#fff':'#0b0e13');
+      rtMap.getSource('rt-ln').setData(lines);
+      rtMap.getSource('rt-pk').setData(pkFC);
+      for(const [l,c] of [['rt-s',th.s],['rt-e',th.e]]){
+        rtMap.setPaintProperty(l,'circle-color',c);
+        rtMap.setPaintProperty(l,'circle-opacity',dimmed?.22:.85);
+        rtMap.setPaintProperty(l,'circle-stroke-color',th.light?'#fff':'#0b0e13');
+      }
+      rtMap.setPaintProperty('rt-ln','line-color',['match',['get','kind'],'in',th.e,'out',th.s,'#7a5cff']);
+      rtMap.setFilter('rt-pk', rtState.showPk ? null : ['==',['get','id'],'__none__']);
+      const mf = rtState.showMon ? ['>',['get','tg'],0] : ['==',['get','id'],'__none__'];
+      rtMap.setFilter('rt-mon', mf); rtMap.setFilter('rt-mon-lab', mf);
+      rtMap.setPaintProperty('rt-mon-lab','text-halo-color',th.light?'#fff':'#0b0e13');
+      rtMap.setPaintProperty('rt-pk','circle-stroke-color',['case',['==',['get','sel'],1],'#7a5cff',ink]);
+      rtMap.setPaintProperty('rt-pk','circle-color',['case',['==',['get','sel'],1],'#7a5cff',['>',['get','n'],0],th.light?'#3b4252':'#cfd6e4','rgba(0,0,0,0)']);
     }
     const key = rtState.city+'|'+rtState.date;
     if(trips.length && rtFitDone !== key){
@@ -5674,6 +6024,12 @@ async function rtDrawMap(trips, th){
       rtFitDone = key;
     }
   };
+
+  const hint = document.getElementById('rtHint');
+  if(hint){
+    hint.classList.toggle('light', th.light);
+    hint.textContent = rtSel?.k==='trip' ? rtx('line') : (rtState.showPk ? rtx('hint_pk') : rtx('hint_trip'));
+  }
 
   if(!rtMap){
     rtMap = new maplibregl.Map({container:'rtMap', style:RT_STYLE_URL[th.style],
@@ -5687,6 +6043,7 @@ async function rtDrawMap(trips, th){
   if(rtStyleKey !== th.style){          // сменилось время суток — меняем подложку
     rtStyleKey = th.style;
     if(rtPopup){ rtPopup.remove(); rtPopup = null; }
+    // после setStyle источники и слои пропадают, а обработчики остаются — повторно не вешаем
     rtMap.once('styledata', ()=>setTimeout(addLayers, 60));
     rtMap.setStyle(RT_STYLE_URL[th.style]);
     return;
