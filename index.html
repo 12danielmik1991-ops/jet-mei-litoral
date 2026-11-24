@@ -1112,7 +1112,51 @@ function applyLang(){
   try{if(typeof renderMonitor==='function'&&mlData){renderMonitor();mlDrawMap();}}catch(e){}
   try{if(typeof renderFleet==='function'&&fleetData)renderFleet();}catch(e){}
 }
-function toggleLang(){lang=lang==='ru'?'pt':'ru';localStorage.setItem('jet_lang',lang);applyLang();}
+// смена языка = перезагрузка: так переводятся и подписи, нарисованные из данных (допереводчик ниже), и вкладка Infraestrutura
+function toggleLang(){lang=lang==='ru'?'pt':'ru';localStorage.setItem('jet_lang',lang);location.reload();}
+
+// ── ДОПЕРЕВОД (24.11.2026): всё, что рисуется из данных и мимо I18N, переводится по словарю на лету ──
+// RU-режим: португальские слова → русский; PT-режим: русские → португальский. Имена людей и города не трогаются.
+const I18N_FB={
+ ru:{'Dia anterior':'Предыдущий день','Próximo dia':'Следующий день','Zoom in':'Приблизить','Zoom out':'Отдалить','Toggle attribution':'Атрибуция',
+  'Ainda não há respostas da pesquisa desta semana.':'Ответов на опрос этой недели пока нет.',
+  'Alarme':'Тревога','Alugado':'В аренде','Armazenado':'На хранении','Carregando':'Зарядка','Conservação':'Консервация','Disponível':'Доступен',
+  'Irrecuperável':'Невосстановим','Manutenção':'Обслуживание','Movimentação':'Перемещение','Procurado':'В розыске','Reparo':'Ремонт','Roubado':'Украден',
+  'Livre / dia todo':'Свободен / весь день','Grade da semana':'Сетка недели','Desejados':'Желающие','Baterias (Charger)':'АКБ (Charger)','Patinetes (Scout)':'Самокаты (Scout)',
+  'Madrugada':'Ночь','Manhã':'Утро','Noite':'Вечер','manhã':'утро','noite':'вечер','folga':'выходной','Dia':'День','dia':'день','Zona':'Зона','Sync':'Синхр.','min':'мин',
+  'Mínimo 30 movimentações em todas as zonas da Cidade':'Минимум 30 перемещений во всех зонах города','Mínimo 30 movimentações em todas as zonas':'Минимум 30 перемещений во всех зонах',
+  'Mínimo 30 movimentações':'Минимум 30 перемещений','Min 30 movimentação':'Минимум 30 перемещений','Minimo 30 trocas':'Минимум 30 замен',
+  'Mín. 30 trocas, carga ≤15% → ≥100%':'Мин. 30 замен, заряд ≤15% → ≥100%',
+  'Preencher monitor e organizar a orla':'Заполнить монитор и упорядочить набережную','Preencher monitor, organizar orla':'Заполнить монитор, упорядочить набережную',
+  'Preencher monitor/ ponto dos promo, organizar a orla':'Заполнить монитор / промо-точку, упорядочить набережную','Preencher pontos do monitor (orla)':'Заполнить точки монитора (набережная)',
+  'Preencher pontos do monitor e organizar a orla':'Заполнить точки монитора и упорядочить набережную','Preencher pontos do monitor priorizando os pontos zerados.':'Заполнить точки монитора, в первую очередь пустые.',
+  'Preencher ponto monitor.':'Заполнить точку монитора.','Preencher pontos do monitor':'Заполнить точки монитора','Preencher pontos dos promo':'Заполнить промо-точки','Preencher monitor':'Заполнить монитор','Trazer dos bairros e fora de zona os patinetes e completar os monitore':'Свезти самокаты из районов и из-за зоны и заполнить мониторы',
+  'descarregar um caminhão com 100 patinetes':'разгрузить грузовик со 100 самокатами','minimo 50 movimentos, levando patinetes para a praia e organizando os':'минимум 50 перемещений: везти самокаты к пляжу и расставлять их',
+  'minimo 50 trocas e ciclagem de baterias sempre que voltar ao armário!!':'минимум 50 замен и цикл АКБ при каждом возвращении к шкафу!!','minimo 50 trocas':'минимум 50 замен',
+  'Fazer o ciclo.':'Сделать цикл.','COMUNICADO – MOVIMENTAÇÕES':'ОБЪЯВЛЕНИЕ – ПЕРЕМЕЩЕНИЯ','ATENÇÃO, AGENTES':'ВНИМАНИЕ, АГЕНТЫ'},
+ pt:{'пунктир — «posso» (резерв)':'tracejado — «posso» (reserva)','пунктир':'tracejado','резерв':'reserva'}
+};
+const I18N_FB_RX={ru:[[/responderam (\d+) de (\d+)/g,'ответили $1 из $2']],pt:[]};
+const _fbL='A-Za-zÀ-ÿА-Яа-яЁё';
+const _fbRx={};
+function _fbList(l){ if(!_fbRx[l]) _fbRx[l]=Object.keys(I18N_FB[l]).sort((a,b)=>b.length-a.length)
+  .map(k=>[new RegExp('(?<!['+_fbL+'])'+k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+'(?!['+_fbL+'])','g'),I18N_FB[l][k]]).concat(I18N_FB_RX[l]); return _fbRx[l]; }
+function fbText(t){ if(!t||!t.trim())return t; for(const [rx,to] of _fbList(lang)){ rx.lastIndex=0; if(rx.test(t)){ rx.lastIndex=0; t=t.replace(rx,to);} } return t; }
+function fbNode(root){
+  if(!root)return;
+  if(root.nodeType===3){const pp=root.parentNode; if(pp&&/^(SCRIPT|STYLE|TEXTAREA)$/.test(pp.tagName))return; const t=fbText(root.nodeValue); if(t!==root.nodeValue)root.nodeValue=t; return;}
+  if(root.nodeType!==1||/^(SCRIPT|STYLE|TEXTAREA|INPUT|IFRAME)$/.test(root.tagName))return;
+  const w=document.createTreeWalker(root,NodeFilter.SHOW_TEXT); let n;
+  while((n=w.nextNode())){const p=n.parentNode; if(p&&/^(SCRIPT|STYLE|TEXTAREA)$/.test(p.tagName))continue; const t=fbText(n.nodeValue); if(t!==n.nodeValue)n.nodeValue=t;}
+  root.querySelectorAll&&root.querySelectorAll('[title],[placeholder],[aria-label]').forEach(e=>{
+    ['title','placeholder','aria-label'].forEach(a=>{const v=e.getAttribute(a); if(v){const t=fbText(v); if(t!==v)e.setAttribute(a,t);}});});
+}
+(function(){
+  const start=()=>{ fbNode(document.body);
+    new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(fbNode))).observe(document.body,{childList:true,subtree:true}); };
+  if(document.body)start(); else document.addEventListener('DOMContentLoaded',start);
+})();
+
 function applyTheme(){document.documentElement.classList.toggle('light',theme==='light');document.getElementById('themeBtn').textContent=theme==='dark'?'🌙':'☀️';}
 function toggleTheme(){theme=theme==='dark'?'light':'dark';localStorage.setItem('jet_theme',theme);applyTheme();}
 
@@ -4764,6 +4808,9 @@ function getTurnoForMei(tgUsername,meiName,dateIso){
       if(typeof render==='function'){
         try{render();}catch(e){console.error('render failed:',e);}
       }
+      // язык из localStorage применяется сразу: раньше applyLang() звали только по кнопке,
+      // и при сохранённом RU статичные подписи оставались на португальском до двойного переключения
+      try{if(typeof applyLang==='function')applyLang();}catch(e){console.warn('applyLang on load:',e);}
       // Восстановить последнюю открытую вкладку (не терять место при обновлении)
       try{
         var _tab=localStorage.getItem('jet_active_tab');
