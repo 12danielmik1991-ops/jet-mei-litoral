@@ -927,7 +927,7 @@
 
 <!-- TAB INFRA: шкафы, стенды, АКБ, ремонт по городам — отдельная страница infra.html (собирается build_map.py --public) -->
 <div class="tab-content" id="tab-infra">
-  <iframe id="infraFrame" title="Infraestrutura" loading="lazy" style="width:100%;height:calc(100vh - 120px);min-height:560px;border:0;display:block"></iframe>
+  <iframe id="infraFrame" title="Infraestrutura" style="width:100%;height:100vh;border:0;display:block"></iframe>
 </div>
 
 <div class="tab-content" id="tab-rentals">
@@ -1539,7 +1539,12 @@ function switchTab(tab){
         if(typeof loadPrices==='function')loadPrices(!priceState.loaded);
         if(typeof plSyncSingleForm==='function')plSyncSingleForm();}catch(e){console.error('switchTab→slots failed',e);}
   }
-  if(tab==='infra'){ const f=document.getElementById('infraFrame'); if(f&&!f.src) f.src='infra.html?v='+Date.now(); }
+  document.body.dataset.tab=tab;
+  // Infraestrutura: iframe растягивается по высоте своего содержимого — одна прокрутка страницы вместо двух (важно на телефоне)
+  if(tab==='infra'){ const f=document.getElementById('infraFrame');
+    if(f&&!f.src){ f.addEventListener('load',()=>{ try{ const d=f.contentDocument; const fit=()=>{ f.style.height=Math.max(400,d.body.scrollHeight)+'px'; };
+      fit(); new ResizeObserver(fit).observe(d.body); }catch(e){ f.style.height='calc(100vh - 120px)'; } });
+      f.src='infra.html?v='+Date.now(); } }
   if(tab==='rentals'&&typeof loadRentals==='function'){
     try{loadRentals();}catch(e){console.error('switchTab→rentals failed',e);}
   }
@@ -5061,6 +5066,8 @@ setTimeout(function(){
   .mnav-btn.active .mnav-ico{filter:drop-shadow(0 0 7px var(--accent))}
 }
 @media(min-width:769px){.mnav{display:none}}
+/* у вкладки Infraestrutura нет календаря — переключатель месяца прячем, на телефоне шапка тогда влезает */
+body[data-tab="infra"] .month-nav{display:none}
 
 /* ── Bottom-sheet (шторка). Общий для «Ещё» и для подсказок ──── */
 .msheet-back{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:900;opacity:0;
