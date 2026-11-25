@@ -196,7 +196,7 @@ const PT = {
  'СЦ / мастерская':'CS / oficina','на СЦ':'no CS','Работает · в доступе':'Funcionando · disponível','город без плана по шкафам: цвет по доступности (≥80% / ≥60% / ниже)':'cidade sem plano de armários: cor pela disponibilidade (≥80% / ≥60% / abaixo)','нет живых данных':'sem dados ao vivo','Charger · замены АКБ':'Charger · troca de baterias','Scout · перемещения':'Scout · movimentações','Мониторы парковок':'Monitores de vagas',
  'Charger: людей / замен':'Charger: pessoas / trocas','Scout: людей / перем.':'Scout: pessoas / movim.','Charger: людей':'Charger: pessoas','Scout: людей':'Scout: pessoas',
  'Charger на смене':'Charger em turno','Scout на смене':'Scout em turno','перемещений за смену':'movimentações no turno','перемещений':'movimentações',
- 'люди':'pessoas','нажми — маршрут по точкам на карте':'toque — rota ponto a ponto no mapa','последнее':'última ação','пока ничего':'nada ainda',
+ 'люди':'pessoas','нажми — маршрут по точкам на карте':'toque — rota ponto a ponto no mapa','последнее':'última ação','пока ничего':'nada ainda','по заданиям координат нет · точка — последняя отметка в Urent':'sem coordenadas nas tarefas · ponto = última marcação no Urent','ещё без действий за смену · точка условная (центр города)':'ainda sem ações no turno · ponto aproximado (centro da cidade)',
  'замена АКБ':'troca de bateria','перемещение':'movimentação','откуда → куда':'de onde → para onde','стоит':'há','обновление: парк — 5 мин, люди — 10 мин':'atualização: frota — 5 min, pessoas — 10 min',
  'Люди: Charger — замены АКБ (зелёные), Scout — перемещения (красные).':'Pessoas: Charger — troca de baterias (verde), Scout — movimentações (vermelho).',
  'Где город есть в Urent — данные Urent плюс те, кто работает через GoJet; город только на GoJet — только GoJet.':'Cidade no Urent — dados do Urent mais quem trabalha pelo GoJet; cidade só no GoJet — só GoJet.',
@@ -475,7 +475,7 @@ const roleOf = w => ROLE[w.role] || ROLE.charger;
 const crewTip = w => { const r = roleOf(w); return `<b>${esc(w.name)}</b> · ${esc(w.city)}<br><span style="color:${LV[w.role === 'scout' ? 'scout' : 'crew'].c};font-weight:600">${r.t}</span> · ${esc(w.src || '')}<br>
  смена с ${hm(w.started)} (${v(w.hours)} ч)${w.car ? ' · на машине' : ''}<br>
  ${r.act} за смену: <b>${w.tasks}</b><br>за последний час: <b>${v(w.tasks_1h)}</b><br>средняя выработка: <b>${perHour(w)}</b> ${r.act}/ч<br>
- ${w.last ? `последнее: ${hm(w.last[2])} (${ago(w.last[2])})${w.last[3] ? ' · ' + esc(w.last[3]) : ''}` : 'пока ничего'}
+ ${w.last ? `последнее: ${hm(w.last[2])} (${ago(w.last[2])})${w.last[3] ? ' · ' + esc(w.last[3]) : ''}` : w.pos_src === 'last' ? 'по заданиям координат нет · точка — последняя отметка в Urent' : 'ещё без действий за смену · точка условная (центр города)'}
  ${w.trail && w.trail.length ? '<br><span style="color:#5d6b66;font-size:11px">нажми — маршрут по точкам на карте</span>' : ''}`; };
 function liveCity(city){
  const x = cityLive(city); if (!x) return LD ? '' : '<div class="note" style="margin-top:8px">живые данные не загрузились</div>';
@@ -537,10 +537,10 @@ function drawLive(d){
   if (tr.length > 1) L.polyline(tr, {color:LV.moving.c, weight:3, opacity:.7}).addTo(LL.moving);
   L.circleMarker([p[1], p[2]], {radius:7, color:'#fff', weight:1.5, fillColor:LV.moving.c, fillOpacity:1})
    [HOVER ? 'bindTooltip' : 'bindPopup'](`${p[0]} · ${esc(p[3])}<br>в движении ${p[6]} мин, путь ${p[5]} км${p[4] ? ' · ' + (SUBRU[p[4]] || p[4]) : ''}`).addTo(LL.moving); });
- (d.crew || []).forEach(w => { if (!w.last) return; const k = w.role === 'scout' ? 'scout' : 'crew', col = LV[k].c;
+ (d.crew || []).forEach(w => { const at = w.last || w.pos; if (!at) return; const k = w.role === 'scout' ? 'scout' : 'crew', col = LV[k].c, idle = !w.last;
   const tr = (w.trail || []).map(t => [t[0], t[1]]);
   if (tr.length > 1) L.polyline(tr, {color:col, weight:2, dashArray:'4 4', opacity:.55}).addTo(LL[k]);
-  const mk = L.marker([w.last[0], w.last[1]], {icon:L.divIcon({className:'', iconSize:[26,26], iconAnchor:[13,13], html:`<div class="pin" style="border-color:${col}">${roleOf(w).ico}</div>`}), zIndexOffset:500})
+  const mk = L.marker([at[0], at[1]], {icon:L.divIcon({className:'', iconSize:[26,26], iconAnchor:[13,13], html:`<div class="pin" style="border-color:${col}${idle ? ';border-style:dashed;opacity:.7' : ''}">${roleOf(w).ico}</div>`}), zIndexOffset:idle ? 400 : 500})
    .bindPopup(crewTip(w)).on('popupopen', () => showRoute(w)).on('popupclose', () => RT.clearLayers());
   if (HOVER) mk.bindTooltip(crewTip(w), {className:'tipbox', direction:'auto'}); mk.addTo(LL[k]); });
  (d.monitors || []).forEach(m => { const [la, lo, city, name, cap, fact] = m; const col = !fact ? '#c8372d' : fact < cap ? '#e08a00' : '#1f8a4c';
