@@ -226,7 +226,7 @@ const PT = {
  'Работают сейчас':'Trabalhando agora','простой >45 мин':'parados >45 min','точка — живой GPS самоката, который он везёт':'ponto = GPS ao vivo do patinete que ele está levando',
  'Статус по действиям, а не по GPS телефона: живую геопозицию приложения Jet Crew платформа GoJet наружу не отдаёт.':'Status pelas ações, não pelo GPS do celular: a plataforma GoJet não fornece a localização ao vivo do app Jet Crew.',
  'Работает — последнее действие не старше 15 мин; пауза — 15–45 мин; простой — больше 45 мин; везёт самокат — перемещение в Urent начато и не закрыто, точка на карте = живой GPS этого самоката.':'Trabalhando — última ação há até 15 min; pausa — 15–45 min; parado — mais de 45 min; levando patinete — movimentação no Urent iniciada e não fechada, o ponto no mapa = GPS ao vivo desse patinete.',
- 'Отменённые задачи в выработку не входят.':'Tarefas canceladas não entram na produtividade.','Клик по строке — человек на карте и его маршрут.':'Clique na linha — a pessoa no mapa e a rota.',
+ 'Отменённые задачи в выработку не входят.':'Tarefas canceladas não entram na produtividade.','Telegram — ник из реестра MEI-бота (только наши города; сопоставление по ФИО и городу; нет ника — человек не в боте или без @).':'Telegram — usuário do cadastro do bot MEI (só nossas cidades; cruzamento por nome e cidade; sem usuário — a pessoa não está no bot ou não tem @).','Клик по строке — человек на карте и его маршрут.':'Clique na linha — a pessoa no mapa e a rota.',
  'Точка человека — место последнего действия; у того, кто везёт самокат, — живой GPS самоката; кольцо-точка внизу значка — статус, цифра — сделано за смену.':'O ponto da pessoa é o local da última ação; para quem está levando patinete — o GPS ao vivo do patinete; o pontinho no ícone é o status, o número — feito no turno.',
  'Нажми на человека — маршрут по точкам.':'Toque na pessoa — rota ponto a ponto.','по заданиям координат нет · точка — последняя отметка в Urent':'sem coordenadas nas tarefas · ponto = última marcação no Urent','ещё без действий за смену · точка условная (центр города)':'ainda sem ações no turno · ponto aproximado (centro da cidade)',
  'замена АКБ':'troca de bateria','перемещение':'movimentação','откуда → куда':'de onde → para onde','стоит':'há','обновление: парк — 5 мин, люди — 10 мин':'atualização: frota — 5 min, pessoas — 10 min',
@@ -523,8 +523,9 @@ function stText(w){ const s = stOf(w);
  return STC[s.k].t + ' ' + dur(s.m);
 }
 const stPill = w => { const s = stOf(w); return `<span class="stp"><i style="background:${STC[s.k].c}${s.k === 'none' ? ';border:1px dashed #6b7280' : ''}"></i>${stText(w)}</span>`; };
+const tgA = w => w.tg ? `<a href="https://t.me/${encodeURIComponent(w.tg)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">@${esc(w.tg)}</a>` : '';
 const carOf = w => w.car ? (w.car === true ? 'на машине' : 'машина ' + esc(w.car)) : '';
-const crewTip = w => { const r = roleOf(w); return `<b>${esc(w.name)}</b> · ${esc(w.city)}<br><span style="color:${LV[w.role === 'scout' ? 'scout' : 'crew'].c};font-weight:600">${r.t}</span> · ${esc(w.src || '')}<br>
+const crewTip = w => { const r = roleOf(w); return `<b>${esc(w.name)}</b>${w.tg ? ' ' + tgA(w) : ''} · ${esc(w.city)}<br><span style="color:${LV[w.role === 'scout' ? 'scout' : 'crew'].c};font-weight:600">${r.t}</span> · ${esc(w.src || '')}<br>
  ${stPill(w)}<br>
  смена с ${hm(w.started)} (${v(w.hours)} ч)${w.car ? ' · ' + carOf(w) : ''}<br>
  ${r.act} за смену: <b>${w.tasks}</b>${w.canceled ? ` <span style="color:#5d6b66">(+${w.canceled} отменено)</span>` : ''}<br>за последний час: <b>${v(w.tasks_1h)}</b><br>средняя выработка: <b>${perHour(w)}</b> ${r.act}/ч<br>
@@ -545,7 +546,7 @@ function liveCity(city){
   <div><span class="dot" style="background:${LV.crew.c}"></span>Charger на смене</div><div class="n"><b>${x.crew || 0}</b></div><div class="sub2">замен за смену ${x.crew_tasks || 0}</div>
   <div><span class="dot" style="background:${LV.scout.c}"></span>Scout на смене</div><div class="n"><b>${x.scouts || 0}</b></div><div class="sub2">перемещений за смену ${x.scouts_tasks || 0} · люди: ${esc(x.people_src || '')}</div>
  </div>
- ${ppl.length ? '<div style="margin-top:4px;font-size:12px">' + ppl.slice().sort((a, b) => ST_ORD.indexOf(stOf(a).k) - ST_ORD.indexOf(stOf(b).k) || b.tasks - a.tasks).map(w => `<span style="color:${LV[w.role === 'scout' ? 'scout' : 'crew'].c}">${roleOf(w).ico}</span> <b>${esc(w.name)}</b> · ${roleOf(w).act} ${w.tasks} · за час ${v(w.tasks_1h)} · ${perHour(w)}/ч <span class="f">${esc(w.src || '')}</span><br>&nbsp;&nbsp;&nbsp;${stPill(w)}`).join('<br>') + '</div>' : ''}
+ ${ppl.length ? '<div style="margin-top:4px;font-size:12px">' + ppl.slice().sort((a, b) => ST_ORD.indexOf(stOf(a).k) - ST_ORD.indexOf(stOf(b).k) || b.tasks - a.tasks).map(w => `<span style="color:${LV[w.role === 'scout' ? 'scout' : 'crew'].c}">${roleOf(w).ico}</span> <b>${esc(w.name)}</b>${w.tg ? ' ' + tgA(w) : ''} · ${roleOf(w).act} ${w.tasks} · за час ${v(w.tasks_1h)} · ${perHour(w)}/ч <span class="f">${esc(w.src || '')}</span><br>&nbsp;&nbsp;&nbsp;${stPill(w)}`).join('<br>') + '</div>' : ''}
  <h2 style="margin-top:12px">Шкафы и базы — опрос супервайзеров</h2>
  ${cabs.length ? cabs.map(b => `<div class="cab"><b>${esc(b.base || b.city)}</b> <span class="note">${esc(b.by)} · ${when(b.at)}</span><div class="g2">${CABF.map(([k,t]) => `<div>${t}</div><div class="n">${v(b[k])}</div>`).join('')}</div></div>`).join('')
    : '<div class="note">Ответа ещё нет. Опрос уходит супервайзерам в 08:00 и 21:00.</div>'}`;
@@ -601,19 +602,19 @@ function renderCrew(){
   .map(([k, t]) => `<button class="chip" data-g="st" data-v="${k}" aria-pressed="${CF.st === k}">${t}</button>`).join(' ');
  document.querySelectorAll('#crewbar button[data-g="role"],#crewbar button[data-g="src"]').forEach(b => b.setAttribute('aria-pressed', CF[b.dataset.g] === b.dataset.v));
  const rows = all.map((w, i) => ({w, i, s:stOf(w)})).filter(({w, s}) => (CF.role === 'all' || w.role === CF.role) && (CF.src === 'all' || w.src === CF.src)
-   && (CF.st === 'all' || s.k === CF.st) && (!CF.q || (w.name + ' ' + w.city).toLowerCase().includes(CF.q)))
+   && (CF.st === 'all' || s.k === CF.st) && (!CF.q || (w.name + ' ' + w.city + ' ' + (w.tg || '')).toLowerCase().includes(CF.q)))
   .sort((a, b) => a.w.city.localeCompare(b.w.city) || ST_ORD.indexOf(a.s.k) - ST_ORD.indexOf(b.s.k) || b.w.tasks - a.w.tasks);
- let h = '<thead><tr><th>Человек</th><th>Город</th><th>Роль</th><th>Статус</th><th>За смену</th><th>За час</th><th>В час</th><th>Смена с</th><th>Машина</th><th>Источник</th></tr></thead><tbody>';
+ let h = '<thead><tr><th>Человек</th><th>Telegram</th><th>Город</th><th>Роль</th><th>Статус</th><th>За смену</th><th>За час</th><th>В час</th><th>Смена с</th><th>Машина</th><th>Источник</th></tr></thead><tbody>';
  let city = null;
- rows.forEach(({w, i}) => { if (w.city !== city) { city = w.city; h += `<tr class="grp"><td colspan="10">${esc(city)} · ${rows.filter(r => r.w.city === city).length}</td></tr>`; }
+ rows.forEach(({w, i}) => { if (w.city !== city) { city = w.city; h += `<tr class="grp"><td colspan="11">${esc(city)} · ${rows.filter(r => r.w.city === city).length}</td></tr>`; }
   const r = roleOf(w);
-  h += `<tr data-i="${i}"><td class="l"><b>${esc(w.name)}</b></td><td class="l">${esc(w.city)}</td><td class="l"><span style="color:${LV[w.role === 'scout' ? 'scout' : 'crew'].c}">${r.ico}</span> ${w.role === 'scout' ? 'Scout' : 'Charger'}</td>
+  h += `<tr data-i="${i}"><td class="l"><b>${esc(w.name)}</b></td><td class="l">${tgA(w)}</td><td class="l">${esc(w.city)}</td><td class="l"><span style="color:${LV[w.role === 'scout' ? 'scout' : 'crew'].c}">${r.ico}</span> ${w.role === 'scout' ? 'Scout' : 'Charger'}</td>
    <td class="l">${stPill(w)}</td><td><b>${w.tasks}</b>${w.canceled ? `<span class="f"> +${w.canceled} отм.</span>` : ''}</td><td>${v(w.tasks_1h)}</td><td>${perHour(w)}</td><td>${hm(w.started)}</td><td class="l">${w.car === true ? '✓' : esc(w.car || '')}</td><td class="f">${esc(w.src || '')}</td></tr>`; });
- if (!rows.length) h += '<tr><td colspan="10">никого под этот фильтр</td></tr>';
+ if (!rows.length) h += '<tr><td colspan="11">никого под этот фильтр</td></tr>';
  $('#crewtbl').innerHTML = h + '</tbody>';
  const pa = LD.sources && LD.sources.people_at;
  $('#crewstamp').textContent = `· ${all.length} на смене` + (pa ? ` · задачи на ${hm(pa)}` : '');
- $('#crewnote').textContent = 'Статус по действиям, а не по GPS телефона: живую геопозицию приложения Jet Crew платформа GoJet наружу не отдаёт. Работает — последнее действие не старше 15 мин; пауза — 15–45 мин; простой — больше 45 мин; везёт самокат — перемещение в Urent начато и не закрыто, точка на карте = живой GPS этого самоката. Отменённые задачи в выработку не входят. Клик по строке — человек на карте и его маршрут.';
+ $('#crewnote').textContent = 'Статус по действиям, а не по GPS телефона: живую геопозицию приложения Jet Crew платформа GoJet наружу не отдаёт. Работает — последнее действие не старше 15 мин; пауза — 15–45 мин; простой — больше 45 мин; везёт самокат — перемещение в Urent начато и не закрыто, точка на карте = живой GPS этого самоката. Отменённые задачи в выработку не входят. Telegram — ник из реестра MEI-бота (только наши города; сопоставление по ФИО и городу; нет ника — человек не в боте или без @). Клик по строке — человек на карте и его маршрут.';
 }
 $('#crewtbl').onclick = e => { const t = e.target.closest('tr[data-i]'); if (!t) return; const i = +t.dataset.i, w = LD.crew[i], mk = CMK[i]; if (!mk) return;
  const k = w.role === 'scout' ? 'scout' : 'crew'; if (!map.hasLayer(LL[k])) { map.addLayer(LL[k]); const b = document.querySelector(`#bar button[data-l="${k}"]`); b && b.setAttribute('aria-pressed', true); }
